@@ -265,3 +265,8 @@ Conversación asociada a un ticket.
 * CRM ↔ Proyectos (cliente opcional)
 * Proyectos → Tareas → Registro de horas
 * Soporte completamente integrado con usuarios
+
+
+## Diagrama Entidad Relación
+
+<img src = "./media/Entidad-Relacion.png">
