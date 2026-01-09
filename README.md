@@ -3,18 +3,18 @@ Plataforma empresarial modular
 
 ---
 
-# Guia básica Trello
+# Guia básica Trello  
 Azul para Frontend
 Morado para Backend
 Rojo para Críticas/correciones
 Verde para Base de Datos
 
-**Nomenclatura**
+**Nomenclatura**  
 Un ejemplo de ticket puede ser FE - "Título de ticket".
 Crear, seleccionar ticket, añadir etiqueta de color y añadir breve descripción.
 
-**Progreso del ticket**
-<img width="1778" height="259" alt="image" src="https://github.com/user-attachments/assets/2b31a82b-c864-4747-a778-66d6ec1f1491" />
+**Progreso del ticket**  
+<img width="1778" height="259" alt="image" src="https://github.com/user-attachments/assets/2b31a82b-c864-4747-a778-66d6ec1f1491" />  
 
 - TO DO -> Listado completo con todos los tickets pendientes.
 - PROGRESS -> Ticket que se está realizando en ese momento (solo un ticket por persona en PROGRESS).
