@@ -269,4 +269,4 @@ Conversación asociada a un ticket.
 
 ## Diagrama Entidad Relación
 
-<img src = "./media/Entidad-Relacion.png">
+<img src = "./media/Entidad-Relacion.png" width = "300px" height = "400px">
