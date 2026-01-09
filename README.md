@@ -1,0 +1,2 @@
+# ProyectoEntornoCliente2026
+Plataforma empresarial modular
