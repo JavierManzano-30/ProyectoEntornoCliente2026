@@ -411,3 +411,301 @@ Permitir que la interfaz de usuario (frontend) interactúe en tiempo real y de f
 La capa frontend y la backend se comunican de forma segura, estructurada y documentada mediante una API común, lo que posibilita que la experiencia del usuario sea reactiva, coherente y confiable, independientemente del módulo o flujo particular que utilice.
 
 ---
+
+### Estructura
+
+# Estructura de Carpetas Frontend — Plataforma Empresarial
+
+Una estructura modular, clara y escalable es fundamental para un desarrollo ordenado y colaborativo.  
+Puedes adaptar la siguiente propuesta a frameworks como React o Vue, pero es válida para la mayoría de aplicaciones SPA modernas:
+
+```
+/src
+  /assets               # Recursos estáticos (imágenes, logos, iconos, fuentes, estilos globales)
+    /images
+    /icons
+    /fonts
+    /styles
+      global.css
+      variables.css
+
+  /components           # Componentes UI reutilizables (Botones, Tablas, Formularios, Cards, Dialogs)
+    Button.jsx
+    Table.jsx
+    Modal.jsx
+    InputField.jsx
+    ...
+  
+  /layouts              # Layouts generales (Sidebar, Header, Footer, PageWrapper, etc.)
+    MainLayout.jsx
+    AuthLayout.jsx
+
+  /modules              # Un folder por módulo funcional, cada uno con sus propias pantallas
+    /core
+      UserList.jsx
+      UserDetail.jsx
+      UserForm.jsx
+      CompanyList.jsx
+      RoleList.jsx
+      ...
+    /rrhh
+      EmployeeList.jsx
+      EmployeeDetail.jsx
+      EmployeeForm.jsx
+      AbsenceCalendar.jsx
+      PayrollList.jsx
+      ...
+    /crm
+      ClientList.jsx
+      ClientDetail.jsx
+      ClientForm.jsx
+      OpportunityBoard.jsx
+      ...
+    /bpm
+      ProcessList.jsx
+      ProcessDetail.jsx
+      ProcessForm.jsx
+      Approvals.jsx
+      ...
+    /erp
+      InvoiceList.jsx
+      InvoiceDetail.jsx
+      InvoiceForm.jsx
+      ProductList.jsx
+      ...
+    /alm
+      ProjectList.jsx
+      ProjectDetail.jsx
+      ProjectForm.jsx
+      TaskList.jsx
+      TaskDetail.jsx
+      ...
+    /soporte
+      TicketList.jsx
+      TicketDetail.jsx
+      TicketForm.jsx
+      Chat.jsx
+      ...
+    /bi
+      DashboardBI.jsx
+      ReportList.jsx
+      ReportDetail.jsx
+
+  /services             # Lógica de acceso a API, requests (típicamente un archivo por módulo)
+    api.js
+    coreService.js
+    rrhhService.js
+    crmService.js
+    bpmService.js
+    erpService.js
+    almService.js
+    soporteService.js
+    biService.js
+
+  /contexts             # Contextos de autenticación, usuario, tema, global state (React Context o equivalente)
+    AuthContext.jsx
+    ThemeContext.jsx
+    UserContext.jsx
+
+  /hooks                # Custom hooks reutilizables (cargar datos, validación, etc.)
+    useFetch.js
+    useForm.js
+    useAuth.js
+
+  /routes               # Definición de rutas y navegación de la app
+    AppRoutes.jsx
+
+  /utils                # Utilidades auxiliares, helpers, validaciones, formateadores
+    dateUtils.js
+    validations.js
+    fileUtils.js
+    ...
+
+  /i18n                 # Internacionalización, traducciones
+    es.json
+    en.json
+
+  /pages                # Páginas globales (Login, Registro, Error 404, Landing, Perfil)
+    Login.jsx
+    NotFound.jsx
+    Profile.jsx
+    Home.jsx
+
+/index.js               # Entry point de la app
+/App.js                 # Componente raíz
+```
+
+### Consejos:
+- **Cada módulo** debería poder crecer sin interferir con otros; por eso tiene su propia carpeta y componentes.
+- **Styles** generales en `/assets/styles` y específicos en los módulos.
+- **Servicios** centralizan la lógica de petición al backend, separando UI y datos.
+- **Componentes reutilizables** se apartan de los específicos de módulo.
+- Puedes añadir `/tests` en cada módulo o un `/__tests__/` global para los tests unitarios y de integración.
+- Si usas TypeScript, cambia `.js`/`.jsx` por `.ts`/`.tsx`.
+
+> Esta estructura es un punto de partida profesional y escalable, flexible para crecer y reorganizar según la evolución del proyecto y las decisiones del equipo.
+
+# Ejemplos de tickets para Trello — Reparto Frontend Plataforma Empresarial
+
+Aquí tienes ejemplos realistas de tarjetas (tickets) para un tablero Trello que podéis usar para organizar y repartir el trabajo.  
+Incluyen definición clara, entregables y breve criterio de aceptación.
+
+---
+
+## 1. Estructura base y elementos transversales
+
+**[TICKET] Inicializar repositorio Frontend y estructura de carpetas**
+- Descripción: Crear repo en GitHub, setear estructura básica de carpetas y subcarpetas (assets, components, layouts, modules...).
+- Criterio de aceptación: El proyecto arranca correctamente, estructura visible en el repo.
+
+**[TICKET] Implementar sistema de rutas y navegación general**
+- Descripción: Definir la navegación entre páginas principales con React Router (o Vue Router).
+- Criterio de aceptación: Menú permite ir de Login a Dashboard y a cada módulo.
+
+---
+
+## 2. CORE (Usuarios, Empresas, Roles)
+
+**[TICKET] Pantalla listado de usuarios**
+- Descripción: Crear componente que muestre una tabla de usuarios con paginación, búsqueda y botones de acciones (ver, editar, eliminar, crear).
+- Criterio de aceptación: Se ve la tabla, busca y filtra correctamente.
+
+**[TICKET] Pantalla detalle de usuario**
+- Descripción: Mostrar información completa del usuario seleccionado, opción de editar o eliminar.
+- Criterio de aceptación: Se ven todos los campos del usuario, enlaza a editar correctamente.
+
+**[TICKET] Formulario alta/edición de usuario**
+- Descripción: Crear formulario con validaciones; aprovecha componentes comunes.
+- Criterio de aceptación: Se valida y guarda (mock/front) un usuario nuevo o editado.
+
+**[TICKET] Pantalla gestión de empresas**
+- Descripción: Listado de empresas, permite ver, añadir y editar empresas clientes.
+
+**[TICKET] Gestión de roles y permisos**
+- Descripción: Listar roles, crear/editar roles, asignar permisos sobre módulos.
+
+---
+
+## 3. RRHH (Recursos Humanos)
+
+**[TICKET] Pantalla listado de empleados**
+- Descripción: Tabla de empleados con búsqueda, filtros por estado/puesto/dep.
+- Criterio de aceptación: La lista es navegable y responde a filtros.
+
+**[TICKET] Detalle de empleado**
+- Descripción: Vista "ficha", incluye datos personales, historial, ausencias.
+- Criterio de aceptación: Se navega desde lista y muestra todos los datos.
+
+**[TICKET] Alta/edición de empleado**
+- Descripción: Formulario con campos (ver documentación), validaciones.
+
+**[TICKET] Gestión de vacaciones/ausencias**
+- Descripción: Vista calendario, permite solicitud, aprobación y visualización global.
+
+**[TICKET] Listado/descarga de nóminas**
+- Descripción: Tabla de documentos vinculados al usuario, con botón de descarga.
+
+---
+
+## 4. CRM (Clientes)
+
+**[TICKET] Listado de clientes y contactos**
+- Descripción: Tabla con búsqueda, filtro y acceso a detalle.
+
+**[TICKET] Detalle de cliente/contacto**
+- Descripción: Tarjeta con todos los datos + actividades, oportunidades asociadas, historial.
+
+**[TICKET] Formulario alta/edición de cliente/contacto**
+
+**[TICKET] Oportunidades comerciales**
+- Descripción: Tablero Kanban de oportunidades, con etapas, drag & drop y registro de actividades.
+
+---
+
+## 5. BPM
+
+**[TICKET] Listado de procesos**
+- Descripción: Tabla de procesos, botón ver/crear/duplicar proceso.
+
+**[TICKET] Detalle de proceso**
+- Descripción: Resumen (por fases), estado, historial, responsables.
+
+**[TICKET] Editor/alta proceso**
+- Descripción: Prototipo visual editable (aunque sea wireframe).
+
+**[TICKET] Seguimiento/aprobación de instancias**
+- Descripción: Tabla de instancias, con acciones rápidas por estado.
+
+---
+
+## 6. ERP
+
+**[TICKET] Listado de facturas**
+- Descripción: Tabla de facturas emitidas/recibidas, filtro por estado, fechas.
+
+**[TICKET] Detalle de factura**
+- Descripción: Todos los campos, relación con cliente/producto.
+
+**[TICKET] Alta/edición de factura**
+
+**[TICKET] Listado y gestión de productos**
+- Descripción: Tabla de productos (nombre, SKU, stock), alta/editar productos.
+
+---
+
+## 7. ALM (Proyectos)
+
+**[TICKET] Listado de proyectos**
+- Descripción: Tabla, filtro, estado y acceso a tareas asociadas.
+
+**[TICKET] Detalle de proyecto**
+
+**[TICKET] Alta/edición de proyecto**
+
+**[TICKET] Gestión de tareas**
+- Descripción: Tabla/Listado, asignación, detalle, marcar como terminada.
+
+---
+
+## 8. Soporte (Tickets)
+
+**[TICKET] Listado de tickets**
+- Descripción: Tabla, filtros por prioridad/estado, acceso a detalle.
+
+**[TICKET] Detalle de ticket y conversación**
+- Descripción: Historial, mensajes con comentarios y adjuntos.
+
+**[TICKET] Alta/edición de ticket**
+
+---
+
+## 9. BI (Informes)
+
+**[TICKET] Dashboard BI**
+- Descripción: Vista con tarjetas claves (KPIs), gráficas básicas.
+
+**[TICKET] Listado de informes**
+- Descripción: Tabla de informes generados, acceso a detalle.
+
+**[TICKET] Detalle de informe**
+- Descripción: Gráficas, filtros dinámicos, exportación.
+
+---
+
+## 10. Orquestación y validación
+
+**[TICKET] Página de Login**
+- Descripción: Login visual, validaciones mock y protección de rutas privadas.
+
+**[TICKET] Perfil de usuario**
+- Descripción: Resumen editable de datos personales, preferencias.
+
+**[TICKET] Página de error 404**
+
+---
+
+### Sugerencias:
+- Añade etiquetas por módulo o tipo: `core`, `rrhh`, `crm`...
+- Subdivide tickets grandes en tareas menores si el scope es amplio.
+- Usa checklist en cada ticket para subtareas.
+- Revisa la documentación y mockups al crear cada tarjeta.
