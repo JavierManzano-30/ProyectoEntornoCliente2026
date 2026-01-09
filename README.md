@@ -36,14 +36,6 @@ Crear, seleccionar ticket, añadir etiqueta de color y añadir breve descripció
 
 # Idea base frontend
 
-## Paleta de colores
-- Azul primario: #2867B2
-- Verde acento: #27AE60
-- Naranja acento: #FF9900
-- Fondo: #F6F6F6
-- Texto principal: #222
-- Error: #FF4D4F
-
 ## Tipografía
 - Fuente principal: Inter (Google Fonts)
 - Alternativa: Roboto, Open Sans
@@ -68,4 +60,19 @@ Crear, seleccionar ticket, añadir etiqueta de color y añadir breve descripció
 
 > *Total aproximado para MVP: 32-38 pantallas.*
 
+## Paleta de colores provisional
+
+*Imagen de la paleta de colores provisional*
+<img width="1596" height="290" alt="image" src="https://github.com/user-attachments/assets/a3a82931-ebc6-424d-8c8e-c67465e4b765" />
+
+Colores:
+
+- #5AC8DB
+- #5A76DB
+- #5A9FDB
+- #5ADBC4
+- #675ADB
+- #7CB1DF
+
 ---
+
