@@ -74,5 +74,96 @@ Colores:
 - #675ADB
 - #7CB1DF
 
+## Diagrama de flujo provisional
+
+```mermaid
+flowchart TD
+    A[Login] --> B[Dashboard]
+
+    %% Desde dashboard, menú de navegación
+    B --> C1[CORE]
+    B --> C2[RRHH]
+    B --> C3[CRM]
+    B --> C4[BPM]
+    B --> C5[ERP]
+    B --> C6[ALM]
+    B --> C7[Soporte]
+    B --> C8[BI]
+    B --> D[Perfil de usuario]
+    B --> E[Logout]
+
+    %% Estructura genérica de módulo
+    C1 --> CORE_List[Listado Usuarios/Empresas/Roles]
+    CORE_List --> CORE_Det[Detalle Usuario/Empresa/Rol]
+    CORE_List --> CORE_New[Alta Usuario/Empresa/Rol]
+    CORE_Det --> CORE_Edit[Editar Usuario/Empresa/Rol]
+    CORE_Edit --> CORE_List
+    CORE_New --> CORE_List
+
+    C2 --> RRHH_List[Listado Empleados]
+    RRHH_List --> RRHH_Det[Detalle Empleado]
+    RRHH_List --> RRHH_New[Alta Empleado]
+    RRHH_Det --> RRHH_Edit[Editar Empleado]
+    RRHH_Edit --> RRHH_List
+    RRHH_New --> RRHH_List
+    RRHH_Det --> RRHH_Vacaciones[Vacaciones/Ausencias]
+
+    C3 --> CRM_List[Listado Clientes/Contactos]
+    CRM_List --> CRM_Det[Detalle Cliente/Contacto]
+    CRM_List --> CRM_New[Alta Cliente/Contacto]
+    CRM_Det --> CRM_Edit[Editar Cliente/Contacto]
+    CRM_Edit --> CRM_List
+    CRM_New --> CRM_List
+    CRM_Det --> CRM_Opp[Oportunidades]
+    CRM_Opp --> CRM_Int[Interacciones]
+
+    C4 --> BPM_List[Listado Procesos]
+    BPM_List --> BPM_Det[Detalle/Instancia Proceso]
+    BPM_List --> BPM_New[Alta Proceso]
+    BPM_Det --> BPM_Edit[Editar Proceso]
+    BPM_Edit --> BPM_List
+    BPM_New --> BPM_List
+    BPM_Det --> BPM_Apr[Seguimiento/Aprobación]
+
+    C5 --> ERP_ListF[Listado Facturas]
+    C5 --> ERP_ListP[Listado Productos]
+    ERP_ListF --> ERP_DetF[Detalle Factura]
+    ERP_ListF --> ERP_NewF[Alta Factura]
+    ERP_DetF --> ERP_EditF[Editar Factura]
+    ERP_EditF --> ERP_ListF
+    ERP_NewF --> ERP_ListF
+    ERP_ListP --> ERP_DetP[Detalle Producto]
+    ERP_ListP --> ERP_NewP[Alta Producto]
+    ERP_DetP --> ERP_EditP[Editar Producto]
+    ERP_EditP --> ERP_ListP
+    ERP_NewP --> ERP_ListP
+
+    C6 --> ALM_ListP[Listado Proyectos]
+    ALM_ListP --> ALM_DetP[Detalle Proyecto]
+    ALM_ListP --> ALM_NewP[Alta Proyecto]
+    ALM_DetP --> ALM_EditP[Editar Proyecto]
+    ALM_EditP --> ALM_ListP
+    ALM_NewP --> ALM_ListP
+    ALM_DetP --> ALM_ListT[Listado Tareas]
+    ALM_ListT --> ALM_DetT[Detalle Tarea]
+    ALM_ListT --> ALM_NewT[Alta Tarea]
+    ALM_DetT --> ALM_EditT[Editar Tarea]
+    ALM_EditT --> ALM_ListT
+    ALM_NewT --> ALM_ListT
+
+    C7 --> Sop_List[Listado Tickets]
+    Sop_List --> Sop_Det[Detalle Ticket]
+    Sop_List --> Sop_New[Alta Ticket]
+    Sop_Det --> Sop_Edit[Editar Ticket]
+    Sop_Edit --> Sop_List
+    Sop_New --> Sop_List
+    Sop_Det --> Sop_Conv[Conversación Ticket]
+
+    C8 --> BI_Dash[Dashboard BI]
+    BI_Dash --> BI_List[Listado Informes]
+    BI_List --> BI_Det[Detalle Informe]
+    BI_Det --> BI_List
+```
+
 ---
 
