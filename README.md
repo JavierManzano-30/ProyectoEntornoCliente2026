@@ -301,3 +301,39 @@ Conversación asociada a un ticket.
 * Soporte completamente integrado con usuarios
 
 ---
+
+# Idea base frontend
+
+## Paleta de colores
+- Azul primario: #2867B2
+- Verde acento: #27AE60
+- Naranja acento: #FF9900
+- Fondo: #F6F6F6
+- Texto principal: #222
+- Error: #FF4D4F
+
+## Tipografía
+- Fuente principal: Inter (Google Fonts)
+- Alternativa: Roboto, Open Sans
+- Tamaños: Títulos 24-32px, Texto 14-16px
+
+## Componentes de UI principales
+- Sidebar con iconos para navegación rápida
+- Tablas para listados
+- Formularios simples (inputs, selects, datepickers)
+- Cards para resúmenes/detalles
+- Botones azules (primario), grises (secundario)
+
+## Pantallas mínimas por módulo
+- CORE: Dashboard, Login, Lista Usuarios, Detalle Usuario, Alta/Edición Usuario, Lista Empresas, Detalle Empresa, Alta/Edición Empresa, Roles
+- RRHH: Lista Empleados, Detalle Empleado, Alta/Edición Empleado, Vacaciones/ausencias (calendario, solicitud)
+- CRM: Lista Clientes, Detalle Cliente, Alta/Edición Cliente, Oportunidades/interacciones
+- BPM: Lista Procesos, Detalle Proceso, Crear/Edición, Seguimiento/Aprobación
+- ERP: Lista Facturas, Detalle Factura, Crear/Edición Factura, Lista Productos, Detalle Producto
+- ALM: Lista Proyectos, Detalle Proyecto, Crear/Edición Proyecto, Lista Tareas
+- Soporte: Lista Tickets, Detalle Ticket, Crear/Edición Ticket, Chat
+- BI: Dashboard, Vista informe
+
+> *Total aproximado para MVP: 32-38 pantallas.*
+
+---
