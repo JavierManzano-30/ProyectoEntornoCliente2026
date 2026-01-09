@@ -34,7 +34,7 @@
 
 ---
 
-## 👤 Dev Backend 1: CORE + Coordinación de Arquitectura
+## 👤 Alberto: CORE + Coordinación de Arquitectura
 
 ### Módulo Asignado
 **CORE** (Usuarios, Empresas, Roles, Permisos, Autenticación)
@@ -112,7 +112,7 @@
 
 ---
 
-## 👤 Dev Backend 2: RRHH + Coordinación de Modelo de Datos
+## 👤 Bartolome: RRHH + Coordinación de Modelo de Datos
 
 ### Módulo Asignado
 **RRHH** (Recursos Humanos)
@@ -170,7 +170,7 @@
 
 ---
 
-## 👤 Dev Backend 3: CRM + Coordinación de APIs
+## 👤 Paco: CRM + Coordinación de APIs
 
 ### Módulo Asignado
 **CRM** (Customer Relationship Management)
@@ -238,7 +238,7 @@
 
 ---
 
-## 👤 Dev Backend 4: ALM + Coordinación de Integraciones
+## 👤 Javier: ALM + Coordinación de Integraciones
 
 ### Módulo Asignado
 **ALM** (Application Lifecycle Management - Gestión de Proyectos y Tareas)
@@ -296,7 +296,7 @@
 
 ---
 
-## 👤 Dev Backend 5: BPM + ERP
+## 👤 Hernán: BPM + ERP
 
 ### Módulos Asignados
 **BPM** (Business Process Management) + **ERP** (Enterprise Resource Planning)
@@ -359,7 +359,7 @@
 
 ---
 
-## 👤 Dev Backend 6: Soporte/Tickets + BI
+## 👤 David: Soporte/Tickets + BI
 
 ### Módulos Asignados
 **Soporte/Tickets** + **BI** (Business Intelligence)
@@ -592,3 +592,4 @@ Archivo: `docs/modulos/[modulo]-integraciones.md`
 ---
 
 **¡Éxito en el Sprint 1!** 🚀
+
