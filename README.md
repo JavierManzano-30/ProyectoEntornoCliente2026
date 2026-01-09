@@ -344,14 +344,3 @@ Colores:
 
 ---
 
-# MODULOS DEL SISTEMA BACKEND
-La plataforma está compuesta por los siguientes módulos, todos integrados sobre un CORE común:
-
-CORE: empresas, usuarios, empleados, roles y permisos
-RRHH: gestión básica de empleados, vacaciones y fichajes
-CRM: clientes y oportunidades comerciales
-ERP básico: productos y facturación
-BPM: definición de procesos y aprobaciones
-ALM: proyectos y tareas
-Soporte: gestión de tickets
-BI: análisis de datos mediante eventos del sistema
