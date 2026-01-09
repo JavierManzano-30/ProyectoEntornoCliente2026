@@ -1,5 +1,15 @@
 # ProyectoEntornoCliente2026
-Plataforma empresarial modular
+
+Proyecto grupal de desarrollo de una **plataforma empresarial modular**, similar a herramientas como ERP/CRM/RRHH, organizada en **múltiples módulos integrados** (CORE, RRHH, CRM, BPM, ERP, ALM, Soporte y BI).
+
+Durante el **Sprint 2.1** el equipo se centra en la **definición, organización y documentación del producto**, estableciendo:
+- La visión global del sistema y sus módulos
+- El modelo de datos común y las relaciones entre entidades
+- Las integraciones entre módulos
+- Un diseño de API a alto nivel
+- La organización del equipo y la metodología de trabajo
+
+En este sprint **no se desarrolla código funcional**, priorizando una base sólida y coherente antes de comenzar la implementación.
 
 ---
 
