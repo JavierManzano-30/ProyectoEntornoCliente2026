@@ -428,122 +428,123 @@
 ---
 
 ## 📂 Estructura de Carpetas `/docs`
-/docs
-├── producto
-│   └── analisis-producto.md                 (Dev 1)
 
-├── modulos
-│   ├── core
-│   │   ├── descripcion.md                  (Dev 1)
-│   │   ├── entidades.md                    (Dev 1)
-│   │   └── integraciones.md                (Dev 1)
+```
+docs/
+│-- 📂 producto
+│   │-- analisis-producto.md (Dev 1)
+│
+│-- 📂 modulos
+│   │-- 📂 core
+│   │   │-- descripcion.md (Dev 1)
+│   │   │-- entidades.md (Dev 1)
+│   │   │-- integraciones.md (Dev 1)
 │   │
-│   ├── rrhh
-│   │   ├── descripcion.md                  (Dev 2)
-│   │   ├── entidades.md                    (Dev 2)
-│   │   └── integraciones.md                (Dev 2)
+│   │-- 📂 rrhh
+│   │   │-- descripcion.md (Dev 2)
+│   │   │-- entidades.md (Dev 2)
+│   │   │-- integraciones.md (Dev 2)
 │   │
-│   ├── crm
-│   │   ├── descripcion.md                  (Dev 3)
-│   │   ├── entidades.md                    (Dev 3)
-│   │   └── integraciones.md                (Dev 3)
+│   │-- 📂 crm
+│   │   │-- descripcion.md (Dev 3)
+│   │   │-- entidades.md (Dev 3)
+│   │   │-- integraciones.md (Dev 3)
 │   │
-│   ├── alm
-│   │   ├── descripcion.md                  (Dev 4)
-│   │   ├── entidades.md                    (Dev 4)
-│   │   └── integraciones.md                (Dev 4)
+│   │-- 📂 alm
+│   │   │-- descripcion.md (Dev 4)
+│   │   │-- entidades.md (Dev 4)
+│   │   │-- integraciones.md (Dev 4)
 │   │
-│   ├── bpm
-│   │   ├── descripcion.md                  (Dev 5)
-│   │   ├── entidades.md                    (Dev 5)
-│   │   ├── sistema-aprobaciones.md         (Dev 5)
-│   │   └── integraciones.md                (Dev 5)
+│   │-- 📂 bpm
+│   │   │-- descripcion.md (Dev 5)
+│   │   │-- entidades.md (Dev 5)
+│   │   │-- sistema-aprobaciones.md (Dev 5)
+│   │   │-- integraciones.md (Dev 5)
 │   │
-│   ├── erp
-│   │   ├── descripcion.md                  (Dev 5)
-│   │   ├── entidades.md                    (Dev 5)
-│   │   └── integraciones.md                (Dev 5)
+│   │-- 📂 erp
+│   │   │-- descripcion.md (Dev 5)
+│   │   │-- entidades.md (Dev 5)
+│   │   │-- integraciones.md (Dev 5)
 │   │
-│   ├── soporte
-│   │   ├── descripcion.md                  (Dev 6)
-│   │   ├── entidades.md                    (Dev 6)
-│   │   └── integraciones.md                (Dev 6)
+│   │-- 📂 soporte
+│   │   │-- descripcion.md (Dev 6)
+│   │   │-- entidades.md (Dev 6)
+│   │   │-- integraciones.md (Dev 6)
 │   │
-│   └── bi
-│       ├── descripcion.md                  (Dev 6)
-│       ├── dashboards.md                   (Dev 6)
-│       └── metricas.md                     (Dev 6)
-
-├── database
-│   ├── global
-│   │   ├── modelo-global-er.png             (Dev 2 consolida)
-│   │   ├── modelo-global.dbml               (Dev 2 consolida)
-│   │   └── script-creacion-tablas.sql       (Dev 2 consolida)
+│   │-- 📂 bi
+│   │   │-- descripcion.md (Dev 6)
+│   │   │-- dashboards.md (Dev 6)
+│   │   │-- metricas.md (Dev 6)
+│
+│-- 📂 database
+│   │-- 📂 global
+│   │   │-- modelo-global-er.png (Dev 2 consolida)
+│   │   │-- modelo-global.dbml (Dev 2 consolida)
+│   │   │-- script-creacion-tablas.sql (Dev 2 consolida)
 │   │
-│   ├── convenciones
-│   │   ├── campos-obligatorios.md           (Dev 2)
-│   │   └── convenciones-nomenclatura.md    (Dev 2)
+│   │-- 📂 convenciones
+│   │   │-- campos-obligatorios.md (Dev 2)
+│   │   │-- convenciones-nomenclatura.md (Dev 2)
 │   │
-│   └── modulos
-│       ├── core
-│       │   ├── er.png                       (Dev 1)
-│       │   └── er.dbml                      (Dev 1)
-│       ├── rrhh
-│       │   ├── er.png                       (Dev 2)
-│       │   └── er.dbml                      (Dev 2)
-│       ├── crm
-│       │   ├── er.png                       (Dev 3)
-│       │   └── er.dbml                      (Dev 3)
-│       ├── alm
-│       │   ├── er.png                       (Dev 4)
-│       │   └── er.dbml                      (Dev 4)
-│       ├── bpm
-│       │   ├── er.png                       (Dev 5)
-│       │   └── er.dbml                      (Dev 5)
-│       ├── erp
-│       │   ├── er.png                       (Dev 5)
-│       │   └── er.dbml                      (Dev 5)
-│       └── soporte
-│           ├── er.png                       (Dev 6)
-│           └── er.dbml                      (Dev 6)
-
-├── api
-│   ├── convenciones-api.md                  (Dev 3)
-│   ├── catalogo-endpoints.md                (Dev 3 consolida)
-│   └── modulos
-│       ├── core.md                          (Dev 1)
-│       ├── rrhh.md                          (Dev 2)
-│       ├── crm.md                           (Dev 3)
-│       ├── alm.md                           (Dev 4)
-│       ├── bpm.md                           (Dev 5)
-│       ├── erp.md                           (Dev 5)
-│       ├── soporte.md                       (Dev 6)
-│       └── bi.md                            (Dev 6)
-
-├── integraciones
-│   ├── documento-integraciones.md           (Dev 4 consolida)
-│   ├── matriz-integraciones.md              (Dev 4)
-│   ├── diagrama-flujo-datos.png             (Dev 4)
-│   └── secuencia-desarrollo.md              (Dev 4)
-
-├── arquitectura
-│   ├── arquitectura-backend.md              (Dev 1)
-│   ├── estructura-carpetas.md               (Dev 1)
-│   └── convenciones-codigo.md               (Dev 1)
-
-├── equipo
-│   ├── organizacion-equipo.md               (Dev 1)
-│   └── metodologia-trabajo.md               (Dev 1)
-
-├── coordinacion
-│   └── acuerdos-frontend-backend.md         (Dev 3)
-
-└── templates
-    ├── descripcion-modulo.md                (Dev 1)
-    ├── entidades.md                         (Dev 1)
-    └── endpoints.md                         (Dev 1)
-
-
+│   │-- 📂 modulos
+│   │   │-- 📂 core
+│   │   │   │-- er.png (Dev 1)
+│   │   │   │-- er.dbml (Dev 1)
+│   │   │-- 📂 rrhh
+│   │   │   │-- er.png (Dev 2)
+│   │   │   │-- er.dbml (Dev 2)
+│   │   │-- 📂 crm
+│   │   │   │-- er.png (Dev 3)
+│   │   │   │-- er.dbml (Dev 3)
+│   │   │-- 📂 alm
+│   │   │   │-- er.png (Dev 4)
+│   │   │   │-- er.dbml (Dev 4)
+│   │   │-- 📂 bpm
+│   │   │   │-- er.png (Dev 5)
+│   │   │   │-- er.dbml (Dev 5)
+│   │   │-- 📂 erp
+│   │   │   │-- er.png (Dev 5)
+│   │   │   │-- er.dbml (Dev 5)
+│   │   │-- 📂 soporte
+│   │   │   │-- er.png (Dev 6)
+│   │   │   │-- er.dbml (Dev 6)
+│
+│-- 📂 api
+│   │-- convenciones-api.md (Dev 3)
+│   │-- catalogo-endpoints.md (Dev 3 consolida)
+│   │-- 📂 modulos
+│   │   │-- core.md (Dev 1)
+│   │   │-- rrhh.md (Dev 2)
+│   │   │-- crm.md (Dev 3)
+│   │   │-- alm.md (Dev 4)
+│   │   │-- bpm.md (Dev 5)
+│   │   │-- erp.md (Dev 5)
+│   │   │-- soporte.md (Dev 6)
+│   │   │-- bi.md (Dev 6)
+│
+│-- 📂 integraciones
+│   │-- documento-integraciones.md (Dev 4 consolida)
+│   │-- matriz-integraciones.md (Dev 4)
+│   │-- diagrama-flujo-datos.png (Dev 4)
+│   │-- secuencia-desarrollo.md (Dev 4)
+│
+│-- 📂 arquitectura
+│   │-- arquitectura-backend.md (Dev 1)
+│   │-- estructura-carpetas.md (Dev 1)
+│   │-- convenciones-codigo.md (Dev 1)
+│
+│-- 📂 equipo
+│   │-- organizacion-equipo.md (Dev 1)
+│   │-- metodologia-trabajo.md (Dev 1)
+│
+│-- 📂 coordinacion
+│   │-- acuerdos-frontend-backend.md (Dev 3)
+│
+│-- 📂 templates
+│   │-- descripcion-modulo.md (Dev 1)
+│   │-- entidades.md (Dev 1)
+│   │-- endpoints.md (Dev 1)
+```
 
 ---
 
