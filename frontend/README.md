@@ -16,9 +16,204 @@ La aplicación es una plataforma web modular para la gestión empresarial, dise�
 
 ---
 
-## 2. Diagrama de Navegación General
+## Listado de Pantallas Necesarias y Conexión Frontend-Backend por Módulo
 
-Ya incluido en el documento anterior ([ver aquí](#2-diagrama-de-flujo-general-de-navegacion)).
+---
+
+## Listado de Pantallas por Módulo (con módulos mínimos de cada página)
+
+### CORE (Usuarios, Empresas, Roles)
+- **Login**
+  - Módulos mínimos: Formulario de login, feedback/error.
+- **Listado de usuarios**
+  - Tabla de usuarios, búsqueda, filtro, paginación.
+- **Detalle de usuario**
+  - Visualización completa, acciones (editar, borrar, desactivar).
+- **Alta de usuario**
+  - Formulario de creación, validación.
+- **Edición de usuario**
+  - Formulario pre-llenado, validación.
+- **Listado de empresas**
+  - Tabla de empresas, búsqueda, filtro.
+- **Detalle de empresa**
+  - Datos corporativos, empleados asociados, editar.
+- **Listado de roles**
+  - Tabla, ver rol, editar rol, crear/eliminar.
+- **Perfil de usuario**
+  - Visualización y edición de datos personales.
+
+---
+
+### RRHH (Recursos Humanos)
+- **Listado de empleados**
+  - Tabla, búsqueda, filtros.
+- **Detalle de empleado**
+  - Ficha detallada y acciones (editar, baja, documentación, ausencias).
+- **Alta empleado**
+  - Formulario de datos.
+- **Edición de empleado**
+  - Formulario pre-llenado.
+- **Gestión de ausencias/vacaciones**
+  - Calendario, solicitud, aprobación/denegación.
+- **Listado de nóminas/contratos**
+  - Tabla, descarga.
+- **Detalle de nómina/contrato** *(opcional para descarga/ver info completa)*
+
+---
+
+### CRM (Clientes, Oportunidades)
+- **Listado de clientes**
+  - Tabla, búsqueda, filtro.
+- **Detalle de cliente**
+  - Ficha, historial, oportunidades asociadas.
+- **Alta cliente**
+  - Formulario de datos.
+- **Edición cliente**
+  - Formulario pre-llenado.
+- **Listado de contactos**
+  - Tabla de contactos, búsqueda.
+- **Listado/kanban de oportunidades**
+  - Vista de pipeline, drag&drop etapas, nuevo/editar.
+- **Detalle de oportunidad** *(opcional para desarrollos avanzados)*
+
+---
+
+### BPM (Procesos)
+- **Listado de procesos**
+  - Tabla, búsqueda, tipo y estado.
+- **Detalle de proceso**
+  - Visor de fases, historial.
+- **Alta/edición de proceso**
+  - Formulario/maqueta visual.
+- **Seguimiento/aprobación**
+  - Estado de instancia, aprobar, rechazar.
+
+---
+
+### ERP (Facturación, Inventario)
+- **Listado de facturas**
+  - Tabla, filtros, fecha y estado.
+- **Detalle de factura**
+  - Info completa, links a cliente/productos.
+- **Alta/edición de factura**
+  - Formulario.
+- **Listado de productos**
+  - Tabla, filtro, stock.
+- **Detalle de producto**
+  - Información, editar, histórico.
+
+---
+
+### ALM (Proyectos y Tareas)
+- **Listado de proyectos**
+  - Tabla, filtro, estado.
+- **Detalle de proyecto**
+  - Cronograma, milestones, equipo, tareas.
+- **Alta/edición de proyecto**
+  - Formulario.
+- **Listado de tareas (por proyecto)**
+  - Tabla/lista.
+- **Detalle de tarea**
+  - Ficha, comentarios, documentos.
+
+---
+
+### Soporte (Tickets)
+- **Listado de tickets**
+  - Tabla, prioridad, estado.
+- **Detalle de ticket**
+  - Historial, conversación.
+- **Alta/edición de ticket**
+  - Formulario.
+- **Vista de conversación**
+  - Chat/comentarios.
+
+---
+
+### BI (Business Intelligence)
+- **Dashboard BI**
+  - Tarjetas resumen, gráficas clave.
+- **Listado de informes**
+  - Tabla/list, filtro por módulo/fecha.
+- **Detalle de informe**
+  - Gráficas, exportar.
+
+---
+
+## Tabla Pantalla - Acción - Redirección
+
+| Pantalla                | Acción                              | Redirección tras éxito               |
+|-------------------------|-------------------------------------|--------------------------------------|
+| Login                   | Iniciar sesión                      | Dashboard / Módulo principal         |
+| Listado de <Entidad>    | Ver detalle, Crear, Editar, Eliminar| Detalle (Ver/Crear/Edit), Listado    |
+| Detalle de <Entidad>    | Editar, Eliminar, Navegar a relacionado| Editar, Listado, Relacionado      |
+| Alta de <Entidad>       | Guardar nuevo registro              | Detalle nuevo, Listado              |
+| Edición de <Entidad>    | Guardar cambios                     | Detalle, Listado                    |
+| Gestión vacaciones      | Solicitar, aprobar/denegar          | Listado ausencias, Detalle empleado  |
+| Listado facturas        | Ver detalle, Descargar pdf          | Detalle factura, descarga           |
+| Listado proyectos       | Ver detalle, Añadir proyecto        | Detalle, Listado                    |
+| Kanban oportunidades    | Mover etapa, Crear/Editar Oportunidad| Kanban, Detalle oportunidad         |
+| Detalle ticket          | Responder, cerrar/reabrir           | Detalle/Conversación, Listado       |
+| Dashboard BI            | Acceso informe                      | Detalle informe                     |
+
+*(<Entidad> = usuario, empleado, cliente, proyecto, etc.)*
+
+---
+
+## Relación de Pantallas-Backend (Rutas principales por operación)
+
+| Página                       | Verb   | Endpoint                              | Descripción                                 |
+|------------------------------|--------|---------------------------------------|---------------------------------------------|
+| Login                        | POST   | /api/v1/auth/login                    | Login y obtener token                       |
+| Listado usuarios             | GET    | /api/v1/users                         | Obtener usuarios con filtros/paginación     |
+| Detalle usuario              | GET    | /api/v1/users/:id                     | Obtener usuario concreto                    |
+| Alta/Edición usuario         | POST   | /api/v1/users                         | Crear usuario                               |
+|                              | PATCH  | /api/v1/users/:id                     | Editar usuario                              |
+| Eliminar usuario             | DELETE | /api/v1/users/:id                     | Eliminar usuario                            |
+| Listado empleados            | GET    | /api/v1/employees                     | Obtener empleados                           |
+| Detalle empleado             | GET    | /api/v1/employees/:id                 | Obtener detalle empleado                    |
+| Alta/Edición empleado        | POST   | /api/v1/employees                     | Crear empleado                              |
+|                              | PATCH  | /api/v1/employees/:id                 | Editar empleado                             |
+| Listado ausencias            | GET    | /api/v1/vacations                     | Obtener ausencias/vacaciones                |
+| Solicitud/gestión ausencia   | POST   | /api/v1/vacations                     | Crear nueva ausencia                        |
+|                              | PATCH  | /api/v1/vacations/:id                 | Aprobar/Denegar                            |
+| Listado nóminas              | GET    | /api/v1/employees/:id/payrolls        | Nóminas de empleado                        |
+| Descargar nómina             | GET    | /api/v1/employees/:id/payrolls/:pid   | Descargar PDF nómina                        |
+| Listado clientes/contactos   | GET    | /api/v1/clients                       | Obtener clientes                            |
+| Detalle cliente              | GET    | /api/v1/clients/:id                   | Ficha cliente                               |
+| Alta/Edición cliente         | POST   | /api/v1/clients                       | Crear cliente                               |
+|                              | PATCH  | /api/v1/clients/:id                   | Editar cliente                              |
+| Listado oportunidades        | GET    | /api/v1/opportunities                 | Kanban y oportunidades                      |
+| Alta/Editar oportunidad      | POST   | /api/v1/opportunities                 | Crear oportunidad                           |
+|                              | PATCH  | /api/v1/opportunities/:id             | Editar etapa o datos                        |
+| Listado procesos             | GET    | /api/v1/processes                     | Procesos BPM                                |
+| Detalle proceso              | GET    | /api/v1/processes/:id                 | Ficha BPM                                   |
+| Alta/Editar proceso          | POST   | /api/v1/processes                     | Crear proceso                               |
+|                              | PATCH  | /api/v1/processes/:id                 | Editar proceso                              |
+| Seguimiento/aprobación       | PATCH  | /api/v1/processes/:id/approve         | Aprobar paso                                |
+| Listado facturas             | GET    | /api/v1/invoices                      | Facturas ERP                                |
+| Detalle factura              | GET    | /api/v1/invoices/:id                  | Ver factura                                 |
+| Alta/Editar factura          | POST   | /api/v1/invoices                      | Crear factura                               |
+|                              | PATCH  | /api/v1/invoices/:id                  | Editar factura                              |
+| Descargar factura            | GET    | /api/v1/invoices/:id/pdf              | Descargar PDF                               |
+| Listado productos            | GET    | /api/v1/products                      | Consulta productos                          |
+| Detalle producto             | GET    | /api/v1/products/:id                  | Ficha producto                              |
+| Listado proyectos            | GET    | /api/v1/projects                      | Proyectos ALM                               |
+| Detalle proyecto             | GET    | /api/v1/projects/:id                  | Ver proyecto                                |
+| Alta/Editar proyecto         | POST   | /api/v1/projects                      | Crear proyecto                              |
+|                              | PATCH  | /api/v1/projects/:id                  | Editar proyecto                             |
+| Listado tareas               | GET    | /api/v1/projects/:id/tasks            | Listar tareas de proyecto                   |
+| Detalle tarea                | GET    | /api/v1/tasks/:id                     | Info tarea                                  |
+| Alta/Editar tarea            | POST   | /api/v1/tasks                         | Crear tarea                                 |
+|                              | PATCH  | /api/v1/tasks/:id                     | Editar tarea                                |
+| Listado tickets soporte      | GET    | /api/v1/tickets                       | Tickets                                     |
+| Detalle ticket               | GET    | /api/v1/tickets/:id                   | Ficha ticket                                |
+| Alta/Editar ticket           | POST   | /api/v1/tickets                       | Crear ticket                                |
+|                              | PATCH  | /api/v1/tickets/:id                   | Editar ticket                               |
+| Conversación ticket          | POST   | /api/v1/tickets/:id/messages          | Enviar mensaje                              |
+| Listado informes BI          | GET    | /api/v1/reports                       | Consulta informes BI                        |
+| Detalle informe BI           | GET    | /api/v1/reports/:id                   | Ver gráfico/detalle                         |
+| Dashboard BI                 | GET    | /api/v1/bi/kpis                       | KPIs y datos generales                      |
 
 ---
 
@@ -28,270 +223,343 @@ Ya incluido en el documento anterior ([ver aquí](#2-diagrama-de-flujo-general-d
 
 #### 1. Listado de usuarios
 - **Función:** Visualizar, buscar, filtrar y exportar usuarios del sistema.
-- **Contenido:**  
+- **Contenido:**
   - Tabla: nombre, email, empresa, rol, estado (activo/inactivo), fecha de creación
   - Acciones: Ver detalle, Editar, Eliminar, Crear nuevo usuario
   - Buscador por nombre/email, filtros por empresa/rol/estado
   - Exportación CSV/Excel
 
 #### 2. Detalle de usuario
-- **Función:** Mostrar información individual y acceso rápido a edición.
-- **Contenido:**  
-  - Foto/avatar, datos completos, rol, empresa
-  - Acciones: Editar, Desactivar/Eliminar
-  - Historial de accesos o acciones recientes
-  - Password reset (si el usuario es admin)
+- **Función:** Ver toda la información relevante de un usuario y sus acciones principales.
+- **Contenido:**
+  - Datos completos del usuario: nombre, email, empresa, rol, estado, fecha de alta/modificación
+  - Acciones: Editar usuario, Eliminar usuario, Resetear contraseña (si tiene permiso)
+  - Historial de actividad/accesos recientes
+  - Acceso directo a perfil o a empleado vinculado (si aplica)
 
-#### 3. Formulario de alta/edición de usuario
-- **Función:** Crear o editar usuarios con validaciones.
-- **Contenido:**  
-  - Inputs: nombre, apellidos, correo, empresa (dropdown), rol, estado, contraseña
-  - Validaciones: campos obligatorios, unicidad de email, fuerza de contraseña
+#### 3. Alta de usuario
+- **Función:** Dar de alta un nuevo usuario en el sistema.
+- **Contenido:**
+  - Formulario: nombre, apellidos, email, empresa (select), rol (select), estado, contraseña
+  - Selectores de permisos extra si procede
+  - Validaciones en tiempo real (email único, contraseña segura)
   - Botones: Guardar, Cancelar
-  - Avisos de éxito/error en operaciones
 
-#### 4. Listado/gestión de empresas
-- **Función:** Visualización y gestión de empresas clientes.
-- **Contenido:**  
-  - Tabla: nombre legal, CIF, contacto principal, número de empleados
-  - Acciones: Ver detalle de empresa, Editar, Eliminar, Crear nueva
-  - Filtro/búsqueda por nombre
+#### 4. Edición de usuario
+- **Función:** Modificar la información de un usuario ya existente.
+- **Contenido:**
+  - Formulario prellenado con los datos actuales del usuario
+  - Posibilidad de cambiar campos editables: rol, empresa, estado, email, nombre
+  - Guardar cambios o cancelar
+  - Feedback de éxito/error al guardar
 
-#### 5. Gestión de roles
-- **Función:** Definición de roles de acceso y sus permisos.
-- **Contenido:**  
-  - Tabla o card: nombre de rol, descripción, módulos permitidos
-  - Acciones: crear nuevo rol, editar permisos de rol, eliminar rol
+#### 5. Listado de empresas
+- **Función:** Visualizar, buscar y gestionar empresas registradas en el sistema.
+- **Contenido:**
+  - Tabla: nombre legal, CIF, teléfono, dirección, número de empleados
+  - Acciones: Ver detalle de empresa, Editar, Eliminar, Crear nueva empresa
+  - Filtros por nombre, empleados, estado
+  - Búsqueda por nombre o CIF
 
-#### **Resultado esperado:**
-- Acceso centralizado al core de usuarios/empresas.
-- Flujos claros y seguros para administrar acceso y permisos.
+#### 6. Detalle de empresa
+- **Función:** Mostrar todos los detalles de una empresa y acceso a sus registros vinculados.
+- **Contenido:**
+  - Datos generales: nombre legal, CIF, dirección, teléfono, email
+  - Lista de empleados asociados
+  - Historial de actividad de la empresa
+  - Acciones: Editar empresa, Eliminar empresa
+  - Acceso a módulos relacionados: RRHH, facturación
+
+#### 7. Listado de roles
+- **Función:** Visualizar y gestionar los roles y permisos disponibles en el sistema.
+- **Contenido:**
+  - Tabla: nombre de rol, descripción, módulos/acciones permitidas
+  - Acciones: Crear nuevo rol, Editar rol, Eliminar rol
+  - Buscador y filtro de roles
+
+#### 8. Detalle/edición de rol
+- **Función:** Consultar y modificar los permisos y descripciones de un rol.
+- **Contenido:**
+  - Nombre, descripción, listado de permisos (checkbox por módulo/acción)
+  - Acciones: Guardar cambios, Eliminar rol, Volver atrás
+  - Visualización de usuarios asociados a ese rol
+
+#### 9. Perfil de usuario (propio)
+- **Función:** Consultar y editar información personal y de acceso del usuario logueado.
+- **Contenido:**
+  - Datos personales: nombre, apellidos, email, teléfono, foto/avatar
+  - Sección para cambiar contraseña, editar datos de contacto
+  - Acciones: Guardar cambios, Cerrar sesión
+  - Actividad reciente del usuario
+
 ---
 
 ### B. RRHH (Recursos Humanos)
 
 #### 1. Listado de empleados
-- **Función:** Visualizar todo el personal de una empresa.
-- **Contenido:**  
-  - Tabla: nombre, puesto, estado, departamento, fecha de incorporación
-  - Fotos/avatars
-  - Acciones: ver detalle, filtrar/buscar, alta nuevo empleado
+- **Función:** Visualizar, buscar y filtrar empleados de la empresa.
+- **Contenido:**
+  - Tabla: nombre, puesto, departamento, estado, fecha de incorporación
+  - Acciones: Ver detalle, Editar, Eliminar, Crear nuevo empleado
+  - Filtros por puesto, estado, departamento
+  - Buscador por nombre o email
 
 #### 2. Detalle de empleado
-- **Función:** Brindar una “ficha” completa del empleado.
-- **Contenido:**  
-  - Foto, datos personales y laborales, historial de puestos, supervisor, contacto
-  - Últimas evaluaciones, historial de ausencias, archivos/documentos asociados
-  - Acciones: editar empleado, baja, generar documento/certificado laboral
+- **Función:** Ver la ficha completa de un empleado, gestionar acciones y acceder a información relacionada.
+- **Contenido:**
+  - Datos generales y laborales: nombre, cargo, departamento, supervisor, email, teléfono
+  - Historial de puestos, evaluaciones, ausencias
+  - Documentos asociados (contratos, nóminas, vacaciones)
+  - Acciones: Editar empleado, Dar de baja, Generar certificado
 
-#### 3. Alta/edición de empleado
-- **Función:** Alta y actualización de empleados, con validaciones de empresa/duplicados.
-- **Contenido:**  
-  - Formulario: nombre, apellidos, fecha nacimiento, email, puesto, supervisor, salario, tipo contrato, fecha inicio/fin
-  - Selección de documentos adjuntos (CV, etc)
+#### 3. Alta empleado
+- **Función:** Registrar un nuevo empleado en la empresa.
+- **Contenido:**
+  - Formulario: nombre, apellidos, email, puesto, departamento, fecha incorporación, tipo de contrato, salario
+  - Adjuntar documentos iniciales (CV, contrato)
   - Botones: Guardar, Cancelar
 
-#### 4. Gestión de vacaciones/ausencias
-- **Función:** Solicitar, aprobar y revisar ausencias.
-- **Contenido:**  
-  - Calendario de ausencias (individual/global)
-  - Solicitudes nuevas, aprobar/denegar solucitudes (según rol)
-  - Estado de ausencias (pendiente, aprobada, rechazada), motivos
-  - Límites y advertencias de días disponibles
+#### 4. Edición empleado
+- **Función:** Modificar los datos de un empleado existente.
+- **Contenido:**
+  - Formulario editable con los datos actuales del empleado
+  - Modificar: puesto, departamento, salario, tipo de contrato, supervisor, datos personales
+  - Guardar cambios, Cancelar
 
-#### 5. Listado/descarga de nóminas y contratos
-- **Función:** Facilitar al empleado y RRHH el acceso a su historial documental.
-- **Contenido:**  
-  - Tabla/listado: nombre documento, fecha, estado (firmado/pendiente)
-  - Descargas y subida de documentos
+#### 5. Gestión de ausencias/vacaciones
+- **Función:** Solicitar, aprobar y revisar ausencias y vacaciones.
+- **Contenido:**
+  - Calendario de ausencias por empleado o global
+  - Solicitud de nueva ausencia, con motivo y fechas
+  - Listado de ausencias por estado (pendiente, aprobada, denegada)
+  - Acciones: Aprobar/denegar (si responsable), anular solicitud (si empleado)
 
-#### **Resultado esperado:**
-- Un módulo robusto para el seguimiento del talento y la gestión documental, útil tanto para RRHH como para empleados.
----
-
-### C. CRM (Gestión de Clientes)
-
-#### 1. Listado de clientes/contactos
-- **Función:** Consulta y exploración de la base de clientes.
-- **Contenido:**  
-  - Tabla: nombre cliente, NIF, responsable, estatus, sector, fecha alta
-  - Filtros altamente configurables, por sector/responsable/conversiones
-
-#### 2. Detalle de cliente/contacto
-- **Función:** Ver toda la información y el historial operativo del cliente.
-- **Contenido:**  
-  - Datos generales, dirección, responsable, contactos asociados
-  - Resumen de oportunidades activas/históricas, ventas
-  - Historial de llamadas, emails, reuniones, comentarios de equipo
-  - Acceso rápido a editar o agregar interacción
-
-#### 3. Alta/edición de cliente/contacto
-- **Función:** Añadir o modificar una cuenta/contacto.
-- **Contenido:**  
-  - Datos reglamentarios, empresa asociada, responsable, canales de contacto
-  - Estado (potencial, activo, inactivo)
-  - Campos personalizados (observaciones, notas)
-
-#### 4. Oportunidades/interacciones
-- **Función:** Seguir el pipeline comercial y concertar/sumar actividades.
-- **Contenido:**  
-  - Embudo de oportunidades (Kanban), etapa/valor/probabilidad
-  - Registro rápido de follow-up, email/call, próximas acciones
-
-#### **Resultado esperado:**
-- Control comercial ágil, pipeline y trazabilidad de negocio optimizados.
+#### 6. Listado de nóminas y contratos
+- **Función:** Visualizar y descargar nóminas/contratos asociados al empleado.
+- **Contenido:**
+  - Tabla: nombre de documento, periodo, estado (firmado/pendiente), fecha de subida
+  - Acciones: Descargar, Ver documento
+  - Buscador por periodo/estado
 
 ---
 
-### D. BPM (Gestión de Procesos)
+### C. CRM (Clientes y Oportunidades)
+
+#### 1. Listado de clientes
+- **Función:** Visualizar y filtrar todos los clientes registrados.
+- **Contenido:**
+  - Tabla: nombre cliente, NIF, sector, responsable, fecha alta
+  - Acciones: Ver detalle, Editar, Eliminar, Crear nuevo cliente
+  - Buscador y filtros por sector/responsable
+
+#### 2. Detalle de cliente
+- **Función:** Consultar datos completos del cliente y su historial comercial.
+- **Contenido:**
+  - Datos fiscales y comerciales
+  - Contactos asociados al cliente
+  - Oportunidades y ventas relacionadas
+  - Historial de actividades e interacciones
+  - Acciones: Editar cliente, Ver/contactar responsable
+
+#### 3. Alta de cliente
+- **Función:** Añadir un nuevo cliente.
+- **Contenido:**
+  - Formulario: nombre, NIF, sector, datos de contacto, responsable asignado
+  - Botones: Guardar, Cancelar
+
+#### 4. Edición de cliente
+- **Función:** Modificar información de un cliente.
+- **Contenido:**
+  - Formulario prellenado con datos actuales
+  - Editar: datos de contacto, sector, responsable
+  - Guardar cambios, Cancelar
+
+#### 5. Listado de contactos
+- **Función:** Ver y filtrar todos los contactos de clientes.
+- **Contenido:**
+  - Tabla: nombre, email, teléfono, cliente asociado, rol
+  - Acciones: Ver, Editar, Eliminar, Añadir contacto
+  - Filtros por cliente, rol, búsqueda por nombre/email
+
+#### 6. Oportunidades comerciales (Kanban/pipeline)
+- **Función:** Seguir, mover y crear oportunidades de negocio.
+- **Contenido:**
+  - Vista Kanban por etapas del pipeline
+  - Cartas con nombre oportunidad, cliente, valor, fecha cierre, responsable
+  - Acciones: Mover etapa (drag and drop), editar, borrar, ver detalle
+  - Botón para nueva oportunidad
+
+#### 7. Detalle de oportunidad
+- **Función:** Consultar el detalle de una oportunidad de venta.
+- **Contenido:**
+  - Datos: cliente, valor, etapa, probabilidad, responsable, historial de interacciones
+  - Acciones: Editar oportunidad, cambiar etapa, agregar nota/interacción
+
+---
+
+### D. BPM (Procesos)
 
 #### 1. Listado de procesos
-- **Función:** Ver procesos modelados internos de la empresa.
-- **Contenido:**  
-  - Tabla: nombre, tipo, estado, responsable, fecha de inicio
-  - Acciones: ver detalle, modelo nuevo, duplicar
+- **Función:** Ver todos los procesos empresariales modelados.
+- **Contenido:**
+  - Tabla: nombre, tipo, responsable, estado actual, fecha última ejecución
+  - Acciones: Ver detalle, Editar, Eliminar, Crear proceso
+  - Filtros por tipo/estado/responsable
 
 #### 2. Detalle de proceso
-- **Función:** Seguir el estado de una instancia o proceso.
-- **Contenido:**  
-  - Diagrama visual (fases/estados)
-  - Estado actual, responsables de cada fase, historial de cambios
-  - Acciones según permiso (aprobar, avanzar, pausar, cancelar)
+- **Función:** Ver el flujo de fases, estado y progreso de un proceso.
+- **Contenido:**
+  - Diagrama de flujo/fases
+  - Estado actual, historial de acciones, usuarios implicados
+  - Acciones: Editar proceso, Aprobar/rechazar (si autorizado)
 
-#### 3. Alta/edición/modelado de procesos
-- **Función:** Crear/ajustar un flujo empresarial.
-- **Contenido:**  
-  - Formulario con campos de nombre, pasos, responsables
-  - Editor visual sencillo (prototipo/maqueta)
-  - Validaciones de consistencia
+#### 3. Alta/Edición de proceso
+- **Función:** Modelar un nuevo proceso o modificar uno existente.
+- **Contenido:**
+  - Formulario/maqueta visual: nombre, tipo, pasos, responsables por fase
+  - Guardar cambios, Cancelar
+  - Validación de coherencia de pasos y lógica de negocio
 
-#### 4. Seguimiento/aprobación
-- **Función:** Revisar/aprobar/concluir procesos.
-- **Contenido:**  
-  - Panel de instancias pendientes/aprobadas
-  - Acciones rápidas
-  - Filtros por estado
-
-#### **Resultado esperado:**
-- Visibilidad clara sobre los procesos empresariales y su ciclo de vida.
+#### 4. Seguimiento/aprobación de procesos
+- **Función:** Revisar y aprobar/rechazar procesos pendientes.
+- **Contenido:**
+  - Listado de procesos/instancias pendientes de acción, por usuario
+  - Acciones: Aprobar, rechazar, ver historial
+  - Filtro por estado/responsable
 
 ---
 
-### E. ERP (Facturación, Compras, Inventario)
+### E. ERP (Facturación, Inventario)
 
 #### 1. Listado de facturas
-- **Función:** Controlar el flujo de facturas (emitidas/recibidas).
-- **Contenido:**  
-  - Tabla: número, cliente, fecha, importe, estado (pagada/pendiente/vencida)
-  - Acciones: ver detalle, crear, editar, borrar, descargar PDF
+- **Función:** Visualizar todas las facturas, ver estado y descargar.
+- **Contenido:**
+  - Tabla: número, cliente, fecha, importe, estado (pagado/pendiente), vencimiento
+  - Acciones: Ver, Editar, Eliminar, Descargar PDF, Crear factura
+  - Filtro por cliente, estado, fecha
+  - Buscador por número/factura
 
 #### 2. Detalle de factura
-- **Función:** Información completa y links a clientes/productos asociados.
-- **Contenido:**  
-  - Datos fiscales, facturador, descripción servicios/productos
-  - Estado de cobro/pago, notas
+- **Función:** Ver completo de una factura.
+- **Contenido:**
+  - Todos los campos fiscales: cliente, conceptos, totales, impuestos, fecha, estado
+  - Productos/servicios facturados
+  - Documentos adjuntos
+  - Acciones: Editar factura, Descargar PDF
 
-#### 3. Alta/edición de factura
-- **Función:** Crear/modificar factura.
-- **Contenido:**  
-  - Campos: cliente, concepto, líneas de producto/servicio, precio, impuestos
-  - Adjuntos (contratos, justificantes)
-  - Validación en tiempo real de datos
+#### 3. Alta/Edición de factura
+- **Función:** Añadir nueva factura/modificar existente.
+- **Contenido:**
+  - Formulario: cliente, lista de productos/servicios, importes, fechas, impuestos, estado
+  - Adjuntar documentos (presupuesto, justificante)
+  - Guardar, Cancelar
 
-#### 4. Listado y detalle de productos
-- **Función:** Gestión sencilla del inventario.
-- **Contenido:**  
-  - Tabla: nombre, SKU, stock, precio/unidad, proveedor
-  - Acciones: ver, añadir, editar producto
+#### 4. Listado de productos
+- **Función:** Ver y gestionar productos disponibles.
+- **Contenido:**
+  - Tabla: nombre, SKU, categoría, stock actual, precio, proveedor
+  - Acciones: Ver detalle de producto, Editar, Eliminar, Añadir producto
+  - Filtros por categoría/proveedor
 
-#### **Resultado esperado:**
-- Flujo económico e inventario perfectamente documentados y consultables.
+#### 5. Detalle/edición de producto
+- **Función:** Consultar y modificar detalles del producto.
+- **Contenido:**
+  - Datos principales, histórico de movimientos/stock
+  - Editar nombre, precio, proveedor, stock
+  - Guardar cambios, Cancelar
 
 ---
 
 ### F. ALM (Proyectos y Tareas)
 
 #### 1. Listado de proyectos
-- **Función:** Exploración y búsqueda de los proyectos en activo o históricos.
-- **Contenido:**  
-  - Tabla: nombre, responsable, fecha inicio/fin, estado, % de avance
+- **Función:** Ver y buscar proyectos de la empresa.
+- **Contenido:**
+  - Tabla: nombre, responsable, estado, % de avance, fechas importante
+  - Acciones: Ver detalle, Editar, Eliminar, Crear nuevo proyecto
+  - Filtros por estado, responsable, cliente
 
 #### 2. Detalle de proyecto
-- **Función:** Seguimiento y control del proyecto.
-- **Contenido:**  
-  - Cronograma, milestones, tareas asociadas, equipo involucrado, files
-  - Acciones: archivar, pausar, editar, añadir tarea
-
-#### 3. Alta/edición de proyecto
-- **Función:** Nueva entrada proyecto o ajustes sobre existentes.
+- **Función:** Ver cronograma, tareas, equipo y documentos de un proyecto.
 - **Contenido:**
-  - Formulario con campos: nombre, descripción, fechas, participantes, etc.
+  - Cronograma, milestones, tareas asociadas (tabla/lista)
+  - Listado de miembros del proyecto
+  - Documentos adjuntos, comentarios/interacciones
+  - Acciones: Editar proyecto, Añadir tarea/comentario
 
-#### 4. Listado y detalle de tareas
-- **Función:** Asignación, estado y edición de tareas dentro de proyectos.
-- **Contenido:**  
-  - Tabla: título, responsable, estado, prioritario, fecha entrega
-  - Detalle: descripción, subtareas, comentarios, archivos adjuntos
-  - Acciones: marcar completada, editar, reasignar
+#### 3. Alta/Edición de proyecto
+- **Función:** Registrar nuevo proyecto o modificar datos de uno.
+- **Contenido:**
+  - Formulario: nombre, descripción, fechas, responsable, clientes vinculados
+  - Adjuntar documentos de inicio/cierre
+  - Guardar, Cancelar
 
-#### **Resultado esperado:**
-- Seguimiento ágil y control eficiente de proyectos y tareas.
+#### 4. Listado de tareas (por proyecto)
+- **Función:** Gestionar y hacer seguimiento de tareas del proyecto.
+- **Contenido:**
+  - Tabla: título, asignado, estado, prioridad, fecha entrega
+  - Acciones: Ver detalle tarea, Editar, Completar, Crear tarea
+  - Filtro por estado/prioridad/responsable
+
+#### 5. Detalle de tarea
+- **Función:** Consultar y actualizar información de una tarea específica.
+- **Contenido:**
+  - Datos: título, descripción, responsable, estado, fechas, subtareas
+  - Comentarios, adjuntos
+  - Acciones: Editar tarea, Cambiar estado/completada
 
 ---
 
-### G. Soporte / Tickets
+### G. Soporte (Tickets)
 
 #### 1. Listado de tickets
-- **Función:** Consulta + filtro rápido de todos los tickets (internos/externos).
-- **Contenido:**  
-  - Tabla: número, asunto, estado, prioridad, responsable, fecha creación
+- **Función:** Visualizar, buscar y filtrar todos los tickets de soporte.
+- **Contenido:**
+  - Tabla: número, asunto, prioridad, estado, responsable, fecha creación
+  - Acciones: Ver detalle, Editar, Eliminar, Crear ticket
+  - Filtros por estado/prioridad/responsable
 
 #### 2. Detalle de ticket
-- **Función:** Ver el historial completo y toma de acción rápida.
-- **Contenido:**  
-  - Mensajes/actividad, estado, archivos adjuntos
-  - Acciones: responder, cerrar, reabrir, reasignar
-  - Línea temporal (timeline) de actualizaciones
+- **Función:** Consular toda la conversación, estado e historia del ticket.
+- **Contenido:**
+  - Datos principales, mensajes/conversaciones, adjuntos
+  - Acciones: Responder, Cerrar, Reabrir, Editar ticket
+  - Timeline de cambios
 
-#### 3. Alta/edición de ticket
-- **Función:** Reportar un nuevo problema o actualizar uno existente.
-- **Contenido:**  
-  - Formulario: asunto, descripción, prioridad, adjunto opcional
-  - Validación rápida, feedback inmediato
+#### 3. Alta/Edición de ticket
+- **Función:** Registrar y modificar un ticket de soporte.
+- **Contenido:**
+  - Formulario: asunto, descripción, prioridad, adjunto
+  - Guardar, Cancelar
 
-#### 4. Conversación/mensajería
-- **Función:** Comunicación con el soporte/usuario.
-- **Contenido:**  
-  - Mensajería tipo chat o comentarios
-  - Marcadores (resuelto, pendiente, escalado)
-
-#### **Resultado esperado:**
-- Registro claro y trazabilidad total del soporte recibido y gestionado.
+#### 4. Conversación de ticket (chat)
+- **Función:** Conversar y dejar registro con el cliente o usuario.
+- **Contenido:**
+  - Mensajes, adjuntos
+  - Botones de enviar, marcar como resuelto, escalar
 
 ---
 
 ### H. BI (Business Intelligence)
 
-#### 1. Dashboard principal
-- **Función:** Vista de alto nivel de los KPIs clave y datos agregados de la empresa.
-- **Contenido:**  
-  - Tarjetas de resumen (total ventas, empleados, tickets, proyectos activos, etc.)
-  - Gráficas (tendencias, ranking, comparativas)
+#### 1. Dashboard BI
+- **Función:** Visualización de los principales KPIs y métricas globales.
+- **Contenido:**
+  - Tarjetas resumen (empleados activos, facturación, tickets abiertos, etc.)
+  - Gráficas: líneas, barras, tarta, mapas de calor
+  - Filtros por rango temporal/módulo
 
 #### 2. Listado de informes
-- **Función:** Acceso a reportes generados o personalizables.
-- **Contenido:**  
-  - Tabla/list: nombre, módulo fuente, fecha creación, filtros guardados
+- **Función:** Consulta y filtrado de todos los informes generados.
+- **Contenido:**
+  - Tabla/lista de informes: nombre, módulo, periodo, responsable
+  - Acciones: Ver detalle, Exportar, Borrar informe
 
 #### 3. Detalle de informe
-- **Función:** Visualización y exportación de datos analíticos.
-- **Contenido:**  
-  - Gráficos y tablas, filtros dinámicos, selección de fechas
-  - Botones para exportar (PDF/Excel)
-
-#### **Resultado esperado:**
-- Soporte a la toma de decisiones estratégica y operación basada en datos.
-
+- **Función:** Ver el informe analítico en profundidad.
+- **Contenido:**
+  - Gráficos, tablas dinámicas, filtros adicionales
+  - Exportación a PDF/Excel, compartir enlace
 ---
 
 ## 4. Consideraciones Comunes
@@ -709,3 +977,36 @@ Incluyen definición clara, entregables y breve criterio de aceptación.
 - Subdivide tickets grandes en tareas menores si el scope es amplio.
 - Usa checklist en cada ticket para subtareas.
 - Revisa la documentación y mockups al crear cada tarjeta.
+
+---
+
+Ejemplo con código y comentarios
+Supongamos Listado y Edición de usuarios (Core):
+
+```
+// Ejemplo usando React y axios
+
+// 1. Listado de usuarios
+useEffect(() => {
+  axios
+    .get('/api/users', { params: { page:1, perPage:10 } })
+    .then(resp => setUserList(resp.data.data))
+    .catch(err => showToast("Error al cargar usuarios", "error"));
+}, []);
+
+// 2. Detalle de usuario
+const fetchUser = (id) => {
+  axios.get(`/api/users/${id}`).then(resp => setUser(resp.data.data));
+}
+
+// 3. Edición
+const handleSubmit = (formData) => {
+  axios.patch(`/api/users/${userId}`, formData)
+    .then(() => {
+        showToast("Usuario editado correctamente", "success");
+        navigate(`/users/${userId}`);
+        // Opcional: context global update
+    })
+    .catch(err => showToast("Error al editar", "error"));
+};
+```
