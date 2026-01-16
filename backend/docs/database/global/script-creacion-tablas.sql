@@ -1,2 +1,0 @@
--- Script SQL generado desde el modelo global (DBML).
--- Pendiente de generar.
