@@ -95,4 +95,3 @@ El uso de PostgreSQL facilita esta evolución debido a su estabilidad y capacida
 ## 9. Conclusión
 PostgreSQL será la base de datos principal del proyecto, actuando como repositorio central para todos los módulos del producto. Permitirá mantener datos consistentes, organizados por empresa y con trazabilidad, asegurando que el sistema pueda evolucionar de manera modular y escalable.
 
-Esta elección es adecuada para una plataforma empresarial tipo Factorial, ya que se adapta bien a escenarios multiempresa, soporta integración entre áreas y facilita el análisis de información desde BI.
