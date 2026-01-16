@@ -36,28 +36,12 @@
 
 ## ✅ Entregables obligatorios (Sprint 1)
 
-- `docs/producto/analisis-producto.md`
-- `docs/modulos/<modulo>/descripcion.md`
-- `docs/modulos/<modulo>/entidades.md`
-- `docs/modulos/<modulo>/integraciones.md`
-- `docs/database/global/modelo-global-er.png` y `docs/database/global/modelo-global.dbml`
-- `docs/integraciones/documento-integraciones.md`
-- `docs/integraciones/matriz-integraciones.md`
-- `docs/equipo/organizacion-equipo.md`
-- `docs/equipo/metodologia-trabajo.md`
-- `docs/api/modulos/*.md` (lista de endpoints por modulo, alto nivel)
-
-## ⭐ Extras (si hay tiempo)
-
-- `docs/arquitectura/`
-- `docs/templates/`
+- `docs/modulos/<modulo>/informacion.md`
+- `docs/modulos/<modulo>/funcionalidades.md`
+- `docs/api/modulos/<modulo>.md`
+- `docs/database/modelo-datos-backend.md`
+- `docs/database/media/modelo-global-er.png`
 - `docs/api/convenciones-api.md`
-- `docs/api/catalogo-endpoints.md`
-- `docs/database/global/script-creacion-tablas.sql`
-- `docs/database/convenviones/`
-- `docs/database/modulos/*/er.png` y `docs/database/modulos/*/er.dbml`
-- `docs/integraciones/diagrama-flujo-datos.png`
-- `docs/integraciones/secuencia-desarrollo.md`
 
 ---
 
@@ -67,16 +51,14 @@
 **CORE** (Usuarios, Empresas, Roles, Permisos, Autenticacion)
 
 ### Entregables del Modulo (obligatorio)
-- `docs/modulos/core/descripcion.md`
-- `docs/modulos/core/entidades.md`
-- `docs/modulos/core/integraciones.md`
-- `docs/api/modulos/core.md` (lista de endpoints, sin payloads)
+- `docs/modulos/core/informacion.md`
+- `docs/modulos/core/funcionalidades.md`
+- `docs/api/modulos/core.md`
 
 ### Coordinacion (extra)
-- `docs/arquitectura/arquitectura-backend.md`
-- `docs/arquitectura/estructura-carpetas.md`
-- `docs/arquitectura/convenciones-codigo.md`
-- `docs/templates/`
+- `docs/templates/descripcion.md`
+- `docs/templates/entidades.md`
+- `docs/templates/endpoints.md`
 
 ---
 
@@ -86,18 +68,13 @@
 **RRHH** (Recursos Humanos)
 
 ### Entregables del Modulo (obligatorio)
-- `docs/modulos/rrhh/descripcion.md`
-- `docs/modulos/rrhh/entidades.md`
-- `docs/modulos/rrhh/integraciones.md`
+- `docs/modulos/rrhh/informacion.md`
+- `docs/modulos/rrhh/funcionalidades.md`
 - `docs/api/modulos/rrhh.md`
 
 ### Coordinacion (obligatorio)
-- `docs/database/global/modelo-global-er.png`
-- `docs/database/global/modelo-global.dbml`
-
-### Coordinacion (extra)
-- `docs/database/global/script-creacion-tablas.sql`
-- `docs/database/convenviones/`
+- `docs/database/media/modelo-global-er.png`
+- `docs/database/modelo-datos-backend.md`
 
 ---
 
@@ -107,15 +84,12 @@
 **CRM** (Customer Relationship Management)
 
 ### Entregables del Modulo (obligatorio)
-- `docs/modulos/crm/descripcion.md`
-- `docs/modulos/crm/entidades.md`
-- `docs/modulos/crm/integraciones.md`
+- `docs/modulos/crm/informacion.md`
+- `docs/modulos/crm/funcionalidades.md`
 - `docs/api/modulos/crm.md`
 
 ### Coordinacion (extra)
 - `docs/api/convenciones-api.md`
-- `docs/api/catalogo-endpoints.md`
-- `docs/coordinacion/acuerdos-frontend-backend.md`
 
 ---
 
@@ -125,18 +99,9 @@
 **ALM** (Gestion de Proyectos y Tareas)
 
 ### Entregables del Modulo (obligatorio)
-- `docs/modulos/alm/descripcion.md`
-- `docs/modulos/alm/entidades.md`
-- `docs/modulos/alm/integraciones.md`
+- `docs/modulos/alm/informacion.md`
+- `docs/modulos/alm/funcionalidades.md`
 - `docs/api/modulos/alm.md`
-
-### Coordinacion (obligatorio)
-- `docs/integraciones/documento-integraciones.md`
-- `docs/integraciones/matriz-integraciones.md`
-
-### Coordinacion (extra)
-- `docs/integraciones/diagrama-flujo-datos.png`
-- `docs/integraciones/secuencia-desarrollo.md`
 
 ---
 
@@ -146,18 +111,13 @@
 **BPM** + **ERP**
 
 ### BPM (obligatorio)
-- `docs/modulos/bpm/descripcion.md`
-- `docs/modulos/bpm/entidades.md`
-- `docs/modulos/bpm/integraciones.md`
+- `docs/modulos/bpm/informacion.md`
+- `docs/modulos/bpm/funcionalidades.md`
 - `docs/api/modulos/bpm.md`
 
-### BPM (extra)
-- `docs/modulos/bpm/sistema-aprobaciones.md`
-
 ### ERP (obligatorio)
-- `docs/modulos/erp/descripcion.md`
-- `docs/modulos/erp/entidades.md`
-- `docs/modulos/erp/integraciones.md`
+- `docs/modulos/erp/informacion.md`
+- `docs/modulos/erp/funcionalidades.md`
 - `docs/api/modulos/erp.md`
 
 ---
@@ -165,20 +125,14 @@
 ## 👤 David: Soporte/Tickets + BI
 
 ### Soporte (obligatorio)
-- `docs/modulos/soporte/descripcion.md`
-- `docs/modulos/soporte/entidades.md`
-- `docs/modulos/soporte/integraciones.md`
+- `docs/modulos/soporte/informacion.md`
+- `docs/modulos/soporte/funcionalidades.md`
 - `docs/api/modulos/soporte.md`
 
 ### BI (obligatorio)
-- `docs/modulos/bi/descripcion.md`
-- `docs/modulos/bi/entidades.md`
-- `docs/modulos/bi/integraciones.md`
+- `docs/modulos/bi/informacion.md`
+- `docs/modulos/bi/funcionalidades.md`
 - `docs/api/modulos/bi.md`
-
-### BI (extra)
-- `docs/modulos/bi/dashboards.md`
-- `docs/modulos/bi/metricas.md`
 
 ---
 
@@ -187,17 +141,10 @@
 ```
 /docs
   /api
-    /modulos
-  /arquitectura
-  /coordinacion
   /database
-    /global
-    /modulos
-  /equipo
-  /integraciones
+    /media
   /modulos
     /core /rrhh /crm /bpm /erp /alm /soporte /bi
-  /producto
   /templates
 ```
 
@@ -205,22 +152,18 @@
 
 ## 📋 Tareas comunes para todos
 
-- Descripcion de modulo: finalidad, funcionalidades clave, usuarios y datos.
-- Entidades: tablas, campos clave y relaciones.
-- Integraciones: que consume y que expone (con FKs o campo relacion).
-- API: lista de endpoints por modulo, sin payloads ni ejemplos detallados.
+- Informacion: finalidad, alcance, usuarios y datos.
+- Funcionalidades: lista de capacidades y relaciones clave.
+- Endpoints: lista de endpoints por modulo, sin payloads ni ejemplos detallados.
 
 ---
 
 ## ✅ Entregables finales del Sprint 1
 
-1. **Documento de analisis del producto** (`docs/producto/analisis-producto.md`)
-2. **Documentacion de modulos** (descripcion, entidades, integraciones)
-3. **Modelo de datos global** (`docs/database/global/modelo-global-er.png` y `docs/database/global/modelo-global.dbml`)
-4. **Documento de integraciones** (`docs/integraciones/documento-integraciones.md`)
-5. **Organizacion del equipo** (`docs/equipo/organizacion-equipo.md`)
-6. **Metodologia de trabajo** (`docs/equipo/metodologia-trabajo.md`)
-7. **Endpoints por modulo (alto nivel)** (`docs/api/modulos/*.md`)
+1. **Documentacion de modulos** (informacion, funcionalidades, endpoints)
+2. **Modelo de datos backend** (`docs/database/modelo-datos-backend.md`)
+3. **Diagrama ER global** (`docs/database/media/modelo-global-er.png`)
+4. **Convenciones de API** (`docs/api/convenciones-api.md`)
 
 ---
 

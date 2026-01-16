@@ -95,20 +95,3 @@ El uso de PostgreSQL facilita esta evolución debido a su estabilidad y capacida
 ## 9. Conclusión
 PostgreSQL será la base de datos principal del proyecto, actuando como repositorio central para todos los módulos del producto. Permitirá mantener datos consistentes, organizados por empresa y con trazabilidad, asegurando que el sistema pueda evolucionar de manera modular y escalable.
 
-Esta elección es adecuada para una plataforma empresarial tipo Factorial, ya que se adapta bien a escenarios multiempresa, soporta integración entre áreas y facilita el análisis de información desde BI.
-
-
----
-
-## Buenas prácticas comunes para todos los módulos (base de datos)
-
-- El sistema es multiempresa: todos los datos se gestionan dentro del contexto de una empresa.
-- Se aplican convenciones comunes:
-  - Tablas en snake_case y plural
-  - Columnas en snake_case
-  - IDs en formato UUID
-- Se evita duplicar información entre módulos: cada área mantiene su dato principal (empleados en RRHH, clientes en CRM, usuarios en CORE).
-- Los registros críticos no se eliminan, se desactivan (baja lógica) para mantener trazabilidad e histórico.
-- Se mantiene auditoría básica en entidades importantes (fechas de creación y actualización).
-- Se definen reglas para evitar duplicados (emails, documentos, periodos de nómina, etc.).
-- La base de datos soporta el análisis de BI mediante consultas agregadas y métricas por módulo.
