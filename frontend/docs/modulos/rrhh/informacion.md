@@ -1,20 +1,5 @@
 # Documentación Técnica - Módulo RRHH Frontend
 
-## 📋 Índice
-
-1. [Visión General](#-visión-general)
-2. [Arquitectura del Módulo](#-arquitectura-del-módulo)
-3. [Integración con Backend](#-integración-con-backend)
-4. [Pantallas y Funcionalidades](#-pantallas-y-funcionalidades)
-5. [Gestión de Estado](#-gestión-de-estado)
-6. [Comunicación con API](#-comunicación-con-api)
-7. [Validaciones y Reglas de Negocio](#-validaciones-y-reglas-de-negocio)
-8. [Integración con Otros Módulos](#-integración-con-otros-módulos)
-9. [Consideraciones de UX/UI](#-consideraciones-de-uxui)
-10. [Testing](#-testing)
-11. [Métricas y Monitoreo](#-métricas-y-monitoreo)
-12. [Guía de Desarrollo](#-guía-de-desarrollo)
-
 ---
 
 ## 🎯 Visión General
