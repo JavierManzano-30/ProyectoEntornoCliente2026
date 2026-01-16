@@ -81,12 +81,97 @@ Meta de paginacion:
 - `DELETE /alm/proyectos/{id}`
 - `GET /alm/proyectos/{id}/tareas`
 
+Filtros y paginacion (listas):
+- `page`, `limit`, `sort`
+- `estado`, `clienteId`, `responsableId`, `fechaInicio`, `fechaFin`
+
+Ejemplo request (POST):
+```json
+{
+  "empresaId": "emp_1",
+  "nombre": "Proyecto Atlas",
+  "descripcion": "Migracion de CRM",
+  "fechaInicio": "2026-01-10",
+  "fechaFin": "2026-03-30",
+  "responsableId": "usr_10",
+  "estado": "planificacion",
+  "presupuesto": 25000,
+  "clienteId": "cli_5"
+}
+```
+
+Ejemplo response (POST):
+```json
+{
+  "success": true,
+  "data": {
+    "id": "proy_100",
+    "empresaId": "emp_1",
+    "nombre": "Proyecto Atlas",
+    "descripcion": "Migracion de CRM",
+    "fechaInicio": "2026-01-10",
+    "fechaFin": "2026-03-30",
+    "responsableId": "usr_10",
+    "estado": "planificacion",
+    "presupuesto": 25000,
+    "clienteId": "cli_5",
+    "createdAt": "2026-01-10T09:00:00Z",
+    "updatedAt": "2026-01-10T09:00:00Z"
+  }
+}
+```
+
 ### Tareas
 - `GET /alm/tareas`
 - `POST /alm/tareas`
 - `GET /alm/tareas/{id}`
 - `PUT /alm/tareas/{id}`
 - `DELETE /alm/tareas/{id}`
+
+Filtros y paginacion (listas):
+- `page`, `limit`, `sort`
+- `estado`, `prioridad`, `proyectoId`, `asignadoA`, `fechaVencimiento`
+
+Ejemplo request (POST):
+```json
+{
+  "empresaId": "emp_1",
+  "proyectoId": "proy_100",
+  "titulo": "Diseno de entidades",
+  "descripcion": "Definir tablas y relaciones",
+  "estado": "pendiente",
+  "prioridad": "media",
+  "asignadoA": "usr_10",
+  "fechaVencimiento": "2026-01-31",
+  "tiempoEstimado": 16
+}
+```
+
+Ejemplo response (POST):
+```json
+{
+  "success": true,
+  "data": {
+    "id": "tar_900",
+    "empresaId": "emp_1",
+    "proyectoId": "proy_100",
+    "titulo": "Diseno de entidades",
+    "descripcion": "Definir tablas y relaciones",
+    "estado": "pendiente",
+    "prioridad": "media",
+    "asignadoA": "usr_10",
+    "fechaVencimiento": "2026-01-31",
+    "tiempoEstimado": 16,
+    "createdAt": "2026-01-12T10:00:00Z",
+    "updatedAt": "2026-01-12T10:00:00Z"
+  }
+}
+```
+
+## Enums
+- `proyecto.estado`: `planificacion | en_curso | pausado | completado`
+- `tarea.estado`: `pendiente | en_progreso | completada`
+- `tarea.prioridad`: `baja | media | alta`
 
 ## Relaciones clave (para frontend)
 - `proyectos.responsable_id` -> `usuarios.id`

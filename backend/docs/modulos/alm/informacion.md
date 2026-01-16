@@ -31,8 +31,11 @@ Desde el backend, ALM aporta un modelo de datos estructurado para la gestión de
 
 ## 4. Datos que gestiona
 - **Proyectos:** planificación y estado del trabajo.  
+  - Campos clave: `id`, `empresa_id`, `nombre`, `descripcion`, `fecha_inicio`, `fecha_fin`, `responsable_id`, `estado`, `presupuesto`, `cliente_id`, `created_at`, `updated_at`.  
 - **Tareas:** unidades de ejecución dentro de proyectos.  
+  - Campos clave: `id`, `empresa_id`, `proyecto_id`, `titulo`, `descripcion`, `estado`, `prioridad`, `asignado_a`, `fecha_vencimiento`, `tiempo_estimado`, `created_at`, `updated_at`.  
 - **Registro de horas:** seguimiento básico de dedicación.  
+  - Campos clave: `id`, `empresa_id`, `tarea_id`, `usuario_id`, `fecha`, `horas`, `descripcion`, `created_at`.  
 
 ---
 
@@ -61,3 +64,15 @@ ALM actúa como **módulo operativo y de ejecución**. Consume datos base de COR
 - **Soporte:** tickets convertidos en tareas (opcional).  
 - **BI:** métricas de productividad y avance.  
 
+### Integraciones clave (consume/provee + FK)
+
+| Módulo | Relación | Campo FK |
+|---|---|---|
+| CORE | ALM consume usuarios | `proyectos.responsable_id -> usuarios.id` |
+| CORE | ALM consume usuarios | `tareas.asignado_a -> usuarios.id` |
+| CRM | ALM consume clientes | `proyectos.cliente_id -> clientes.id` |
+| RRHH | ALM consume empleados (referencia) | `tareas.asignado_a -> usuarios.id` |
+| Soporte | ALM puede recibir tickets | `tareas.ticket_id -> tickets.id` (opcional) |
+| BI | BI consume datos de ALM | `proyectos`, `tareas`, `registro_horas` |
+
+> Referencia del modelo completo: `docs/database/modelo-datos-backend.md`.

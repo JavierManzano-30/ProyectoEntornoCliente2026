@@ -41,6 +41,17 @@ ALM organiza el trabajo en **tareas** vinculadas a un proyecto.
 
 ---
 
+## 2.1 🔑 Relaciones y claves foráneas
+- `proyectos.responsable_id -> usuarios.id` (CORE)
+- `proyectos.cliente_id -> clientes.id` (CRM)
+- `tareas.asignado_a -> usuarios.id` (CORE)
+- `tareas.proyecto_id -> proyectos.id` (ALM)
+- `registro_horas.usuario_id -> usuarios.id` (CORE)
+- `registro_horas.tarea_id -> tareas.id` (ALM)
+- `tareas.ticket_id -> tickets.id` (Soporte, opcional)
+
+---
+
 ## 3. ⏱️ Registro de tiempos
 ALM permite registrar **tiempos dedicados** a tareas para control y seguimiento.
 
@@ -78,4 +89,3 @@ Las entidades principales incluyen campos de auditoria y control de cambios.
 ### 🔗 Integración con otros módulos
 - **CORE:** Roles y permisos.
 - **BI:** Informes de control y auditoria.
-
