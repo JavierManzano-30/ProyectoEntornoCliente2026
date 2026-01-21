@@ -6,9 +6,9 @@
 
 ### Propósito del Módulo
 
-El módulo **BPM (Business Process Management)** del frontend es responsable de proporcionar una interfaz completa y eficiente para la gestión integral de procesos de negocio, flujos de aprobación, tareas humanas y monitorización operacional.
+El módulo **BPM (Business Process Management)** del frontend es responsable de proporcionar una interfaz completa para la gestión de procesos de negocio, flujos de aprobación, tareas humanas y monitorización operacional.
 
-Este módulo actúa como **punto central de orquestación de procesos**, proporcionando herramientas tanto para administradores de procesos, ejecutores de tareas, aprobadores y dirección. 
+Este módulo actúa como **punto central de orquestación de procesos**, proporcionando herramientas para administradores de procesos, ejecutores de tareas, aprobadores y dirección.
 
 ### Objetivos Principales
 
@@ -35,7 +35,7 @@ Este módulo actúa como **punto central de orquestación de procesos**, proporc
 5. **Monitorización y SLA**
    - Dashboard de procesos activos
    - Alertas de incumplimiento de SLA
-   - Métricas en tiempo real de cuellos de botella
+   - Métricas en tiempo real
 
 6. **Gestión Documental**
    - Adjuntar archivos a instancias
@@ -108,7 +108,7 @@ const InstanceMonitor = lazy(() => import('./pages/InstanceMonitor'));
 
 ### Concordancia con Backend BPM
 
-El módulo frontend está **completamente alineado** con la documentación del backend BPM: 
+El módulo frontend está completamente alineado con la documentación del backend BPM.
 
 #### Entidades Gestionadas
 
@@ -133,7 +133,7 @@ El módulo frontend está **completamente alineado** con la documentación del b
 | Obtener instancia | GET | `/api/v1/bpm/instancias/:id` | InstanceDetail |
 | Cancelar instancia | POST | `/api/v1/bpm/instancias/:id/cancelar` | InstanceDetail |
 | Listar tareas pendientes | GET | `/api/v1/bpm/tareas/bandeja` | TaskInbox |
-| Obtener tarea | GET | `/api/v1/bpm/tareas/: id` | TaskDetail |
+| Obtener tarea | GET | `/api/v1/bpm/tareas/:id` | TaskDetail |
 | Completar tarea | POST | `/api/v1/bpm/tareas/:id/completar` | TaskForm |
 | Transferir tarea | POST | `/api/v1/bpm/tareas/:id/transferir` | TaskInbox |
 | Adjuntar documento | POST | `/api/v1/bpm/instancias/:id/documentos` | DocumentUpload |
@@ -141,55 +141,19 @@ El módulo frontend está **completamente alineado** con la documentación del b
 
 ---
 
-## 🖥️ Pantallas y Funcionalidades
+## 🖥️ Pantallas Principales
 
-### 1. Listado de Procesos (`ProcessList. jsx`)
+### 1. Listado de Procesos (`ProcessList.jsx`)
 
-#### Funcionalidad Completa
+**Propósito**: Vista general de procesos definidos con sus versiones y estados.
 
-**Propósito**: Proporcionar una vista general de todos los procesos definidos con sus versiones y estados.
+**Características**:
+- Vista de cards con información clave (nombre, versión, estado, instancias activas)
+- Búsqueda y filtros (nombre, estado, categoría)
+- Acciones rápidas (ver, editar, publicar, iniciar instancia)
+- Estadísticas del dashboard
 
-**Características**: 
-
-- ✅ **Vista de Cards con Información Clave**: 
-  - Nombre del proceso
-  - Versión actual y estado (borrador, publicado, obsoleto)
-  - Número de instancias activas
-  - Fecha de última modificación
-  - Usuario creador
-  
-- ✅ **Búsqueda y Filtros**:
-  - Búsqueda por nombre o descripción
-  - Filtro por estado (borrador, publicado, obsoleto)
-  - Filtro por categoría (aprobaciones, compras, RRHH, proyectos)
-  - Ordenación por nombre, fecha, instancias activas
-
-- ✅ **Acciones Rápidas**:
-  - Ver detalle del modelo (ícono ojo)
-  - Editar proceso (ícono lápiz) - Solo borradores
-  - Publicar versión (ícono check) - Requiere validación
-  - Iniciar nueva instancia (ícono play)
-  - Ver instancias activas (ícono lista)
-  - Archivar proceso (ícono archivo)
-
-- ✅ **Estadísticas del Dashboard**:
-  - Total de procesos publicados
-  - Instancias en ejecución
-  - Tareas pendientes globales
-  - Procesos más utilizados
-
-**Permisos Requeridos**:
-- `bpm.view` - Ver listado de procesos
-- `bpm.design` - Crear/editar procesos
-- `bpm.publish` - Publicar procesos
-- `bpm.start_instance` - Iniciar instancias
-
-**Navegación**:
-- **Desde**:  Menú lateral → BPM → Procesos
-- **Hacia**: 
-  - ProcessDesigner (nuevo/editar)
-  - InstanceMonitor (ver instancias)
-  - ProcessStartForm (iniciar)
+**Permisos**: `bpm.view`, `bpm.design`, `bpm.publish`, `bpm.start_instance`
 
 ---
 
