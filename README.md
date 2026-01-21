@@ -12,6 +12,30 @@ Durante el **Sprint 2.1** el equipo se centra en la **definición, organización
 En este sprint **no se desarrolla código funcional**, priorizando una base sólida y coherente antes de comenzar la implementación.
 
 ---
+# Organización del equipo y planificación del trabajo
+
+## Frontend
+- Visión general del Frontend + planificación de la base: José Luis, Pablo y Víctor.
+- Primera elección de colores, tipografía, distribución: José Luis, Pablo y Víctor.
+- Primeros bocetos, prototipos y apartado visual: Victor.
+- Documentación de módulos basados en el backend: José Luis y Pablo.
+
+## Backend
+- Visión general del Backend + planifición de la base: Javier, Paco, Bartolome, Hernán, Alberto y David.
+- División de modulos para documentación:
+    - Alberto: CORE + Coordinacion de Arquitectura
+    - Bartolome: RRHH + Coordinacion de Modelo de Datos
+    - Paco: CRM + Coordinacion de APIs
+    - Javier: ALM + Coordinacion de Integraciones
+    - Hernan: BPM + ERP
+    - David: Soporte/Tickets + BI
+
+## Coordinación
+
+- Coordinador general + Front: José Luis
+- Coordinador de back: Javier
+
+---
 
 # Guia básica Trello  
 Azul para Frontend
