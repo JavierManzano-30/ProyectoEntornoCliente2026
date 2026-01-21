@@ -2,16 +2,31 @@
 
 Proyecto grupal de desarrollo de una **plataforma empresarial modular**, similar a herramientas como ERP/CRM/RRHH, organizada en **múltiples módulos integrados** (CORE, RRHH, CRM, BPM, ERP, ALM, Soporte y BI).
 
-Durante el **Sprint 2.1** el equipo se centra en la **definición, organización y documentación del producto**, estableciendo:
-- La visión global del sistema y sus módulos
-- El modelo de datos común y las relaciones entre entidades
-- Las integraciones entre módulos
-- Un diseño de API a alto nivel
-- La organización del equipo y la metodología de trabajo
+---
 
-En este sprint **no se desarrolla código funcional**, priorizando una base sólida y coherente antes de comenzar la implementación.
+## Definición del producto
+
+### Posibles nombres para el producto
+**BizHub** / **Orbix** / **FlowDesk**
+
+### Objetivo general
+BizHub es una **plataforma empresarial todo-en-uno** que centraliza la gestión de los principales procesos de negocio en un único sistema integrado. Su objetivo es proporcionar a empresas de cualquier tamaño una solución modular, escalable y fácil de usar para gestionar recursos humanos, relaciones con clientes, procesos internos, proyectos, facturación, soporte y análisis de datos.
+
+### Tipo de empresas a las que va dirigido
+- **PYMEs** (pequeñas y medianas empresas) que buscan digitalizar y centralizar sus operaciones sin invertir en múltiples herramientas especializadas. 
+- **Startups en crecimiento** que necesitan escalar sus procesos de forma ordenada y eficiente.
+- **Empresas de servicios** (consultorías, agencias, estudios) que requieren gestión de proyectos, clientes y facturación integrada. 
+- **Organizaciones que buscan flexibilidad**, pudiendo activar solo los módulos que necesitan en cada momento.
+
+### Problemas que resuelve
+1. **Dispersión de herramientas**: Muchas empresas utilizan aplicaciones separadas para RRHH, CRM, facturación, proyectos, etc., lo que genera desconexión de datos, duplicidad de información y pérdida de eficiencia. 
+2. **Falta de visibilidad centralizada**: Sin una plataforma unificada, es difícil tener una visión global del estado de la empresa (empleados, clientes, proyectos, finanzas).
+3. **Costes elevados**:  Contratar múltiples SaaS especializados puede resultar caro para PYMEs.  BizHub ofrece una alternativa modular y escalable.
+4. **Complejidad de integración**: Las integraciones entre herramientas diferentes suelen ser complejas y frágiles.  BizHub integra todos los módulos de forma nativa.
+5. **Pérdida de tiempo en tareas administrativas**: La plataforma automatiza flujos de trabajo (aprobaciones, notificaciones, reportes) reduciendo la carga administrativa.
 
 ---
+
 # Organización del equipo y planificación del trabajo
 
 ## Frontend
