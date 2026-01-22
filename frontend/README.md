@@ -1010,3 +1010,16 @@ const handleSubmit = (formData) => {
     .catch(err => showToast("Error al editar", "error"));
 };
 ```
+## 11. Prototipado en Figma
+
+A continuación se muestra la paleta de colores provisional para el frontend de la web así como imágenes del prototipado de las principales vistas de la web.
+
+---
+
+### 11.1. Pantallas
+
+---
+
+### 11.2. Gif de navegación
+
+
