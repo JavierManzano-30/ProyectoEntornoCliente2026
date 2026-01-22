@@ -1024,10 +1024,20 @@ A continuación se muestra la paleta de colores provisional para el frontend de 
 
 #### 2. Pantalla de recuperar contraseña
 
+![recuperar contraseña](/frontend/images/RecuperarContrasenia.png)
+
+#### 3. Pantalla de registro de nuevo usuario
+
+![registro](/frontend/images/RegistrarNuevoUsuario.png)
+
+#### 4. Web de inicio
+
+![web de inicio](/frontend/images/WebInicio.png)
 
 ---
 
 ### 11.2. Gif de navegación
 
+![recorrido](frontend/images/recorrido1.gif)
 
 
