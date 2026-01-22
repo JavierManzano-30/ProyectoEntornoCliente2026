@@ -1018,8 +1018,16 @@ A continuación se muestra la paleta de colores provisional para el frontend de 
 
 ### 11.1. Pantallas
 
+#### 1. Pantalla de Login
+
+![login de la web](/frontend/images/Login.png)
+
+#### 2. Pantalla de recuperar contraseña
+
+
 ---
 
 ### 11.2. Gif de navegación
+
 
 
