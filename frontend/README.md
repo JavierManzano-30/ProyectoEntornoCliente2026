@@ -1016,7 +1016,11 @@ A continuación se muestra la paleta de colores provisional para el frontend de 
 
 ---
 
-### 11.1. Pantallas
+### 11.1. Colores (provisional)
+
+![paleta de colores](/frontend/images/Colores.png)
+
+### 11.2. Pantallas
 
 #### 1. Pantalla de Login
 
@@ -1042,9 +1046,6 @@ A continuación se muestra la paleta de colores provisional para el frontend de 
 
 ---
 
-### 11.2. Gif de navegación
+### 11.3. Gif de navegación
 
 ![recorrido](/frontend/images/recorrido1.gif)
-
-
-
