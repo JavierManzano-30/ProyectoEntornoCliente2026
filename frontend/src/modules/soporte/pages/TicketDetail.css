@@ -1,0 +1,138 @@
+.ticket-detail-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.ticket-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 1.5rem;
+}
+
+.ticket-detail-main {
+  min-width: 0;
+}
+
+.ticket-detail-header {
+  margin-bottom: 1.5rem;
+}
+
+.ticket-badges {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ticket-detail-description {
+  padding: 1.5rem 0;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 1.5rem;
+}
+
+.ticket-detail-description h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.ticket-detail-description p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.ticket-detail-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid #e5e7eb;
+  margin-bottom: 1.5rem;
+}
+
+.tab-button {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  margin-bottom: -2px;
+}
+
+.tab-button:hover {
+  color: #2563eb;
+}
+
+.tab-button.active {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
+}
+
+.ticket-detail-tab-content {
+  min-height: 400px;
+}
+
+.tab-placeholder {
+  padding: 3rem;
+  text-align: center;
+  color: #9ca3af;
+}
+
+.ticket-detail-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.ticket-info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.info-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #9ca3af;
+  letter-spacing: 0.05em;
+}
+
+.info-value {
+  font-size: 0.875rem;
+  color: #111827;
+}
+
+.ticket-actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (max-width: 1024px) {
+  .ticket-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ticket-detail-sidebar {
+    order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .ticket-detail-page {
+    padding: 1rem;
+  }
+}

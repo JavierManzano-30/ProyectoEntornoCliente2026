@@ -1,0 +1,278 @@
+.support-dashboard-page {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.dashboard-kanban-section {
+  margin-top: 1rem;
+}
+
+.dashboard-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.dashboard-metric-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.dashboard-metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.metric-content {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.metric-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 0.75rem;
+  flex-shrink: 0;
+}
+
+.metric-icon-blue {
+  background-color: #dbeafe;
+  color: #2563eb;
+}
+
+.metric-icon-green {
+  background-color: #d1fae5;
+  color: #10b981;
+}
+
+.metric-icon-yellow {
+  background-color: #fef3c7;
+  color: #f59e0b;
+}
+
+.metric-icon-red {
+  background-color: #fee2e2;
+  color: #ef4444;
+}
+
+.metric-info {
+  flex: 1;
+}
+
+.metric-label {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.metric-value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.metric-value {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1;
+}
+
+.metric-trend {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.metric-trend.positive {
+  color: #10b981;
+}
+
+.metric-trend.negative {
+  color: #ef4444;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.dashboard-card {
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-sla {
+  grid-column: span 1;
+}
+
+.recent-tickets,
+.team-activity {
+  overflow-y: auto;
+  height: 100%;
+}
+
+.recent-ticket-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #f3f4f6;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.recent-ticket-item:hover {
+  background-color: #f9fafb;
+}
+
+.recent-ticket-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.recent-ticket-id {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #2563eb;
+  font-family: 'Courier New', monospace;
+}
+
+.recent-ticket-title {
+  font-size: 0.875rem;
+  color: #111827;
+}
+
+.recent-ticket-status {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-transform: capitalize;
+}
+
+.team-member-activity {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.team-member-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.team-member-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #111827;
+}
+
+.team-member-role {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.team-member-tickets {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.sla-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.sla-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sla-stat-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.sla-stat-value {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1;
+}
+
+.sla-progress-bar {
+  height: 0.75rem;
+  background-color: #e5e7eb;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.sla-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+  transition: width 0.5s ease;
+}
+
+.sla-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sla-breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.sla-breakdown-item.warning {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.sla-breakdown-item.danger {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.empty-state {
+  padding: 3rem;
+  text-align: center;
+  color: #9ca3af;
+}
+
+@media (max-width: 768px) {
+  .support-dashboard-page {
+    padding: 1rem;
+  }
+
+  .dashboard-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}

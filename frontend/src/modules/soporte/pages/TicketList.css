@@ -1,0 +1,11 @@
+.ticket-list-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+@media (max-width: 768px) {
+  .ticket-list-page {
+    padding: 1rem;
+  }
+}

@@ -1,0 +1,107 @@
+.message-input-container {
+  border-top: 1px solid #e5e7eb;
+  background-color: #ffffff;
+}
+
+.attached-file {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.attached-file-name {
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.attached-file-remove {
+  padding: 0.25rem;
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.attached-file-remove:hover {
+  background-color: #e5e7eb;
+  color: #6b7280;
+}
+
+.message-input-main {
+  padding: 1rem;
+}
+
+.message-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  resize: vertical;
+  min-height: 80px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.message-textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.message-textarea:disabled {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+}
+
+.message-input-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+  gap: 1rem;
+}
+
+.message-input-options {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.internal-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #374151;
+  cursor: pointer;
+  user-select: none;
+}
+
+.internal-checkbox input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.file-input-hidden {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .message-input-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .message-input-options {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

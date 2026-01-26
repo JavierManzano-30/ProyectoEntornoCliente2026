@@ -1,0 +1,92 @@
+.sla-indicator {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 2px solid;
+}
+
+.sla-indicator.sla-ok {
+  border-color: #10b981;
+  background-color: #d1fae5;
+}
+
+.sla-indicator.sla-warning {
+  border-color: #f59e0b;
+  background-color: #fef3c7;
+}
+
+.sla-indicator.sla-breached {
+  border-color: #ef4444;
+  background-color: #fee2e2;
+}
+
+.sla-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.sla-ok .sla-header {
+  color: #065f46;
+}
+
+.sla-warning .sla-header {
+  color: #92400e;
+}
+
+.sla-breached .sla-header {
+  color: #991b1b;
+}
+
+.sla-status-text {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.sla-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sla-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sla-metric-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.sla-progress-bar {
+  height: 0.5rem;
+  background-color: #e5e7eb;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.sla-progress-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.sla-progress-fill.sla-ok {
+  background-color: #10b981;
+}
+
+.sla-progress-fill.sla-warning {
+  background-color: #f59e0b;
+}
+
+.sla-progress-fill.sla-breached {
+  background-color: #ef4444;
+}
+
+.sla-metric-value {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #374151;
+}

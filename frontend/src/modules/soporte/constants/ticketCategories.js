@@ -1,0 +1,23 @@
+export const TICKET_CATEGORIES = {
+  INCIDENCIA: 'incidencia',
+  CONSULTA: 'consulta',
+  PETICION: 'peticion',
+  ERROR: 'error',
+  MEJORA: 'mejora',
+};
+
+export const TICKET_CATEGORY_LABELS = {
+  [TICKET_CATEGORIES.INCIDENCIA]: 'Incidencia',
+  [TICKET_CATEGORIES.CONSULTA]: 'Consulta',
+  [TICKET_CATEGORIES.PETICION]: 'Petición',
+  [TICKET_CATEGORIES.ERROR]: 'Error',
+  [TICKET_CATEGORIES.MEJORA]: 'Mejora',
+};
+
+export const TICKET_CATEGORY_COLORS = {
+  [TICKET_CATEGORIES.INCIDENCIA]: 'error',
+  [TICKET_CATEGORIES.CONSULTA]: 'info',
+  [TICKET_CATEGORIES.PETICION]: 'warning',
+  [TICKET_CATEGORIES.ERROR]: 'error',
+  [TICKET_CATEGORIES.MEJORA]: 'success',
+};
