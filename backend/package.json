@@ -1,7 +1,7 @@
 {
-  "name": "alm-backend",
+  "name": "backend-api",
   "version": "1.0.0",
-  "description": "Backend API for ALM module",
+  "description": "Backend API",
   "main": "src/server.js",
   "scripts": {
     "dev": "nodemon src/server.js",

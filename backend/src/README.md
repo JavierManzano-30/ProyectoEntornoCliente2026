@@ -70,7 +70,7 @@ API base: `http://localhost:3001/api/v1`
 
 ## 🔐 Autenticación
 
-- Todos los endpoints de ALM requieren JWT.
+- Los endpoints que requieran auth usan JWT.
 - Header: `Authorization: Bearer <token>`
 - La clave está en `JWT_SECRET` del `.env`.
 
@@ -108,4 +108,3 @@ Cada módulo tiene un endpoint base de salud:
 - `/api/v1/erp/health`
 - `/api/v1/soporte/health`
 - `/api/v1/bi/health`
-

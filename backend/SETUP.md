@@ -1,4 +1,4 @@
-# ALM Backend Setup (Express + Postgres)
+# Backend Setup (Express + Postgres)
 
 ## 1) Install deps
 
