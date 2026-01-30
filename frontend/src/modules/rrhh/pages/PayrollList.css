@@ -1,0 +1,85 @@
+.payroll-list-page {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.payroll-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.payroll-metric-card {
+  transition: transform 0.2s;
+}
+
+.payroll-metric-card:hover {
+  transform: translateY(-2px);
+}
+
+.payroll-filters-card {
+  margin-bottom: 24px;
+}
+
+.payroll-table-card {
+  margin-bottom: 24px;
+}
+
+.payroll-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.payroll-table thead {
+  background: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.payroll-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.payroll-table tbody tr {
+  border-bottom: 1px solid #e2e8f0;
+  transition: background-color 0.2s;
+}
+
+.payroll-row:hover {
+  background: #f8fafc;
+}
+
+.payroll-table td {
+  padding: 16px;
+  font-size: 14px;
+  color: #334155;
+}
+
+.employee-number {
+  display: block;
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.net-amount {
+  font-weight: 600;
+  color: #22c55e;
+}
+
+@media (max-width: 768px) {
+  .payroll-list-page {
+    padding: 16px;
+  }
+
+  .payroll-metrics {
+    grid-template-columns: 1fr;
+  }
+}

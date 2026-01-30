@@ -1,0 +1,57 @@
+export const EVALUATION_CRITERIA = {
+  TECHNICAL_SKILLS: 'technical_skills',
+  COMMUNICATION: 'communication',
+  TEAMWORK: 'teamwork',
+  LEADERSHIP: 'leadership',
+  PROBLEM_SOLVING: 'problem_solving',
+  PRODUCTIVITY: 'productivity',
+  INITIATIVE: 'initiative',
+  ADAPTABILITY: 'adaptability',
+};
+
+export const EVALUATION_CRITERIA_LABELS = {
+  [EVALUATION_CRITERIA.TECHNICAL_SKILLS]: 'Habilidades Técnicas',
+  [EVALUATION_CRITERIA.COMMUNICATION]: 'Comunicación',
+  [EVALUATION_CRITERIA.TEAMWORK]: 'Trabajo en Equipo',
+  [EVALUATION_CRITERIA.LEADERSHIP]: 'Liderazgo',
+  [EVALUATION_CRITERIA.PROBLEM_SOLVING]: 'Resolución de Problemas',
+  [EVALUATION_CRITERIA.PRODUCTIVITY]: 'Productividad',
+  [EVALUATION_CRITERIA.INITIATIVE]: 'Iniciativa',
+  [EVALUATION_CRITERIA.ADAPTABILITY]: 'Adaptabilidad',
+};
+
+export const EVALUATION_RATINGS = {
+  EXCELLENT: 5,
+  GOOD: 4,
+  AVERAGE: 3,
+  BELOW_AVERAGE: 2,
+  POOR: 1,
+};
+
+export const EVALUATION_RATING_LABELS = {
+  [EVALUATION_RATINGS.EXCELLENT]: 'Excelente',
+  [EVALUATION_RATINGS.GOOD]: 'Bueno',
+  [EVALUATION_RATINGS.AVERAGE]: 'Promedio',
+  [EVALUATION_RATINGS.BELOW_AVERAGE]: 'Por Debajo del Promedio',
+  [EVALUATION_RATINGS.POOR]: 'Deficiente',
+};
+
+export const EVALUATION_RATING_COLORS = {
+  [EVALUATION_RATINGS.EXCELLENT]: 'success',
+  [EVALUATION_RATINGS.GOOD]: 'info',
+  [EVALUATION_RATINGS.AVERAGE]: 'warning',
+  [EVALUATION_RATINGS.BELOW_AVERAGE]: 'error',
+  [EVALUATION_RATINGS.POOR]: 'error',
+};
+
+export const EVALUATION_PERIODS = {
+  QUARTERLY: 'quarterly',
+  SEMIANNUAL: 'semiannual',
+  ANNUAL: 'annual',
+};
+
+export const EVALUATION_PERIOD_LABELS = {
+  [EVALUATION_PERIODS.QUARTERLY]: 'Trimestral',
+  [EVALUATION_PERIODS.SEMIANNUAL]: 'Semestral',
+  [EVALUATION_PERIODS.ANNUAL]: 'Anual',
+};

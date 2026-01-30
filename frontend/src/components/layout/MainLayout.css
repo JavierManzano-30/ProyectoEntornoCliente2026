@@ -103,7 +103,29 @@
 
 .header-actions {
   display: flex;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-module-link {
+  padding: 0.5rem 1rem;
+  background: #f3f4f6;
+  border-radius: 0.5rem;
+  color: #6b7280;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.header-module-link:hover {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.header-module-link.active {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
 }
 
 .header-button {

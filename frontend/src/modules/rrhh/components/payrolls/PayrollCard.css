@@ -1,0 +1,131 @@
+.payroll-card {
+  padding: 20px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+
+.payroll-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.payroll-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.payroll-card-period {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.payroll-card-employee {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.payroll-download-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.payroll-download-btn:hover {
+  background: #2563eb;
+}
+
+.payroll-card-amounts {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.payroll-amount-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.payroll-amount-net {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 12px;
+  border-radius: 8px;
+  color: white;
+}
+
+.payroll-amount-net .amount-label {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.payroll-amount-net .amount-value {
+  color: white;
+}
+
+.amount-label {
+  font-size: 11px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.amount-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.amount-negative {
+  color: #ef4444;
+}
+
+.amount-highlight {
+  font-size: 18px;
+}
+
+.payroll-amount-divider {
+  font-size: 20px;
+  color: #cbd5e1;
+  font-weight: 300;
+  margin: 0 4px;
+}
+
+@media (max-width: 768px) {
+  .payroll-card-amounts {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .payroll-amount-divider {
+    display: none;
+  }
+
+  .payroll-amount-item {
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+  }
+
+  .payroll-amount-net {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+}
