@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
-import { LayoutDashboard, Ticket, AlertCircle, BarChart3, Settings, Users, Calendar, DollarSign, Building2, UserPlus, TrendingUp, Activity } from 'lucide-react';
+import { LayoutDashboard, Ticket, AlertCircle, BarChart3, Settings, Users, Calendar, DollarSign, Building2, Shield, UserPlus, TrendingUp, Activity } from 'lucide-react';
 import './MainLayout.css';
 
 const MainLayout = ({ module = 'soporte' }) => {
@@ -23,6 +23,15 @@ const MainLayout = ({ module = 'soporte' }) => {
         { name: 'Nóminas', href: '/rrhh/nominas', icon: DollarSign },
         { name: 'Departamentos', href: '/rrhh/departamentos', icon: Building2 },
         { name: 'Configuración', href: '/rrhh/config', icon: Settings },
+      ],
+    },
+    core: {
+      title: 'Módulo Core',
+      items: [
+        { name: 'Dashboard', href: '/core', icon: LayoutDashboard, exact: true },
+        { name: 'Usuarios', href: '/core/usuarios', icon: Users },
+        { name: 'Empresas', href: '/core/empresas', icon: Building2 },
+        { name: 'Roles', href: '/core/roles', icon: Shield },
       ],
     },
     crm: {
@@ -73,6 +82,7 @@ const MainLayout = ({ module = 'soporte' }) => {
           <div className="header-content">
             <h2 className="header-title">{currentNav.title}</h2>
             <div className="header-actions">
+              <NavLink to="/core" className="header-module-link">Core</NavLink>
               <NavLink to="/soporte" className="header-module-link">Soporte</NavLink>
               <NavLink to="/rrhh" className="header-module-link">RRHH</NavLink>
               <NavLink to="/crm" className="header-module-link">CRM</NavLink>
