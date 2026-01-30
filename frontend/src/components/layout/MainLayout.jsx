@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
-import { LayoutDashboard, Ticket, AlertCircle, BarChart3, Settings, Users, Calendar, DollarSign, Building2 } from 'lucide-react';
+import { LayoutDashboard, Ticket, AlertCircle, BarChart3, Settings, Users, Calendar, DollarSign, Building2, UserPlus, TrendingUp, Activity } from 'lucide-react';
 import './MainLayout.css';
 
 const MainLayout = ({ module = 'soporte' }) => {
@@ -23,6 +23,16 @@ const MainLayout = ({ module = 'soporte' }) => {
         { name: 'Nóminas', href: '/rrhh/nominas', icon: DollarSign },
         { name: 'Departamentos', href: '/rrhh/departamentos', icon: Building2 },
         { name: 'Configuración', href: '/rrhh/config', icon: Settings },
+      ],
+    },
+    crm: {
+      title: 'Módulo CRM',
+      items: [
+        { name: 'Dashboard', href: '/crm', icon: LayoutDashboard, exact: true },
+        { name: 'Clientes', href: '/crm/clientes', icon: Users },
+        { name: 'Leads', href: '/crm/leads', icon: UserPlus },
+        { name: 'Oportunidades', href: '/crm/oportunidades', icon: TrendingUp },
+        { name: 'Actividades', href: '/crm/actividades', icon: Activity },
       ],
     },
   };
@@ -65,6 +75,7 @@ const MainLayout = ({ module = 'soporte' }) => {
             <div className="header-actions">
               <NavLink to="/soporte" className="header-module-link">Soporte</NavLink>
               <NavLink to="/rrhh" className="header-module-link">RRHH</NavLink>
+              <NavLink to="/crm" className="header-module-link">CRM</NavLink>
               <button className="header-button">
                 <Settings size={20} />
               </button>

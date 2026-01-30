@@ -1,0 +1,42 @@
+.opportunity-board-page {
+  padding: 1rem;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.opportunity-board {
+  display: flex;
+  gap: 0.25rem;
+  overflow-x: auto;
+  flex: 1;
+  padding: 0.5rem;
+}
+
+.opportunity-board::-webkit-scrollbar {
+  height: 8px;
+}
+
+.opportunity-board::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.opportunity-board::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.opportunity-board::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+@media (max-width: 768px) {
+  .opportunity-board-page {
+    padding: 1rem;
+  }
+
+  .opportunity-board {
+    gap: 0.5rem;
+  }
+}
