@@ -1,3 +1,7 @@
+-- ================================
+-- MÓDULO ALM
+-- ================================
+
 CREATE TABLE IF NOT EXISTS alm_proyectos (
   id TEXT PRIMARY KEY,
   empresa_id TEXT NOT NULL,
