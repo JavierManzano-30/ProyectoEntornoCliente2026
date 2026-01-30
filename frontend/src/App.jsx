@@ -27,6 +27,12 @@ import {
   RoleManagement
 } from './modules/core';
 
+// Páginas del módulo CRM
+import CRMDashboard from './modules/crm/pages/CRMDashboard';
+import CustomerList from './modules/crm/pages/CustomerList';
+import LeadList from './modules/crm/pages/LeadList';
+import OpportunityBoard from './modules/crm/pages/OpportunityBoard';
+
 import './App.css';
 
 function App() {
@@ -71,6 +77,15 @@ function App() {
           <Route path="empresas/:id" element={<CompanyDetail />} />
           <Route path="empresas/:id/editar" element={<CompanyForm />} />
           <Route path="roles" element={<RoleManagement />} />
+        </Route>
+
+        {/* Rutas del módulo CRM */}
+        <Route path="/crm" element={<MainLayout module="crm" />}>
+          <Route index element={<CRMDashboard />} />
+          <Route path="dashboard" element={<CRMDashboard />} />
+          <Route path="clientes" element={<CustomerList />} />
+          <Route path="leads" element={<LeadList />} />
+          <Route path="oportunidades" element={<OpportunityBoard />} />
         </Route>
 
         {/* Ruta 404 */}
