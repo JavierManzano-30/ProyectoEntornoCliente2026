@@ -34,7 +34,13 @@ import LeadList from './modules/crm/pages/LeadList';
 import OpportunityBoard from './modules/crm/pages/OpportunityBoard';
 
 // Páginas del módulo ALM
-import { ProjectList } from './modules/alm';
+import { 
+  ProjectList, 
+  ProjectForm, 
+  ProjectDetail, 
+  TaskManagement, 
+  TimeTracking 
+} from './modules/alm';
 
 import './App.css';
 
@@ -95,6 +101,11 @@ function App() {
         <Route path="/alm" element={<MainLayout module="alm" />}>
           <Route index element={<ProjectList />} />
           <Route path="proyectos" element={<ProjectList />} />
+          <Route path="proyectos/nuevo" element={<ProjectForm />} />
+          <Route path="proyectos/:id" element={<ProjectDetail />} />
+          <Route path="proyectos/:id/editar" element={<ProjectForm />} />
+          <Route path="tareas" element={<TaskManagement />} />
+          <Route path="tiempos" element={<TimeTracking />} />
         </Route>
 
         {/* Ruta 404 */}
