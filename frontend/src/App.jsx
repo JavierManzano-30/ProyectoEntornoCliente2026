@@ -14,6 +14,19 @@ import AbsenceManagement from './modules/rrhh/pages/AbsenceManagement';
 import PayrollList from './modules/rrhh/pages/PayrollList';
 import DepartmentManagement from './modules/rrhh/pages/DepartmentManagement';
 
+// Páginas del módulo CORE
+import {
+  Login,
+  Dashboard,
+  UserList,
+  UserDetail,
+  UserForm,
+  CompanyList,
+  CompanyDetail,
+  CompanyForm,
+  RoleManagement
+} from './modules/core';
+
 import './App.css';
 
 function App() {
@@ -21,7 +34,10 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* Redirección inicial */}
-        <Route path="/" element={<Navigate to="/rrhh" replace />} />
+        <Route path="/" element={<Navigate to="/core" replace />} />
+        
+        {/* Ruta de Login (pública) */}
+        <Route path="/login" element={<Login />} />
 
         {/* Rutas del módulo de soporte */}
         <Route path="/soporte" element={<MainLayout module="soporte" />}>
@@ -41,6 +57,20 @@ function App() {
           <Route path="ausencias" element={<AbsenceManagement />} />
           <Route path="nominas" element={<PayrollList />} />
           <Route path="departamentos" element={<DepartmentManagement />} />
+        </Route>
+
+        {/* Rutas del módulo CORE */}
+        <Route path="/core" element={<MainLayout module="core" />}>
+          <Route index element={<Dashboard />} />
+          <Route path="usuarios" element={<UserList />} />
+          <Route path="usuarios/nuevo" element={<UserForm />} />
+          <Route path="usuarios/:id" element={<UserDetail />} />
+          <Route path="usuarios/:id/editar" element={<UserForm />} />
+          <Route path="empresas" element={<CompanyList />} />
+          <Route path="empresas/nuevo" element={<CompanyForm />} />
+          <Route path="empresas/:id" element={<CompanyDetail />} />
+          <Route path="empresas/:id/editar" element={<CompanyForm />} />
+          <Route path="roles" element={<RoleManagement />} />
         </Route>
 
         {/* Ruta 404 */}
