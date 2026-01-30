@@ -15,7 +15,7 @@ export const useProjects = (initialFilters = {}) => {
     try {
       setLoading(true);
       const response = await getProjects();
-      setProjects(response.data);
+      setProjects(response.data || []);
       setError(null);
     } catch (err) {
       setError(err.message || 'Error al cargar proyectos');

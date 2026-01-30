@@ -16,8 +16,11 @@ export const useTimeTracking = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const entries = await getTimeEntries();
-        const almStats = await getALMStats();
+        const entriesResponse = await getTimeEntries();
+        const statsResponse = await getALMStats();
+
+        const entries = entriesResponse.data || [];
+        const almStats = statsResponse.data || {};
 
         setTimeEntries(entries);
         

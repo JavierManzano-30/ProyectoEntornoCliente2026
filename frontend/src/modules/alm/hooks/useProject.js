@@ -18,9 +18,9 @@ export const useProject = (id) => {
         getProjectStats(id)
       ]);
       
-      setProject(projectResponse.data);
-      setTasks(statsResponse.data.tareas || []);
-      setTimeEntries(statsResponse.data.registrosTiempo || []);
+      setProject(projectResponse.data || null);
+      setTasks(statsResponse.data?.tareas || []);
+      setTimeEntries(statsResponse.data?.registrosTiempo || []);
       setError(null);
     } catch (err) {
       setError(err.message || 'Error al cargar proyecto');
