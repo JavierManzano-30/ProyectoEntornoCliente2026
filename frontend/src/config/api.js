@@ -21,4 +21,17 @@ export const API_ENDPOINTS = {
     dashboard: '/soporte/dashboard',
     stats: '/soporte/estadisticas',
   },
+  // Módulo CRM
+  crm: {
+    customers: '/crm/clientes',
+    customerById: (id) => `/crm/clientes/${id}`,
+    leads: '/crm/leads',
+    leadById: (id) => `/crm/leads/${id}`,
+    opportunities: '/crm/oportunidades',
+    opportunityById: (id) => `/crm/oportunidades/${id}`,
+    activities: '/crm/actividades',
+    activityById: (id) => `/crm/actividades/${id}`,
+    dashboard: '/crm/dashboard',
+    stats: '/crm/estadisticas',
+  },
 };

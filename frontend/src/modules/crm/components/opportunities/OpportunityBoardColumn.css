@@ -1,0 +1,80 @@
+.opportunity-column {
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+  flex: 1;
+  background-color: #f9fafb;
+  border-radius: 6px;
+  padding: 0.4rem;
+  height: calc(100vh - 300px);
+  min-height: 500px;
+}
+
+.opportunity-column__header {
+  margin-bottom: 0.4rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.opportunity-column__title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.opportunity-column__title h3 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.opportunity-column__count {
+  background-color: #e5e7eb;
+  color: #374151;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  min-width: 24px;
+  text-align: center;
+}
+
+.opportunity-column__total {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #059669;
+}
+
+.opportunity-column__cards {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.opportunity-column__cards::-webkit-scrollbar {
+  width: 6px;
+}
+
+.opportunity-column__cards::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.opportunity-column__cards::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.opportunity-column__cards::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+.opportunity-column__empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
