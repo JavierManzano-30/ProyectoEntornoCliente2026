@@ -1,0 +1,117 @@
+.project-list-page {
+  padding: 2rem;
+}
+
+.project-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.project-metrics .card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.metric-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.metric-icon.blue { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); }
+.metric-icon.green { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); }
+.metric-icon.orange { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); }
+.metric-icon.purple { background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); }
+
+.metric-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.metric-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.projects-header {
+  margin-bottom: 1.5rem;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  max-width: 400px;
+}
+
+.search-bar svg {
+  color: #9ca3af;
+}
+
+.search-bar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 0.9375rem;
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4rem 2rem;
+  color: #9ca3af;
+  text-align: center;
+}
+
+.empty-state svg {
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  font-size: 1.25rem;
+  color: #374151;
+  margin: 0.5rem 0;
+}
+
+.empty-state p {
+  color: #9ca3af;
+  margin: 0.5rem 0 1.5rem 0;
+}
+
+@media (max-width: 768px) {
+  .project-list-page {
+    padding: 1rem;
+  }
+
+  .project-metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .projects-grid {
+    grid-template-columns: 1fr;
+  }
+}

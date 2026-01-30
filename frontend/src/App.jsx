@@ -33,6 +33,9 @@ import CustomerList from './modules/crm/pages/CustomerList';
 import LeadList from './modules/crm/pages/LeadList';
 import OpportunityBoard from './modules/crm/pages/OpportunityBoard';
 
+// Páginas del módulo ALM
+import { ProjectList } from './modules/alm';
+
 import './App.css';
 
 function App() {
@@ -86,6 +89,12 @@ function App() {
           <Route path="clientes" element={<CustomerList />} />
           <Route path="leads" element={<LeadList />} />
           <Route path="oportunidades" element={<OpportunityBoard />} />
+        </Route>
+
+        {/* Rutas del módulo ALM */}
+        <Route path="/alm" element={<MainLayout module="alm" />}>
+          <Route index element={<ProjectList />} />
+          <Route path="proyectos" element={<ProjectList />} />
         </Route>
 
         {/* Ruta 404 */}
