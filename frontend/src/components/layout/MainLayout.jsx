@@ -1,16 +1,34 @@
 import React from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
-import { LayoutDashboard, Ticket, AlertCircle, BarChart3, Settings } from 'lucide-react';
+import { LayoutDashboard, Ticket, AlertCircle, BarChart3, Settings, Users, Calendar, DollarSign, Building2 } from 'lucide-react';
 import './MainLayout.css';
 
-const MainLayout = () => {
-  const navigation = [
-    { name: 'Dashboard', href: '/soporte', icon: LayoutDashboard, exact: true },
-    { name: 'Tickets', href: '/soporte/tickets', icon: Ticket },
-    { name: 'SLA', href: '/soporte/sla', icon: AlertCircle },
-    { name: 'Reportes', href: '/soporte/reportes', icon: BarChart3 },
-    { name: 'Configuración', href: '/soporte/config', icon: Settings },
-  ];
+const MainLayout = ({ module = 'soporte' }) => {
+  const navigationConfig = {
+    soporte: {
+      title: 'Módulo de Soporte',
+      items: [
+        { name: 'Dashboard', href: '/soporte', icon: LayoutDashboard, exact: true },
+        { name: 'Tickets', href: '/soporte/tickets', icon: Ticket },
+        { name: 'SLA', href: '/soporte/sla', icon: AlertCircle },
+        { name: 'Reportes', href: '/soporte/reportes', icon: BarChart3 },
+        { name: 'Configuración', href: '/soporte/config', icon: Settings },
+      ],
+    },
+    rrhh: {
+      title: 'Módulo RRHH',
+      items: [
+        { name: 'Empleados', href: '/rrhh/empleados', icon: Users },
+        { name: 'Ausencias', href: '/rrhh/ausencias', icon: Calendar },
+        { name: 'Nóminas', href: '/rrhh/nominas', icon: DollarSign },
+        { name: 'Departamentos', href: '/rrhh/departamentos', icon: Building2 },
+        { name: 'Configuración', href: '/rrhh/config', icon: Settings },
+      ],
+    },
+  };
+
+  const currentNav = navigationConfig[module] || navigationConfig.soporte;
+  const navigation = currentNav.items;
 
   return (
     <div className="main-layout">
@@ -43,8 +61,10 @@ const MainLayout = () => {
       <div className="main-content">
         <header className="main-header">
           <div className="header-content">
-            <h2 className="header-title">Módulo de Soporte</h2>
+            <h2 className="header-title">{currentNav.title}</h2>
             <div className="header-actions">
+              <NavLink to="/soporte" className="header-module-link">Soporte</NavLink>
+              <NavLink to="/rrhh" className="header-module-link">RRHH</NavLink>
               <button className="header-button">
                 <Settings size={20} />
               </button>

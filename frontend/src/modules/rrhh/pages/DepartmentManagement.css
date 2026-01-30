@@ -1,0 +1,153 @@
+.department-management-page {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.department-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.stat-card svg {
+  color: #3b82f6;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+.departments-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.department-node {
+  margin-bottom: 8px;
+}
+
+.department-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.department-card:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.department-card-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.department-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.department-info svg {
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+.department-info h4 {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  color: #1e293b;
+}
+
+.department-description {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.department-stats {
+  display: flex;
+  gap: 12px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #f8fafc;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.stat-item svg {
+  color: #64748b;
+}
+
+.department-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.department-children {
+  margin-top: 8px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+}
+
+.empty-state svg {
+  color: #cbd5e1;
+  margin-bottom: 16px;
+}
+
+.empty-state p {
+  margin: 0 0 16px 0;
+  font-size: 15px;
+  color: #64748b;
+}
+
+@media (max-width: 768px) {
+  .department-management-page {
+    padding: 16px;
+  }
+
+  .department-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .department-card-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .department-actions {
+    width: 100%;
+  }
+
+  .department-node {
+    margin-left: 0 !important;
+  }
+}
