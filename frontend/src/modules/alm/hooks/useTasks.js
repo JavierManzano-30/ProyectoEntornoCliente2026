@@ -15,7 +15,7 @@ export const useTasks = (initialFilters = {}) => {
     try {
       setLoading(true);
       const response = await getTasks(filters.proyectoId ? { proyectoId: filters.proyectoId } : {});
-      setTasks(response.data);
+      setTasks(response.data || []);
       setError(null);
     } catch (err) {
       setError(err.message || 'Error al cargar tareas');
