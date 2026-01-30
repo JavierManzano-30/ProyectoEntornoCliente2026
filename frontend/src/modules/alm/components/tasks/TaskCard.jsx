@@ -1,7 +1,6 @@
-import React, { useMemo } from 'react';
-import { useTaskPriority, useTaskStatus } from '../constants/taskPriority';
-import { formatHours } from '../utils/taskHelpers';
-import { formatDate } from '../utils/projectHelpers';
+import React from 'react';
+import { formatHours, getTaskStatusLabel, getTaskPriorityLabel } from '../../utils/taskHelpers';
+import { formatDate } from '../../utils/projectHelpers';
 import { Edit2, Trash2, CheckCircle2 } from 'lucide-react';
 import './TaskCard.css';
 
