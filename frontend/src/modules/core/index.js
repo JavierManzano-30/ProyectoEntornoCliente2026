@@ -1,0 +1,10 @@
+// Módulo Core - Gestión central del sistema
+export { default as Login } from './pages/Login';
+export { default as Dashboard } from './pages/Dashboard';
+export { default as UserList } from './pages/UserList';
+export { default as UserDetail } from './pages/UserDetail';
+export { default as UserForm } from './pages/UserForm';
+export { default as CompanyList } from './pages/CompanyList';
+export { default as CompanyDetail } from './pages/CompanyDetail';
+export { default as CompanyForm } from './pages/CompanyForm';
+export { default as RoleManagement } from './pages/RoleManagement';
