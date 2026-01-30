@@ -152,3 +152,116 @@ CREATE INDEX IF NOT EXISTS idx_crm_actividades_empresa ON crm_actividades(empres
 CREATE INDEX IF NOT EXISTS idx_crm_actividades_usuario ON crm_actividades(usuario_id);
 CREATE INDEX IF NOT EXISTS idx_crm_actividades_cliente ON crm_actividades(cliente_id);
 CREATE INDEX IF NOT EXISTS idx_crm_actividades_oportunidad ON crm_actividades(oportunidad_id);
+
+
+
+
+/* =====================================================
+   MÓDULO RRHH - ESQUEMA COMPLETO DE BASE DE DATOS
+   Azure SQL Server
+   ===================================================== */
+
+-- =====================================================
+-- 1. Tabla: departamentos
+-- =====================================================
+CREATE TABLE departamentos (
+    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    name NVARCHAR(100) NOT NULL,
+    parent_department_id UNIQUEIDENTIFIER NULL,
+    active BIT NOT NULL DEFAULT 1,
+    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+
+    CONSTRAINT fk_parent_department
+        FOREIGN KEY (parent_department_id)
+        REFERENCES departamentos(id)
+);
+
+-- =====================================================
+-- 2. Tabla: empleados
+-- =====================================================
+CREATE TABLE empleados (
+    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    first_name NVARCHAR(50) NOT NULL,
+    last_name NVARCHAR(100) NOT NULL,
+    email NVARCHAR(150) NOT NULL UNIQUE,
+    status NVARCHAR(20) NOT NULL DEFAULT 'activo',
+    hire_date DATE NOT NULL,
+    department_id UNIQUEIDENTIFIER NOT NULL,
+    user_id UNIQUEIDENTIFIER NOT NULL,
+    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+
+    CONSTRAINT fk_department
+        FOREIGN KEY (department_id)
+        REFERENCES departamentos(id)
+);
+
+-- =====================================================
+-- 3. Tabla: contratos
+-- =====================================================
+CREATE TABLE contratos (
+    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    employee_id UNIQUEIDENTIFIER NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NULL,
+    contract_type NVARCHAR(30) NOT NULL,
+    salary DECIMAL(10,2) NOT NULL,
+    active BIT NOT NULL DEFAULT 1,
+    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+
+    CONSTRAINT fk_employee_contract
+        FOREIGN KEY (employee_id)
+        REFERENCES empleados(id)
+);
+
+-- =====================================================
+-- 4. Tabla: ausencias
+-- =====================================================
+CREATE TABLE ausencias (
+    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    employee_id UNIQUEIDENTIFIER NOT NULL,
+    type NVARCHAR(30) NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    status NVARCHAR(20) NOT NULL DEFAULT 'pendiente',
+    notes NVARCHAR(MAX),
+    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+
+    CONSTRAINT fk_employee_absence
+        FOREIGN KEY (employee_id)
+        REFERENCES empleados(id)
+);
+
+-- =====================================================
+-- 5. Tabla: nominas
+-- =====================================================
+CREATE TABLE nominas (
+    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    employee_id UNIQUEIDENTIFIER NOT NULL,
+    period CHAR(7) NOT NULL,
+    gross_amount DECIMAL(10,2) NOT NULL,
+    net_amount DECIMAL(10,2) NOT NULL,
+    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+
+    CONSTRAINT fk_employee_payroll
+        FOREIGN KEY (employee_id)
+        REFERENCES empleados(id),
+    CONSTRAINT uq_employee_period
+        UNIQUE (employee_id, period)
+);
+
+-- =====================================================
+-- 6. Tabla: evaluaciones
+-- =====================================================
+CREATE TABLE evaluaciones (
+    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    employee_id UNIQUEIDENTIFIER NOT NULL,
+    score INT NOT NULL CHECK (score BETWEEN 0 AND 100),
+    review_date DATE NOT NULL,
+    notes NVARCHAR(MAX),
+    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+
+    CONSTRAINT fk_employee_evaluation
+        FOREIGN KEY (employee_id)
+        REFERENCES empleados(id)
+);
+
