@@ -7,6 +7,8 @@
 export { default as BPMDashboard } from './pages/BPMDashboard';
 export { default as ProcessList } from './pages/ProcessList';
 export { default as ProcessStartForm } from './pages/ProcessStartForm';
+export { default as ProcessDesigner } from './pages/ProcessDesigner';
+export { default as InstanceMonitor } from './pages/InstanceMonitor';
 export { default as TaskInbox } from './pages/TaskInbox';
 
 // Componentes - Procesos
@@ -30,6 +32,9 @@ export { default as FormValidation } from './components/forms/FormValidation';
 // Componentes - Documentos
 export { default as DocumentUploader } from './components/documents/DocumentUploader';
 export { default as DocumentList } from './components/documents/DocumentList';
+
+// Componentes - Designer
+export { default as BPMNViewer } from './components/designer/BPMNViewer';
 
 // Componentes - Compartidos
 export { default as SLAProgressBar } from './components/shared/SLAProgressBar';
