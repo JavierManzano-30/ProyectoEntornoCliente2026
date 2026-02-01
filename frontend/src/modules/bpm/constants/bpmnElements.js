@@ -1,0 +1,95 @@
+/**
+ * Tipos de elementos BPMN para el diseñador de procesos
+ */
+
+export const BPMN_ELEMENT_TYPES = {
+  // Eventos
+  START_EVENT: 'startEvent',
+  END_EVENT: 'endEvent',
+  INTERMEDIATE_EVENT: 'intermediateEvent',
+  
+  // Actividades
+  TASK: 'task',
+  USER_TASK: 'userTask',
+  SERVICE_TASK: 'serviceTask',
+  SCRIPT_TASK: 'scriptTask',
+  SUBPROCESS: 'subprocess',
+  
+  // Gateways
+  EXCLUSIVE_GATEWAY: 'exclusiveGateway',
+  PARALLEL_GATEWAY: 'parallelGateway',
+  INCLUSIVE_GATEWAY: 'inclusiveGateway',
+  
+  // Flujos
+  SEQUENCE_FLOW: 'sequenceFlow',
+  MESSAGE_FLOW: 'messageFlow',
+  
+  // Datos
+  DATA_OBJECT: 'dataObject',
+  DATA_STORE: 'dataStore',
+  
+  // Swimlanes
+  POOL: 'pool',
+  LANE: 'lane'
+};
+
+export const BPMN_ELEMENT_LABELS = {
+  [BPMN_ELEMENT_TYPES.START_EVENT]: 'Evento de Inicio',
+  [BPMN_ELEMENT_TYPES.END_EVENT]: 'Evento de Fin',
+  [BPMN_ELEMENT_TYPES.INTERMEDIATE_EVENT]: 'Evento Intermedio',
+  [BPMN_ELEMENT_TYPES.TASK]: 'Tarea',
+  [BPMN_ELEMENT_TYPES.USER_TASK]: 'Tarea de Usuario',
+  [BPMN_ELEMENT_TYPES.SERVICE_TASK]: 'Tarea de Servicio',
+  [BPMN_ELEMENT_TYPES.SCRIPT_TASK]: 'Tarea de Script',
+  [BPMN_ELEMENT_TYPES.SUBPROCESS]: 'Subproceso',
+  [BPMN_ELEMENT_TYPES.EXCLUSIVE_GATEWAY]: 'Gateway Exclusivo',
+  [BPMN_ELEMENT_TYPES.PARALLEL_GATEWAY]: 'Gateway Paralelo',
+  [BPMN_ELEMENT_TYPES.INCLUSIVE_GATEWAY]: 'Gateway Inclusivo',
+  [BPMN_ELEMENT_TYPES.SEQUENCE_FLOW]: 'Flujo de Secuencia',
+  [BPMN_ELEMENT_TYPES.MESSAGE_FLOW]: 'Flujo de Mensaje',
+  [BPMN_ELEMENT_TYPES.DATA_OBJECT]: 'Objeto de Datos',
+  [BPMN_ELEMENT_TYPES.DATA_STORE]: 'Almacén de Datos',
+  [BPMN_ELEMENT_TYPES.POOL]: 'Pool',
+  [BPMN_ELEMENT_TYPES.LANE]: 'Lane'
+};
+
+export const BPMN_ELEMENT_CATEGORIES = {
+  EVENTS: 'Eventos',
+  ACTIVITIES: 'Actividades',
+  GATEWAYS: 'Gateways',
+  FLOWS: 'Flujos',
+  DATA: 'Datos',
+  SWIMLANES: 'Swimlanes'
+};
+
+export const BPMN_ELEMENTS_BY_CATEGORY = {
+  [BPMN_ELEMENT_CATEGORIES.EVENTS]: [
+    BPMN_ELEMENT_TYPES.START_EVENT,
+    BPMN_ELEMENT_TYPES.END_EVENT,
+    BPMN_ELEMENT_TYPES.INTERMEDIATE_EVENT
+  ],
+  [BPMN_ELEMENT_CATEGORIES.ACTIVITIES]: [
+    BPMN_ELEMENT_TYPES.TASK,
+    BPMN_ELEMENT_TYPES.USER_TASK,
+    BPMN_ELEMENT_TYPES.SERVICE_TASK,
+    BPMN_ELEMENT_TYPES.SCRIPT_TASK,
+    BPMN_ELEMENT_TYPES.SUBPROCESS
+  ],
+  [BPMN_ELEMENT_CATEGORIES.GATEWAYS]: [
+    BPMN_ELEMENT_TYPES.EXCLUSIVE_GATEWAY,
+    BPMN_ELEMENT_TYPES.PARALLEL_GATEWAY,
+    BPMN_ELEMENT_TYPES.INCLUSIVE_GATEWAY
+  ],
+  [BPMN_ELEMENT_CATEGORIES.FLOWS]: [
+    BPMN_ELEMENT_TYPES.SEQUENCE_FLOW,
+    BPMN_ELEMENT_TYPES.MESSAGE_FLOW
+  ],
+  [BPMN_ELEMENT_CATEGORIES.DATA]: [
+    BPMN_ELEMENT_TYPES.DATA_OBJECT,
+    BPMN_ELEMENT_TYPES.DATA_STORE
+  ],
+  [BPMN_ELEMENT_CATEGORIES.SWIMLANES]: [
+    BPMN_ELEMENT_TYPES.POOL,
+    BPMN_ELEMENT_TYPES.LANE
+  ]
+};
