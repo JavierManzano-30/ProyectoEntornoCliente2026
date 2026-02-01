@@ -17,6 +17,10 @@ import {
   FolderKanban,
   ListTodo,
   Clock,
+  Package,
+  ShoppingCart,
+  FileText,
+  Calculator,
 } from "lucide-react";
 import "./MainLayout.css";
 
@@ -96,6 +100,20 @@ const MainLayout = ({ module = "soporte" }) => {
         { name: "Tareas", href: "/bpm/tareas", icon: ListTodo },
       ],
     },
+    erp: {
+      title: "Módulo ERP",
+      items: [
+        { name: "Dashboard", href: "/erp", icon: LayoutDashboard, exact: true },
+        { name: "Contabilidad", href: "/erp/contabilidad", icon: Calculator },
+        { name: "Compras", href: "/erp/compras", icon: ShoppingCart },
+        { name: "Ventas", href: "/erp/ventas", icon: FileText },
+        { name: "Inventario", href: "/erp/inventario", icon: Package },
+        { name: "Producción", href: "/erp/produccion", icon: Activity },
+        { name: "Proyectos", href: "/erp/proyectos", icon: FolderKanban },
+        { name: "Tesorería", href: "/erp/tesoreria", icon: DollarSign },
+        { name: "Reportes", href: "/erp/reportes", icon: BarChart3 },
+      ],
+    },
   };
 
   const currentNav = navigationConfig[module] || navigationConfig.soporte;
@@ -154,6 +172,9 @@ const MainLayout = ({ module = "soporte" }) => {
               </NavLink>
               <NavLink to="/bpm" className="header-module-link">
                 BPM
+              </NavLink>
+              <NavLink to="/erp" className="header-module-link">
+                ERP
               </NavLink>
               <button className="header-button">
                 <Settings size={20} />

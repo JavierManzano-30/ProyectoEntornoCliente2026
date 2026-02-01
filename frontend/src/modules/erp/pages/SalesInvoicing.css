@@ -1,0 +1,135 @@
+.sales-invoicing {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Invoice Stats */
+.invoice-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0.5rem 0;
+}
+
+.stat-value.success {
+  color: #10b981;
+}
+
+.stat-value.danger {
+  color: #ef4444;
+}
+
+.stat-count {
+  display: block;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 0.25rem;
+}
+
+/* Invoices Table */
+.invoices-table-container {
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.invoices-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.invoices-table thead {
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.invoices-table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.invoices-table th.text-right {
+  text-align: right;
+}
+
+.invoices-table tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background 0.2s;
+}
+
+.invoices-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.invoices-table td {
+  padding: 1rem;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.invoices-table td.text-right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.invoice-number {
+  font-weight: 600;
+  color: #3b82f6;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.status-badge.status-yellow {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sales-invoicing {
+    padding: 1rem;
+  }
+
+  .invoice-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .invoices-table-container {
+    overflow-x: auto;
+  }
+
+  .invoices-table {
+    min-width: 900px;
+  }
+}
