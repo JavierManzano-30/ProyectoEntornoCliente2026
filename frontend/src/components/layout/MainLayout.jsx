@@ -88,6 +88,14 @@ const MainLayout = ({ module = "soporte" }) => {
         { name: "Tiempos", href: "/alm/tiempos", icon: Clock },
       ],
     },
+    bpm: {
+      title: "Módulo BPM",
+      items: [
+        { name: "Dashboard", href: "/bpm", icon: LayoutDashboard, exact: true },
+        { name: "Procesos", href: "/bpm/procesos", icon: FolderKanban },
+        { name: "Tareas", href: "/bpm/tareas", icon: ListTodo },
+      ],
+    },
   };
 
   const currentNav = navigationConfig[module] || navigationConfig.soporte;
@@ -143,6 +151,9 @@ const MainLayout = ({ module = "soporte" }) => {
               </NavLink>
               <NavLink to="/bi" className="header-module-link">
                 BI
+              </NavLink>
+              <NavLink to="/bpm" className="header-module-link">
+                BPM
               </NavLink>
               <button className="header-button">
                 <Settings size={20} />

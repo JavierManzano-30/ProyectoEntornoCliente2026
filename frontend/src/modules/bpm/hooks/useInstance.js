@@ -4,6 +4,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { bpmService } from '../services/bpmService';
+import { useBPMRealtime } from './useBPMRealtime';
+import { BPM_REALTIME_ENABLED } from '../config/realtime';
 
 export const useInstance = (instanceId) => {
   const [instance, setInstance] = useState(null);
@@ -55,6 +57,28 @@ export const useInstance = (instanceId) => {
     fetchTimeline();
     fetchVariables();
   }, [fetchInstance, fetchTimeline, fetchVariables]);
+
+  useBPMRealtime({
+    enabled: BPM_REALTIME_ENABLED && Boolean(instanceId),
+    topics: instanceId ? [`instance.${instanceId}`] : [],
+    onMessage: (message) => {
+      if (!message || typeof message !== 'object') return;
+      const { type, payload } = message;
+      if (!type || !payload) return;
+
+      if (type === 'instance.updated' && payload.id === instanceId) {
+        setInstance(payload);
+      }
+
+      if (type === 'instance.timeline' && payload.instanceId === instanceId) {
+        setTimeline(payload.timeline || []);
+      }
+
+      if (type === 'instance.variables' && payload.instanceId === instanceId) {
+        setVariables(payload.variables || {});
+      }
+    }
+  });
 
   const cancelInstance = async (reason) => {
     if (!instanceId) return;

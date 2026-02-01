@@ -77,6 +77,7 @@ const ProcessDesigner = ({ processId }) => {
         <BPMNViewer
           model={model}
           loading={loading}
+          zoomLevel={zoomLevel}
         />
       </div>
 

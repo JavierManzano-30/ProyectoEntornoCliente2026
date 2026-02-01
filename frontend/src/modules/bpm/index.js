@@ -54,6 +54,7 @@ export { useTaskInbox } from './hooks/useTaskInbox';
 export { useDocuments } from './hooks/useDocuments';
 export { useBPMMetrics } from './hooks/useBPMMetrics';
 export { useBPMNEditor } from './hooks/useBPMNEditor';
+export { useBPMRealtime } from './hooks/useBPMRealtime';
 
 // Context
 export { BPMContext } from './context/BPMContext';

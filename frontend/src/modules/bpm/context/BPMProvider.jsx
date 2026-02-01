@@ -115,3 +115,5 @@ export const BPMProvider = ({ children }) => {
     </BPMContext.Provider>
   );
 };
+
+export default BPMProvider;
