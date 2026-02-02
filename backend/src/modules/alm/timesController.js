@@ -2,7 +2,6 @@ const { pool } = require('../../config/db');
 const { envelopeSuccess, envelopeError } = require('../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../utils/pagination');
 const { validateRequiredFields } = require('../../utils/validation');
-const { generateId } = require('../../utils/id');
 
 function mapTime(row) {
   return {
@@ -81,27 +80,21 @@ async function createTime(req, res, next) {
         .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
     }
 
-    const id = generateId('tim');
-    const now = new Date().toISOString();
-
     const insertQuery = `
       INSERT INTO alm_registro_horas
-        (id, empresa_id, tarea_id, usuario_id, fecha, horas, descripcion, created_at, updated_at)
+        (empresa_id, tarea_id, usuario_id, fecha, horas, descripcion)
       VALUES
-        ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+        ($1,$2,$3,$4,$5,$6)
       RETURNING *
     `;
 
     const result = await pool.query(insertQuery, [
-      id,
       req.body.empresaId,
       req.body.tareaId,
       req.body.usuarioId,
       req.body.fecha,
       req.body.horas,
-      req.body.descripcion || null,
-      now,
-      now
+      req.body.descripcion || null
     ]);
 
     return res.status(201).json(envelopeSuccess(mapTime(result.rows[0])));
@@ -127,7 +120,6 @@ async function updateTime(req, res, next) {
         .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
     }
 
-    const now = new Date().toISOString();
     const updateQuery = `
       UPDATE alm_registro_horas
       SET empresa_id = $1,
@@ -136,8 +128,8 @@ async function updateTime(req, res, next) {
           fecha = $4,
           horas = $5,
           descripcion = $6,
-          updated_at = $7
-      WHERE id = $8
+          updated_at = NOW()
+      WHERE id = $7
       RETURNING *
     `;
 
@@ -148,7 +140,6 @@ async function updateTime(req, res, next) {
       req.body.fecha,
       req.body.horas,
       req.body.descripcion || null,
-      now,
       id
     ]);
 

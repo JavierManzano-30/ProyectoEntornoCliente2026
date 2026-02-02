@@ -13,12 +13,12 @@ ALM gestiona la **entidad proyecto** como núcleo de planificación y seguimient
 ### Esta funcionalidad permite:
 - Crear, actualizar y consultar proyectos.
 - Definir estado del proyecto (planificacion, en_curso, pausado, completado).
-- Asociar responsable del proyecto (usuario).
+- Asociar responsable del proyecto (empleado).
 - Vincular proyectos a clientes (CRM) cuando aplica.
 - Mantener histórico y trazabilidad de cambios.
 
 ### 🔗 Integración con otros módulos
-- **CORE:** Consume usuarios y empresas para responsables y permisos.
+- **RRHH:** Consume empleados para responsables y equipos.
 - **CRM:** Vincula proyectos con clientes.
 - **BI:** Consume estados y avance de proyectos para métricas.
 
@@ -28,27 +28,25 @@ ALM gestiona la **entidad proyecto** como núcleo de planificación y seguimient
 ALM organiza el trabajo en **tareas** vinculadas a un proyecto.
 
 ### Esta funcionalidad permite:
-- Crear y asignar tareas a usuarios.
+- Crear y asignar tareas a empleados.
 - Gestionar estados (pendiente, en_progreso, completada).
 - Priorizar tareas (baja, media, alta).
 - Consultar tareas por proyecto y por estado.
 - Mantener trazabilidad de modificaciones.
 
 ### 🔗 Integración con otros módulos
-- **CORE:** Identidad de usuarios asignados.
-- **RRHH:** Referencia para disponibilidad de recursos.
+- **RRHH:** Identidad y disponibilidad de empleados asignados.
 - **BI:** Métricas de productividad y cumplimiento.
 
 ---
 
 ## 2.1 🔑 Relaciones y claves foráneas
-- `proyectos.responsable_id -> usuarios.id` (CORE)
+- `proyectos.responsable_employee_id -> empleados.id` (RRHH)
 - `proyectos.cliente_id -> clientes.id` (CRM)
-- `tareas.asignado_a -> usuarios.id` (CORE)
+- `tareas.employee_id -> empleados.id` (RRHH)
 - `tareas.proyecto_id -> proyectos.id` (ALM)
 - `registro_horas.usuario_id -> usuarios.id` (CORE)
 - `registro_horas.tarea_id -> tareas.id` (ALM)
-- `tareas.ticket_id -> tickets.id` (Soporte, opcional)
 
 ---
 
@@ -71,7 +69,6 @@ ALM actua como **proveedor de informacion operativa**, publicando datos de avanc
 
 ### 🔗 Integración con otros módulos
 - **BI:** KPIs de productividad y avance.
-- **Soporte:** Posible conversión de tickets a tareas.
 - **BPM:** Coordinación con procesos de aprobacion.
 
 Toda la exposición respeta el aislamiento multiempresa y los controles de acceso.

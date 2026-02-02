@@ -146,7 +146,7 @@ Pipeline comercial.
 * **fase**: contacto | propuesta | negociacion | ganada | perdida
 * **probabilidad**
 * **fecha_cierre_estimada**
-* **responsable_id**
+* **responsable_employee_id**
 * **created_at**
 * **updated_at**
 
@@ -183,7 +183,7 @@ Gestión de proyectos internos o para clientes.
 * **descripcion**
 * **fecha_inicio**
 * **fecha_fin**
-* **responsable_id**
+* **responsable_employee_id**
 * **estado**: planificacion | en_curso | pausado | completado
 * **presupuesto**
 * **cliente_id** (opcional)
@@ -203,7 +203,7 @@ Unidades de trabajo dentro de proyectos.
 * **descripcion**
 * **estado**: pendiente | en_progreso | completada
 * **prioridad**: baja | media | alta
-* **asignado_a** → usuario
+* **employee_id** → empleado
 * **fecha_vencimiento**
 * **tiempo_estimado** (horas)
 * **created_at**
@@ -223,6 +223,7 @@ Timesheet por tarea.
 * **horas**
 * **descripcion**
 * **created_at**
+* **updated_at**
 
 ---
 

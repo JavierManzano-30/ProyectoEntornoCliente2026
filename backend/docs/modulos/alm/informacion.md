@@ -3,7 +3,7 @@
 ## 1. Finalidad del módulo
 El módulo de **Application Lifecycle Management (ALM)** tiene como finalidad organizar, planificar y controlar el trabajo en proyectos, tareas y tiempos dentro de la empresa.
 
-Actúa como un módulo operativo que conecta la estrategia (proyectos) con la ejecución (tareas), y se integra con otros módulos como **CORE, RRHH, CRM, Soporte y BI**.
+Actúa como un módulo operativo que conecta la estrategia (proyectos) con la ejecución (tareas), y se integra con otros módulos como **CORE, RRHH, CRM y BI**.
 
 Desde el backend, ALM aporta un modelo de datos estructurado para la gestión de proyectos y su avance, manteniendo trazabilidad y coherencia en entornos **multiempresa (multi-tenant)**.
 
@@ -12,7 +12,7 @@ Desde el backend, ALM aporta un modelo de datos estructurado para la gestión de
 ## 2. Funcionalidades principales
 1. Gestión completa de proyectos (creación, estado y seguimiento).  
 2. Gestión de tareas asociadas a proyectos.  
-3. Asignación de tareas a usuarios responsables.  
+3. Asignación de tareas a empleados responsables.  
 4. Consulta de tareas por proyecto y por estado.  
 5. Registro básico de tiempos trabajados.  
 6. Vínculo opcional con clientes (CRM) para proyectos externos.  
@@ -23,7 +23,7 @@ Desde el backend, ALM aporta un modelo de datos estructurado para la gestión de
 ## 3. Usuarios que lo utilizan
 - Administradores del sistema.  
 - Managers / responsables de proyecto.  
-- Usuarios asignados a tareas.  
+- Empleados asignados a tareas.  
 - Dirección (seguimiento de avance y costes).  
 - Sistemas internos (integraciones).  
 
@@ -31,9 +31,9 @@ Desde el backend, ALM aporta un modelo de datos estructurado para la gestión de
 
 ## 4. Datos que gestiona
 - **Proyectos:** planificación y estado del trabajo.  
-  - Campos clave: `id`, `empresa_id`, `nombre`, `descripcion`, `fecha_inicio`, `fecha_fin`, `responsable_id`, `estado`, `presupuesto`, `cliente_id`, `created_at`, `updated_at`.  
+  - Campos clave: `id`, `empresa_id`, `nombre`, `descripcion`, `fecha_inicio`, `fecha_fin`, `responsable_employee_id`, `estado`, `presupuesto`, `cliente_id`, `created_at`, `updated_at`.  
 - **Tareas:** unidades de ejecución dentro de proyectos.  
-  - Campos clave: `id`, `empresa_id`, `proyecto_id`, `titulo`, `descripcion`, `estado`, `prioridad`, `asignado_a`, `fecha_vencimiento`, `tiempo_estimado`, `created_at`, `updated_at`.  
+  - Campos clave: `id`, `empresa_id`, `proyecto_id`, `titulo`, `descripcion`, `estado`, `prioridad`, `employee_id`, `fecha_vencimiento`, `tiempo_estimado`, `created_at`, `updated_at`.  
 - **Registro de horas:** seguimiento básico de dedicación.  
   - Campos clave: `id`, `empresa_id`, `tarea_id`, `usuario_id`, `fecha`, `horas`, `descripcion`, `created_at`.  
 
@@ -59,20 +59,18 @@ Desde el backend, ALM aporta un modelo de datos estructurado para la gestión de
 ## 7. Rol del módulo ALM en la arquitectura global
 ALM actúa como **módulo operativo y de ejecución**. Consume datos base de CORE (usuarios, empresas) y se integra con:
 
-- **RRHH:** usuarios disponibles para asignación.  
+- **RRHH:** empleados disponibles para asignación.  
 - **CRM:** proyectos asociados a clientes.  
-- **Soporte:** tickets convertidos en tareas (opcional).  
 - **BI:** métricas de productividad y avance.  
 
 ### Integraciones clave (consume/provee + FK)
 
 | Módulo | Relación | Campo FK |
 |---|---|---|
-| CORE | ALM consume usuarios | `proyectos.responsable_id -> usuarios.id` |
-| CORE | ALM consume usuarios | `tareas.asignado_a -> usuarios.id` |
+| RRHH | ALM consume empleados | `proyectos.responsable_employee_id -> empleados.id` |
+| RRHH | ALM consume empleados | `tareas.employee_id -> empleados.id` |
 | CRM | ALM consume clientes | `proyectos.cliente_id -> clientes.id` |
-| RRHH | ALM consume empleados (referencia) | `tareas.asignado_a -> usuarios.id` |
-| Soporte | ALM puede recibir tickets | `tareas.ticket_id -> tickets.id` (opcional) |
+| CORE | ALM consume usuarios | `registro_horas.usuario_id -> usuarios.id` |
 | BI | BI consume datos de ALM | `proyectos`, `tareas`, `registro_horas` |
 
 > Referencia del modelo completo: `docs/database/modelo-datos-backend.md`.

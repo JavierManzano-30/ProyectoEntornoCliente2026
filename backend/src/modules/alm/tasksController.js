@@ -2,7 +2,6 @@ const { pool } = require('../../config/db');
 const { envelopeSuccess, envelopeError } = require('../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../utils/pagination');
 const { validateRequiredFields, validateEnum } = require('../../utils/validation');
-const { generateId } = require('../../utils/id');
 
 const TASK_STATES = ['pendiente', 'en_progreso', 'completada'];
 const TASK_PRIORITIES = ['baja', 'media', 'alta'];
@@ -16,7 +15,7 @@ function mapTask(row) {
     descripcion: row.descripcion,
     estado: row.estado,
     prioridad: row.prioridad,
-    asignadoA: row.asignado_a,
+    asignadoA: row.employee_id,
     fechaVencimiento: row.fecha_vencimiento,
     tiempoEstimado: row.tiempo_estimado,
     createdAt: row.created_at,
@@ -63,7 +62,7 @@ async function listTasks(req, res, next) {
     }
     if (req.query.asignadoA) {
       values.push(req.query.asignadoA);
-      filters.push(`asignado_a = $${values.length}`);
+      filters.push(`employee_id = $${values.length}`);
     }
     if (req.query.fechaVencimiento) {
       values.push(req.query.fechaVencimiento);
@@ -129,19 +128,15 @@ async function createTask(req, res, next) {
         .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
     }
 
-    const id = generateId('tar');
-    const now = new Date().toISOString();
-
     const insertQuery = `
       INSERT INTO alm_tareas
-        (id, empresa_id, proyecto_id, titulo, descripcion, estado, prioridad, asignado_a, fecha_vencimiento, tiempo_estimado, created_at, updated_at)
+        (empresa_id, proyecto_id, titulo, descripcion, estado, prioridad, employee_id, fecha_vencimiento, tiempo_estimado)
       VALUES
-        ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+        ($1,$2,$3,$4,$5,$6,$7,$8,$9)
       RETURNING *
     `;
 
     const result = await pool.query(insertQuery, [
-      id,
       req.body.empresaId,
       req.body.proyectoId,
       req.body.titulo,
@@ -150,9 +145,7 @@ async function createTask(req, res, next) {
       req.body.prioridad,
       req.body.asignadoA || null,
       req.body.fechaVencimiento || null,
-      req.body.tiempoEstimado || null,
-      now,
-      now
+      req.body.tiempoEstimado ?? null
     ]);
 
     return res.status(201).json(envelopeSuccess(mapTask(result.rows[0])));
@@ -182,7 +175,6 @@ async function updateTask(req, res, next) {
         .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
     }
 
-    const now = new Date().toISOString();
     const updateQuery = `
       UPDATE alm_tareas
       SET empresa_id = $1,
@@ -191,11 +183,11 @@ async function updateTask(req, res, next) {
           descripcion = $4,
           estado = $5,
           prioridad = $6,
-          asignado_a = $7,
+          employee_id = $7,
           fecha_vencimiento = $8,
           tiempo_estimado = $9,
-          updated_at = $10
-      WHERE id = $11
+          updated_at = NOW()
+      WHERE id = $10
       RETURNING *
     `;
 
@@ -208,8 +200,7 @@ async function updateTask(req, res, next) {
       req.body.prioridad,
       req.body.asignadoA || null,
       req.body.fechaVencimiento || null,
-      req.body.tiempoEstimado || null,
-      now,
+      req.body.tiempoEstimado ?? null,
       id
     ]);
 
@@ -248,10 +239,9 @@ async function updateTaskStatus(req, res, next) {
         ]));
     }
 
-    const now = new Date().toISOString();
     const result = await pool.query(
-      'UPDATE alm_tareas SET estado = $1, updated_at = $2 WHERE id = $3 RETURNING *',
-      [req.body.estado, now, id]
+      'UPDATE alm_tareas SET estado = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+      [req.body.estado, id]
     );
 
     if (!result.rows.length) {
@@ -275,10 +265,9 @@ async function assignTask(req, res, next) {
         ]));
     }
 
-    const now = new Date().toISOString();
     const result = await pool.query(
-      'UPDATE alm_tareas SET asignado_a = $1, updated_at = $2 WHERE id = $3 RETURNING *',
-      [req.body.asignadoA, now, id]
+      'UPDATE alm_tareas SET employee_id = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+      [req.body.asignadoA, id]
     );
 
     if (!result.rows.length) {

@@ -2,7 +2,6 @@ const { pool } = require('../../config/db');
 const { envelopeSuccess, envelopeError } = require('../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../utils/pagination');
 const { validateRequiredFields, validateEnum } = require('../../utils/validation');
-const { generateId } = require('../../utils/id');
 
 const PROJECT_STATES = ['planificacion', 'en_curso', 'pausado', 'completado'];
 
@@ -14,7 +13,7 @@ function mapProject(row) {
     descripcion: row.descripcion,
     fechaInicio: row.fecha_inicio,
     fechaFin: row.fecha_fin,
-    responsableId: row.responsable_id,
+    responsableId: row.responsable_employee_id,
     estado: row.estado,
     presupuesto: row.presupuesto,
     clienteId: row.cliente_id,
@@ -58,7 +57,7 @@ async function listProjects(req, res, next) {
     }
     if (req.query.responsableId) {
       values.push(req.query.responsableId);
-      filters.push(`responsable_id = $${values.length}`);
+      filters.push(`responsable_employee_id = $${values.length}`);
     }
     if (req.query.fechaInicio) {
       values.push(req.query.fechaInicio);
@@ -127,10 +126,7 @@ async function createProject(req, res, next) {
         .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
     }
 
-    const id = generateId('proy');
-    const now = new Date().toISOString();
     const payload = {
-      id,
       empresaId: req.body.empresaId,
       nombre: req.body.nombre,
       descripcion: req.body.descripcion || null,
@@ -138,20 +134,19 @@ async function createProject(req, res, next) {
       fechaFin: req.body.fechaFin || null,
       responsableId: req.body.responsableId,
       estado: req.body.estado,
-      presupuesto: req.body.presupuesto || null,
+      presupuesto: req.body.presupuesto ?? null,
       clienteId: req.body.clienteId || null
     };
 
     const insertQuery = `
       INSERT INTO alm_proyectos
-        (id, empresa_id, nombre, descripcion, fecha_inicio, fecha_fin, responsable_id, estado, presupuesto, cliente_id, created_at, updated_at)
+        (empresa_id, nombre, descripcion, fecha_inicio, fecha_fin, responsable_employee_id, estado, presupuesto, cliente_id)
       VALUES
-        ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+        ($1,$2,$3,$4,$5,$6,$7,$8,$9)
       RETURNING *
     `;
 
     const result = await pool.query(insertQuery, [
-      payload.id,
       payload.empresaId,
       payload.nombre,
       payload.descripcion,
@@ -160,9 +155,7 @@ async function createProject(req, res, next) {
       payload.responsableId,
       payload.estado,
       payload.presupuesto,
-      payload.clienteId,
-      now,
-      now
+      payload.clienteId
     ]);
 
     return res.status(201).json(envelopeSuccess(mapProject(result.rows[0])));
@@ -190,7 +183,6 @@ async function updateProject(req, res, next) {
         .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
     }
 
-    const now = new Date().toISOString();
     const updateQuery = `
       UPDATE alm_proyectos
       SET empresa_id = $1,
@@ -198,12 +190,12 @@ async function updateProject(req, res, next) {
           descripcion = $3,
           fecha_inicio = $4,
           fecha_fin = $5,
-          responsable_id = $6,
+          responsable_employee_id = $6,
           estado = $7,
           presupuesto = $8,
           cliente_id = $9,
-          updated_at = $10
-      WHERE id = $11
+          updated_at = NOW()
+      WHERE id = $10
       RETURNING *
     `;
 
@@ -215,9 +207,8 @@ async function updateProject(req, res, next) {
       req.body.fechaFin || null,
       req.body.responsableId,
       req.body.estado,
-      req.body.presupuesto || null,
+      req.body.presupuesto ?? null,
       req.body.clienteId || null,
-      now,
       id
     ]);
 
@@ -272,7 +263,7 @@ async function listProjectTasks(req, res, next) {
       descripcion: row.descripcion,
       estado: row.estado,
       prioridad: row.prioridad,
-      asignadoA: row.asignado_a,
+      asignadoA: row.employee_id,
       fechaVencimiento: row.fecha_vencimiento,
       tiempoEstimado: row.tiempo_estimado,
       createdAt: row.created_at,
