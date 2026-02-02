@@ -73,10 +73,9 @@ Meta de paginacion:
 
 ## Endpoints - ALM
 
-Notas de esquema (synera-db.sql):
-- IDs son UUID.
-- `responsableId` corresponde a `responsable_employee_id` (empleado).
-- `asignadoA` corresponde a `employee_id` (empleado).
+Notas de esquema (syneraDb.sql):
+- Tablas ALM: `alm_projects`, `alm_tasks`, `alm_time_entries`.
+- IDs en ALM son `TEXT` (no UUID) y se generan en la API.
 
 ### Proyectos
 - `GET /alm/proyectos`
@@ -89,20 +88,20 @@ Notas de esquema (synera-db.sql):
 
 Filtros y paginacion (listas):
 - `page`, `limit`, `sort`
-- `empresaId`, `estado`, `clienteId`, `responsableId`, `fechaInicio`, `fechaFin`
+- `companyId`, `status`, `clientId`, `responsibleId`, `startDate`, `endDate`
 
 Ejemplo request (POST):
 ```json
 {
-  "empresaId": "7f1b9b7a-3a4a-4f1b-9b6a-7f6c2b9e1f10",
-  "nombre": "Proyecto Atlas",
-  "descripcion": "Migracion de CRM",
-  "fechaInicio": "2026-01-10",
-  "fechaFin": "2026-03-30",
-  "responsableId": "2c6d9f7b-1a4f-4a19-9d0a-5f3b7a1e9c33",
-  "estado": "planificacion",
-  "presupuesto": 25000,
-  "clienteId": "c0a1a9d2-4a6f-4e2a-9b0f-1a6d8b0c4f55"
+  "companyId": "7f1b9b7a-3a4a-4f1b-9b6a-7f6c2b9e1f10",
+  "name": "Proyecto Atlas",
+  "description": "Migracion de CRM",
+  "startDate": "2026-01-10",
+  "endDate": "2026-03-30",
+  "responsibleId": "usr_10",
+  "status": "planned",
+  "budget": 25000,
+  "clientId": "cli_5"
 }
 ```
 
@@ -112,15 +111,15 @@ Ejemplo response (POST):
   "success": true,
   "data": {
     "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    "empresaId": "7f1b9b7a-3a4a-4f1b-9b6a-7f6c2b9e1f10",
-    "nombre": "Proyecto Atlas",
-    "descripcion": "Migracion de CRM",
-    "fechaInicio": "2026-01-10",
-    "fechaFin": "2026-03-30",
-    "responsableId": "2c6d9f7b-1a4f-4a19-9d0a-5f3b7a1e9c33",
-    "estado": "planificacion",
-    "presupuesto": 25000,
-    "clienteId": "c0a1a9d2-4a6f-4e2a-9b0f-1a6d8b0c4f55",
+    "companyId": "7f1b9b7a-3a4a-4f1b-9b6a-7f6c2b9e1f10",
+    "name": "Proyecto Atlas",
+    "description": "Migracion de CRM",
+    "startDate": "2026-01-10",
+    "endDate": "2026-03-30",
+    "responsibleId": "usr_10",
+    "status": "planned",
+    "budget": 25000,
+    "clientId": "cli_5",
     "createdAt": "2026-01-10T09:00:00Z",
     "updatedAt": "2026-01-10T09:00:00Z"
   }
@@ -138,20 +137,20 @@ Ejemplo response (POST):
 
 Filtros y paginacion (listas):
 - `page`, `limit`, `sort`
-- `empresaId`, `estado`, `prioridad`, `proyectoId`, `asignadoA`, `fechaVencimiento`
+- `companyId`, `status`, `priority`, `projectId`, `assignedTo`, `dueDate`
 
 Ejemplo request (POST):
 ```json
 {
-  "empresaId": "7f1b9b7a-3a4a-4f1b-9b6a-7f6c2b9e1f10",
-  "proyectoId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "titulo": "Diseno de entidades",
-  "descripcion": "Definir tablas y relaciones",
-  "estado": "pendiente",
-  "prioridad": "media",
-  "asignadoA": "2c6d9f7b-1a4f-4a19-9d0a-5f3b7a1e9c33",
-  "fechaVencimiento": "2026-01-31",
-  "tiempoEstimado": 16
+  "companyId": "7f1b9b7a-3a4a-4f1b-9b6a-7f6c2b9e1f10",
+  "projectId": "proj_100",
+  "title": "Diseno de entidades",
+  "description": "Definir tablas y relaciones",
+  "status": "pending",
+  "priority": "medium",
+  "assignedTo": "usr_10",
+  "dueDate": "2026-01-31",
+  "estimatedTime": 16
 }
 ```
 
@@ -161,15 +160,15 @@ Ejemplo response (POST):
   "success": true,
   "data": {
     "id": "7b9d6a1e-9f2c-4c1a-8d7f-3a1b2c9d0e11",
-    "empresaId": "7f1b9b7a-3a4a-4f1b-9b6a-7f6c2b9e1f10",
-    "proyectoId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    "titulo": "Diseno de entidades",
-    "descripcion": "Definir tablas y relaciones",
-    "estado": "pendiente",
-    "prioridad": "media",
-    "asignadoA": "2c6d9f7b-1a4f-4a19-9d0a-5f3b7a1e9c33",
-    "fechaVencimiento": "2026-01-31",
-    "tiempoEstimado": 16,
+    "companyId": "7f1b9b7a-3a4a-4f1b-9b6a-7f6c2b9e1f10",
+    "projectId": "proj_100",
+    "title": "Diseno de entidades",
+    "description": "Definir tablas y relaciones",
+    "status": "pending",
+    "priority": "medium",
+    "assignedTo": "usr_10",
+    "dueDate": "2026-01-31",
+    "estimatedTime": 16,
     "createdAt": "2026-01-12T10:00:00Z",
     "updatedAt": "2026-01-12T10:00:00Z"
   }
@@ -186,28 +185,27 @@ Ejemplo response (POST):
 
 Filtros y paginacion (listas):
 - `page`, `limit`
-- `empresaId`, `tareaId`, `usuarioId`, `fecha`
+- `companyId`, `taskId`, `userId`, `entryDate`
 
 Ejemplo request (POST):
 ```json
 {
-  "empresaId": "7f1b9b7a-3a4a-4f1b-9b6a-7f6c2b9e1f10",
-  "tareaId": "7b9d6a1e-9f2c-4c1a-8d7f-3a1b2c9d0e11",
-  "usuarioId": "5f2a9d7b-3c1e-4f5a-8b9c-1d2e3f4a5b6c",
-  "fecha": "2026-01-15",
-  "horas": 3.5,
-  "descripcion": "Reunion + avance"
+  "companyId": "7f1b9b7a-3a4a-4f1b-9b6a-7f6c2b9e1f10",
+  "taskId": "task_900",
+  "userId": "usr_10",
+  "entryDate": "2026-01-15",
+  "hours": 3.5,
+  "description": "Reunion + avance"
 }
-```
 ```
 
 ## Enums
-- `proyecto.estado`: `planificacion | en_curso | pausado | completado`
-- `tarea.estado`: `pendiente | en_progreso | completada`
-- `tarea.prioridad`: `baja | media | alta`
+- `project.status`: `planned | in_progress | paused | completed`
+- `task.status`: `pending | in_progress | completed`
+- `task.priority`: `low | medium | high`
 
 ## Relaciones clave (para frontend)
-- `proyectos.responsable_employee_id` -> `empleados.id` (RRHH)
-- `proyectos.cliente_id` -> `clientes.id` (CRM)
-- `tareas.employee_id` -> `empleados.id` (RRHH)
-- `tareas.proyecto_id` -> `proyectos.id`
+- `projects.responsible_id` -> `core_users.id` (CORE)
+- `projects.client_id` -> `crm_clients.id` (CRM)
+- `tasks.assigned_to` -> `core_users.id` (CORE)
+- `tasks.project_id` -> `projects.id`

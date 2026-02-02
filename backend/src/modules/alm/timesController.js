@@ -2,16 +2,17 @@ const { pool } = require('../../config/db');
 const { envelopeSuccess, envelopeError } = require('../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../utils/pagination');
 const { validateRequiredFields } = require('../../utils/validation');
+const { generateId } = require('../../utils/id');
 
 function mapTime(row) {
   return {
     id: row.id,
-    empresaId: row.empresa_id,
-    tareaId: row.tarea_id,
-    usuarioId: row.usuario_id,
-    fecha: row.fecha,
-    horas: row.horas,
-    descripcion: row.descripcion,
+    companyId: row.company_id,
+    taskId: row.task_id,
+    userId: row.user_id,
+    entryDate: row.entry_date,
+    hours: row.hours,
+    description: row.description,
     createdAt: row.created_at,
     updatedAt: row.updated_at
   };
@@ -23,32 +24,32 @@ async function listTimes(req, res, next) {
     const filters = [];
     const values = [];
 
-    if (req.query.empresaId) {
-      values.push(req.query.empresaId);
-      filters.push(`empresa_id = $${values.length}`);
+    if (req.query.companyId) {
+      values.push(req.query.companyId);
+      filters.push(`company_id = $${values.length}`);
     }
-    if (req.query.tareaId) {
-      values.push(req.query.tareaId);
-      filters.push(`tarea_id = $${values.length}`);
+    if (req.query.taskId) {
+      values.push(req.query.taskId);
+      filters.push(`task_id = $${values.length}`);
     }
-    if (req.query.usuarioId) {
-      values.push(req.query.usuarioId);
-      filters.push(`usuario_id = $${values.length}`);
+    if (req.query.userId) {
+      values.push(req.query.userId);
+      filters.push(`user_id = $${values.length}`);
     }
-    if (req.query.fecha) {
-      values.push(req.query.fecha);
-      filters.push(`fecha = $${values.length}`);
+    if (req.query.entryDate) {
+      values.push(req.query.entryDate);
+      filters.push(`entry_date = $${values.length}`);
     }
 
     const whereClause = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
-    const countQuery = `SELECT COUNT(*)::int AS total FROM alm_registro_horas ${whereClause}`;
+    const countQuery = `SELECT COUNT(*)::int AS total FROM alm_time_entries ${whereClause}`;
     const countResult = await pool.query(countQuery, values);
     const totalItems = countResult.rows[0]?.total || 0;
 
     values.push(limit, offset);
     const listQuery = `
       SELECT *
-      FROM alm_registro_horas
+      FROM alm_time_entries
       ${whereClause}
       ORDER BY created_at DESC
       LIMIT $${values.length - 1} OFFSET $${values.length}
@@ -67,11 +68,11 @@ async function listTimes(req, res, next) {
 async function createTime(req, res, next) {
   try {
     const requiredErrors = validateRequiredFields(req.body, [
-      'empresaId',
-      'tareaId',
-      'usuarioId',
-      'fecha',
-      'horas'
+      'companyId',
+      'taskId',
+      'userId',
+      'entryDate',
+      'hours'
     ]);
 
     if (requiredErrors.length) {
@@ -81,20 +82,25 @@ async function createTime(req, res, next) {
     }
 
     const insertQuery = `
-      INSERT INTO alm_registro_horas
-        (empresa_id, tarea_id, usuario_id, fecha, horas, descripcion)
+      INSERT INTO alm_time_entries
+        (id, company_id, task_id, user_id, entry_date, hours, description, created_at, updated_at)
       VALUES
-        ($1,$2,$3,$4,$5,$6)
+        ($1,$2,$3,$4,$5,$6,$7,$8,$9)
       RETURNING *
     `;
 
+    const id = generateId('time');
+    const now = new Date().toISOString();
     const result = await pool.query(insertQuery, [
-      req.body.empresaId,
-      req.body.tareaId,
-      req.body.usuarioId,
-      req.body.fecha,
-      req.body.horas,
-      req.body.descripcion || null
+      id,
+      req.body.companyId,
+      req.body.taskId,
+      req.body.userId,
+      req.body.entryDate,
+      req.body.hours,
+      req.body.description || null,
+      now,
+      now
     ]);
 
     return res.status(201).json(envelopeSuccess(mapTime(result.rows[0])));
@@ -107,11 +113,11 @@ async function updateTime(req, res, next) {
   try {
     const { id } = req.params;
     const requiredErrors = validateRequiredFields(req.body, [
-      'empresaId',
-      'tareaId',
-      'usuarioId',
-      'fecha',
-      'horas'
+      'companyId',
+      'taskId',
+      'userId',
+      'entryDate',
+      'hours'
     ]);
 
     if (requiredErrors.length) {
@@ -121,25 +127,27 @@ async function updateTime(req, res, next) {
     }
 
     const updateQuery = `
-      UPDATE alm_registro_horas
-      SET empresa_id = $1,
-          tarea_id = $2,
-          usuario_id = $3,
-          fecha = $4,
-          horas = $5,
-          descripcion = $6,
-          updated_at = NOW()
-      WHERE id = $7
+      UPDATE alm_time_entries
+      SET company_id = $1,
+          task_id = $2,
+          user_id = $3,
+          entry_date = $4,
+          hours = $5,
+          description = $6,
+          updated_at = $7
+      WHERE id = $8
       RETURNING *
     `;
 
+    const now = new Date().toISOString();
     const result = await pool.query(updateQuery, [
-      req.body.empresaId,
-      req.body.tareaId,
-      req.body.usuarioId,
-      req.body.fecha,
-      req.body.horas,
-      req.body.descripcion || null,
+      req.body.companyId,
+      req.body.taskId,
+      req.body.userId,
+      req.body.entryDate,
+      req.body.hours,
+      req.body.description || null,
+      now,
       id
     ]);
 
@@ -156,7 +164,7 @@ async function updateTime(req, res, next) {
 async function deleteTime(req, res, next) {
   try {
     const { id } = req.params;
-    const result = await pool.query('DELETE FROM alm_registro_horas WHERE id = $1', [id]);
+    const result = await pool.query('DELETE FROM alm_time_entries WHERE id = $1', [id]);
     if (!result.rowCount) {
       return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Registro de tiempo no encontrado'));
     }
@@ -171,25 +179,25 @@ async function getProjectTimeSummary(req, res, next) {
     const { id } = req.params;
     const summaryQuery = `
       SELECT
-        t.proyecto_id,
+        t.project_id,
         COUNT(r.id)::int AS registros,
-        COALESCE(SUM(r.horas), 0)::numeric AS horas_totales
-      FROM alm_registro_horas r
-      JOIN alm_tareas t ON t.id = r.tarea_id
-      WHERE t.proyecto_id = $1
-      GROUP BY t.proyecto_id
+        COALESCE(SUM(r.hours), 0)::numeric AS total_hours
+      FROM alm_time_entries r
+      JOIN alm_tasks t ON t.id = r.task_id
+      WHERE t.project_id = $1
+      GROUP BY t.project_id
     `;
 
     const result = await pool.query(summaryQuery, [id]);
     const row = result.rows[0];
     if (!row) {
-      return res.json(envelopeSuccess({ proyectoId: id, registros: 0, horasTotales: 0 }));
+      return res.json(envelopeSuccess({ projectId: id, entries: 0, totalHours: 0 }));
     }
 
     return res.json(envelopeSuccess({
-      proyectoId: row.proyecto_id,
-      registros: row.registros,
-      horasTotales: Number(row.horas_totales)
+      projectId: row.project_id,
+      entries: row.registros,
+      totalHours: Number(row.total_hours)
     }));
   } catch (err) {
     return next(err);
@@ -201,14 +209,14 @@ async function getUserTimes(req, res, next) {
     const { id } = req.params;
     const { page, limit, offset } = getPaginationParams(req.query);
 
-    const countQuery = 'SELECT COUNT(*)::int AS total FROM alm_registro_horas WHERE usuario_id = $1';
+    const countQuery = 'SELECT COUNT(*)::int AS total FROM alm_time_entries WHERE user_id = $1';
     const countResult = await pool.query(countQuery, [id]);
     const totalItems = countResult.rows[0]?.total || 0;
 
     const listQuery = `
       SELECT *
-      FROM alm_registro_horas
-      WHERE usuario_id = $1
+      FROM alm_time_entries
+      WHERE user_id = $1
       ORDER BY created_at DESC
       LIMIT $2 OFFSET $3
     `;
@@ -228,14 +236,14 @@ async function getTaskTimes(req, res, next) {
     const { id } = req.params;
     const { page, limit, offset } = getPaginationParams(req.query);
 
-    const countQuery = 'SELECT COUNT(*)::int AS total FROM alm_registro_horas WHERE tarea_id = $1';
+    const countQuery = 'SELECT COUNT(*)::int AS total FROM alm_time_entries WHERE task_id = $1';
     const countResult = await pool.query(countQuery, [id]);
     const totalItems = countResult.rows[0]?.total || 0;
 
     const listQuery = `
       SELECT *
-      FROM alm_registro_horas
-      WHERE tarea_id = $1
+      FROM alm_time_entries
+      WHERE task_id = $1
       ORDER BY created_at DESC
       LIMIT $2 OFFSET $3
     `;

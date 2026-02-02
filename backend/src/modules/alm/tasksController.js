@@ -2,22 +2,23 @@ const { pool } = require('../../config/db');
 const { envelopeSuccess, envelopeError } = require('../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../utils/pagination');
 const { validateRequiredFields, validateEnum } = require('../../utils/validation');
+const { generateId } = require('../../utils/id');
 
-const TASK_STATES = ['pendiente', 'en_progreso', 'completada'];
-const TASK_PRIORITIES = ['baja', 'media', 'alta'];
+const TASK_STATES = ['pending', 'in_progress', 'completed'];
+const TASK_PRIORITIES = ['low', 'medium', 'high'];
 
 function mapTask(row) {
   return {
     id: row.id,
-    empresaId: row.empresa_id,
-    proyectoId: row.proyecto_id,
-    titulo: row.titulo,
-    descripcion: row.descripcion,
-    estado: row.estado,
-    prioridad: row.prioridad,
-    asignadoA: row.employee_id,
-    fechaVencimiento: row.fecha_vencimiento,
-    tiempoEstimado: row.tiempo_estimado,
+    companyId: row.company_id,
+    projectId: row.project_id,
+    title: row.title,
+    description: row.description,
+    status: row.status,
+    priority: row.priority,
+    assignedTo: row.assigned_to,
+    dueDate: row.due_date,
+    estimatedTime: row.estimated_time,
     createdAt: row.created_at,
     updatedAt: row.updated_at
   };
@@ -28,10 +29,10 @@ function parseSort(sort) {
   const direction = sort.startsWith('-') ? 'DESC' : 'ASC';
   const field = sort.replace('-', '');
   const map = {
-    titulo: 'titulo',
-    estado: 'estado',
-    prioridad: 'prioridad',
-    fechaVencimiento: 'fecha_vencimiento',
+    title: 'title',
+    status: 'status',
+    priority: 'priority',
+    dueDate: 'due_date',
     createdAt: 'created_at'
   };
   if (!map[field]) return 'created_at DESC';
@@ -44,35 +45,35 @@ async function listTasks(req, res, next) {
     const filters = [];
     const values = [];
 
-    if (req.query.empresaId) {
-      values.push(req.query.empresaId);
-      filters.push(`empresa_id = $${values.length}`);
+    if (req.query.companyId) {
+      values.push(req.query.companyId);
+      filters.push(`company_id = $${values.length}`);
     }
-    if (req.query.estado) {
-      values.push(req.query.estado);
-      filters.push(`estado = $${values.length}`);
+    if (req.query.status) {
+      values.push(req.query.status);
+      filters.push(`status = $${values.length}`);
     }
-    if (req.query.prioridad) {
-      values.push(req.query.prioridad);
-      filters.push(`prioridad = $${values.length}`);
+    if (req.query.priority) {
+      values.push(req.query.priority);
+      filters.push(`priority = $${values.length}`);
     }
-    if (req.query.proyectoId) {
-      values.push(req.query.proyectoId);
-      filters.push(`proyecto_id = $${values.length}`);
+    if (req.query.projectId) {
+      values.push(req.query.projectId);
+      filters.push(`project_id = $${values.length}`);
     }
-    if (req.query.asignadoA) {
-      values.push(req.query.asignadoA);
-      filters.push(`employee_id = $${values.length}`);
+    if (req.query.assignedTo) {
+      values.push(req.query.assignedTo);
+      filters.push(`assigned_to = $${values.length}`);
     }
-    if (req.query.fechaVencimiento) {
-      values.push(req.query.fechaVencimiento);
-      filters.push(`fecha_vencimiento <= $${values.length}`);
+    if (req.query.dueDate) {
+      values.push(req.query.dueDate);
+      filters.push(`due_date <= $${values.length}`);
     }
 
     const whereClause = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
     const orderBy = parseSort(req.query.sort);
 
-    const countQuery = `SELECT COUNT(*)::int AS total FROM alm_tareas ${whereClause}`;
+    const countQuery = `SELECT COUNT(*)::int AS total FROM alm_tasks ${whereClause}`;
     const countResult = await pool.query(countQuery, values);
     const totalItems = countResult.rows[0]?.total || 0;
 
@@ -80,7 +81,7 @@ async function listTasks(req, res, next) {
     values.push(offset);
     const listQuery = `
       SELECT *
-      FROM alm_tareas
+      FROM alm_tasks
       ${whereClause}
       ORDER BY ${orderBy}
       LIMIT $${values.length - 1} OFFSET $${values.length}
@@ -98,7 +99,7 @@ async function listTasks(req, res, next) {
 async function getTask(req, res, next) {
   try {
     const { id } = req.params;
-    const result = await pool.query('SELECT * FROM alm_tareas WHERE id = $1', [id]);
+    const result = await pool.query('SELECT * FROM alm_tasks WHERE id = $1', [id]);
     if (!result.rows.length) {
       return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Tarea no encontrada'));
     }
@@ -111,16 +112,16 @@ async function getTask(req, res, next) {
 async function createTask(req, res, next) {
   try {
     const requiredErrors = validateRequiredFields(req.body, [
-      'empresaId',
-      'proyectoId',
-      'titulo',
-      'estado',
-      'prioridad'
+      'companyId',
+      'projectId',
+      'title',
+      'status',
+      'priority'
     ]);
-    const estadoError = validateEnum(req.body.estado, TASK_STATES);
-    const prioridadError = validateEnum(req.body.prioridad, TASK_PRIORITIES);
-    if (estadoError) requiredErrors.push({ field: 'estado', message: estadoError });
-    if (prioridadError) requiredErrors.push({ field: 'prioridad', message: prioridadError });
+    const estadoError = validateEnum(req.body.status, TASK_STATES);
+    const prioridadError = validateEnum(req.body.priority, TASK_PRIORITIES);
+    if (estadoError) requiredErrors.push({ field: 'status', message: estadoError });
+    if (prioridadError) requiredErrors.push({ field: 'priority', message: prioridadError });
 
     if (requiredErrors.length) {
       return res
@@ -129,23 +130,28 @@ async function createTask(req, res, next) {
     }
 
     const insertQuery = `
-      INSERT INTO alm_tareas
-        (empresa_id, proyecto_id, titulo, descripcion, estado, prioridad, employee_id, fecha_vencimiento, tiempo_estimado)
+      INSERT INTO alm_tasks
+        (id, company_id, project_id, title, description, status, priority, assigned_to, due_date, estimated_time, created_at, updated_at)
       VALUES
-        ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+        ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
       RETURNING *
     `;
 
+    const id = generateId('task');
+    const now = new Date().toISOString();
     const result = await pool.query(insertQuery, [
-      req.body.empresaId,
-      req.body.proyectoId,
-      req.body.titulo,
-      req.body.descripcion || null,
-      req.body.estado,
-      req.body.prioridad,
-      req.body.asignadoA || null,
-      req.body.fechaVencimiento || null,
-      req.body.tiempoEstimado ?? null
+      id,
+      req.body.companyId,
+      req.body.projectId,
+      req.body.title,
+      req.body.description || null,
+      req.body.status,
+      req.body.priority,
+      req.body.assignedTo || null,
+      req.body.dueDate || null,
+      req.body.estimatedTime ?? null,
+      now,
+      now
     ]);
 
     return res.status(201).json(envelopeSuccess(mapTask(result.rows[0])));
@@ -158,16 +164,16 @@ async function updateTask(req, res, next) {
   try {
     const { id } = req.params;
     const requiredErrors = validateRequiredFields(req.body, [
-      'empresaId',
-      'proyectoId',
-      'titulo',
-      'estado',
-      'prioridad'
+      'companyId',
+      'projectId',
+      'title',
+      'status',
+      'priority'
     ]);
-    const estadoError = validateEnum(req.body.estado, TASK_STATES);
-    const prioridadError = validateEnum(req.body.prioridad, TASK_PRIORITIES);
-    if (estadoError) requiredErrors.push({ field: 'estado', message: estadoError });
-    if (prioridadError) requiredErrors.push({ field: 'prioridad', message: prioridadError });
+    const estadoError = validateEnum(req.body.status, TASK_STATES);
+    const prioridadError = validateEnum(req.body.priority, TASK_PRIORITIES);
+    if (estadoError) requiredErrors.push({ field: 'status', message: estadoError });
+    if (prioridadError) requiredErrors.push({ field: 'priority', message: prioridadError });
 
     if (requiredErrors.length) {
       return res
@@ -176,31 +182,33 @@ async function updateTask(req, res, next) {
     }
 
     const updateQuery = `
-      UPDATE alm_tareas
-      SET empresa_id = $1,
-          proyecto_id = $2,
-          titulo = $3,
-          descripcion = $4,
-          estado = $5,
-          prioridad = $6,
-          employee_id = $7,
-          fecha_vencimiento = $8,
-          tiempo_estimado = $9,
-          updated_at = NOW()
-      WHERE id = $10
+      UPDATE alm_tasks
+      SET company_id = $1,
+          project_id = $2,
+          title = $3,
+          description = $4,
+          status = $5,
+          priority = $6,
+          assigned_to = $7,
+          due_date = $8,
+          estimated_time = $9,
+          updated_at = $10
+      WHERE id = $11
       RETURNING *
     `;
 
+    const now = new Date().toISOString();
     const result = await pool.query(updateQuery, [
-      req.body.empresaId,
-      req.body.proyectoId,
-      req.body.titulo,
-      req.body.descripcion || null,
-      req.body.estado,
-      req.body.prioridad,
-      req.body.asignadoA || null,
-      req.body.fechaVencimiento || null,
-      req.body.tiempoEstimado ?? null,
+      req.body.companyId,
+      req.body.projectId,
+      req.body.title,
+      req.body.description || null,
+      req.body.status,
+      req.body.priority,
+      req.body.assignedTo || null,
+      req.body.dueDate || null,
+      req.body.estimatedTime ?? null,
+      now,
       id
     ]);
 
@@ -217,7 +225,7 @@ async function updateTask(req, res, next) {
 async function deleteTask(req, res, next) {
   try {
     const { id } = req.params;
-    const result = await pool.query('DELETE FROM alm_tareas WHERE id = $1', [id]);
+    const result = await pool.query('DELETE FROM alm_tasks WHERE id = $1', [id]);
     if (!result.rowCount) {
       return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Tarea no encontrada'));
     }
@@ -230,18 +238,19 @@ async function deleteTask(req, res, next) {
 async function updateTaskStatus(req, res, next) {
   try {
     const { id } = req.params;
-    const estadoError = validateEnum(req.body.estado, TASK_STATES);
+    const estadoError = validateEnum(req.body.status, TASK_STATES);
     if (estadoError) {
       return res
         .status(400)
         .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', [
-          { field: 'estado', message: estadoError }
+          { field: 'status', message: estadoError }
         ]));
     }
 
+    const now = new Date().toISOString();
     const result = await pool.query(
-      'UPDATE alm_tareas SET estado = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
-      [req.body.estado, id]
+      'UPDATE alm_tasks SET status = $1, updated_at = $2 WHERE id = $3 RETURNING *',
+      [req.body.status, now, id]
     );
 
     if (!result.rows.length) {
@@ -257,17 +266,18 @@ async function updateTaskStatus(req, res, next) {
 async function assignTask(req, res, next) {
   try {
     const { id } = req.params;
-    if (!req.body.asignadoA) {
+    if (!req.body.assignedTo) {
       return res
         .status(400)
         .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', [
-          { field: 'asignadoA', message: 'Requerido' }
+          { field: 'assignedTo', message: 'Requerido' }
         ]));
     }
 
+    const now = new Date().toISOString();
     const result = await pool.query(
-      'UPDATE alm_tareas SET employee_id = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
-      [req.body.asignadoA, id]
+      'UPDATE alm_tasks SET assigned_to = $1, updated_at = $2 WHERE id = $3 RETURNING *',
+      [req.body.assignedTo, now, id]
     );
 
     if (!result.rows.length) {
