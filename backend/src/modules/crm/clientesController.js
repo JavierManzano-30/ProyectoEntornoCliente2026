@@ -1,24 +1,24 @@
-const { pool } = require('../../config/db');
+const supabase = require('../core/src/config/supabaseClient');
 const { envelopeSuccess, envelopeError } = require('../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../utils/pagination');
 const { validateRequiredFields, validateEnum } = require('../../utils/validation');
 const { generateId } = require('../../utils/id');
 
-const CLIENTE_TIPOS = ['lead', 'cliente'];
+const CLIENTE_TIPOS = ['lead', 'customer'];
 
 function mapCliente(row) {
   return {
     id: row.id,
-    empresaId: row.empresa_id,
-    nombre: row.nombre,
-    cif: row.cif,
+    companyId: row.company_id,
+    name: row.name,
+    taxId: row.tax_id,
     email: row.email,
-    telefono: row.telefono,
-    direccion: row.direccion,
-    ciudad: row.ciudad,
-    responsableId: row.responsable_id,
-    tipo: row.tipo,
-    notas: row.notas,
+    phone: row.phone,
+    address: row.address,
+    city: row.city,
+    responsibleId: row.responsible_id,
+    type: row.type,
+    notes: row.notes,
     createdAt: row.created_at,
     updatedAt: row.updated_at
   };
@@ -29,9 +29,9 @@ function parseSort(sort) {
   const direction = sort.startsWith('-') ? 'DESC' : 'ASC';
   const field = sort.replace('-', '');
   const map = {
-    nombre: 'nombre',
-    tipo: 'tipo',
-    ciudad: 'ciudad',
+    name: 'name',
+    type: 'type',
+    city: 'city',
     createdAt: 'created_at'
   };
   if (!map[field]) return 'created_at DESC';
@@ -41,44 +41,47 @@ function parseSort(sort) {
 async function listClientes(req, res, next) {
   try {
     const { page, limit, offset } = getPaginationParams(req.query);
-    const filters = [];
-    const values = [];
+    
+    // Construir query
+    let query = supabase.from('crm_clients').select('*', { count: 'exact' });
 
-    if (req.query.tipo) {
-      values.push(req.query.tipo);
-      filters.push(`tipo = $${values.length}`);
+    // Aplicar filtros
+    if (req.query.type) {
+      query = query.eq('type', req.query.type);
     }
-    if (req.query.responsableId) {
-      values.push(req.query.responsableId);
-      filters.push(`responsable_id = $${values.length}`);
+    if (req.query.responsibleId) {
+      query = query.eq('responsible_id', req.query.responsibleId);
     }
     if (req.query.search) {
-      values.push(`%${req.query.search}%`);
-      filters.push(`(nombre ILIKE $${values.length} OR cif ILIKE $${values.length})`);
+      query = query.or(`name.ilike.%${req.query.search}%,tax_id.ilike.%${req.query.search}%`);
     }
 
-    const whereClause = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
-    const orderBy = parseSort(req.query.sort);
+    // Ordenamiento
+    const sort = req.query.sort || '-createdAt';
+    const direction = sort.startsWith('-');
+    const field = sort.replace('-', '');
+    const fieldMap = {
+      name: 'name',
+      type: 'type',
+      city: 'city',
+      createdAt: 'created_at'
+    };
+    const sortField = fieldMap[field] || 'created_at';
+    query = query.order(sortField, { ascending: !direction });
 
-    const countQuery = `SELECT COUNT(*)::int AS total FROM crm_clientes ${whereClause}`;
-    const countResult = await pool.query(countQuery, values);
-    const totalItems = countResult.rows[0]?.total || 0;
+    // Paginación
+    query = query.range(offset, offset + limit - 1);
 
-    values.push(limit);
-    values.push(offset);
-    const listQuery = `
-      SELECT *
-      FROM crm_clientes
-      ${whereClause}
-      ORDER BY ${orderBy}
-      LIMIT $${values.length - 1} OFFSET $${values.length}
-    `;
+    const { data, error, count } = await query;
 
-    const result = await pool.query(listQuery, values);
-    const data = result.rows.map(mapCliente);
-    const meta = buildPaginationMeta(page, limit, totalItems);
+    if (error) {
+      throw error;
+    }
 
-    return res.json(envelopeSuccess(data, meta));
+    const mappedData = data.map(mapCliente);
+    const meta = buildPaginationMeta(page, limit, count || 0);
+
+    return res.json(envelopeSuccess(mappedData, meta));
   } catch (err) {
     return next(err);
   }
@@ -89,44 +92,54 @@ async function getCliente(req, res, next) {
     const { id } = req.params;
     
     // Obtener cliente
-    const clienteResult = await pool.query('SELECT * FROM crm_clientes WHERE id = $1', [id]);
-    if (!clienteResult.rows.length) {
+    const { data: cliente, error: clienteError } = await supabase
+      .from('crm_clients')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (clienteError || !cliente) {
       return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Cliente no encontrado'));
     }
 
-    const cliente = mapCliente(clienteResult.rows[0]);
+    const mappedCliente = mapCliente(cliente);
 
     // Obtener contactos
-    const contactosResult = await pool.query(
-      'SELECT * FROM crm_contactos WHERE cliente_id = $1 ORDER BY created_at DESC',
-      [id]
-    );
-    cliente.contactos = contactosResult.rows.map(row => ({
+    const { data: contactos } = await supabase
+      .from('crm_contacts')
+      .select('*')
+      .eq('client_id', id)
+      .order('created_at', { ascending: false });
+
+    mappedCliente.contacts = (contactos || []).map(row => ({
       id: row.id,
-      nombre: row.nombre,
-      apellidos: row.apellidos,
-      cargo: row.cargo,
+      name: row.name,
+      lastName: row.last_name,
+      jobTitle: row.job_title,
       email: row.email,
-      telefono: row.telefono,
-      esDecisor: row.es_decisor
+      phone: row.phone,
+      isDecisionMaker: row.is_decision_maker
     }));
 
     // Obtener métricas de oportunidades
-    const metricsResult = await pool.query(
-      `SELECT 
-        COUNT(*)::int AS oportunidades_abiertas,
-        COALESCE(SUM(valor_estimado), 0) AS valor_pipeline_total
-      FROM crm_oportunidades
-      WHERE cliente_id = $1 AND fase_id NOT IN (
-        SELECT id FROM crm_fases WHERE nombre IN ('Ganada', 'Perdida')
-      )`,
-      [id]
-    );
+    // Primero obtener IDs de stages ganados/perdidos
+    const { data: closedStages } = await supabase
+      .from('crm_stages')
+      .select('id')
+      .in('name', ['Won', 'Lost']);
 
-    cliente.oportunidadesAbiertas = metricsResult.rows[0]?.oportunidades_abiertas || 0;
-    cliente.valorPipelineTotal = parseFloat(metricsResult.rows[0]?.valor_pipeline_total || 0);
+    const closedStageIds = (closedStages || []).map(s => s.id);
 
-    return res.json(envelopeSuccess(cliente));
+    const { data: opportunities } = await supabase
+      .from('crm_opportunities')
+      .select('id, estimated_value')
+      .eq('client_id', id)
+      .not('stage_id', 'in', `(${closedStageIds.join(',')})`);
+
+    mappedCliente.openOpportunities = opportunities?.length || 0;
+    mappedCliente.totalPipelineValue = opportunities?.reduce((sum, opp) => sum + (parseFloat(opp.estimated_value) || 0), 0) || 0;
+
+    return res.json(envelopeSuccess(mappedCliente));
   } catch (err) {
     return next(err);
   }
@@ -134,9 +147,9 @@ async function getCliente(req, res, next) {
 
 async function createCliente(req, res, next) {
   try {
-    const requiredErrors = validateRequiredFields(req.body, ['nombre', 'tipo']);
-    const tipoError = validateEnum(req.body.tipo, CLIENTE_TIPOS);
-    if (tipoError) requiredErrors.push({ field: 'tipo', message: tipoError });
+    const requiredErrors = validateRequiredFields(req.body, ['name', 'type']);
+    const typeError = validateEnum(req.body.type, CLIENTE_TIPOS);
+    if (typeError) requiredErrors.push({ field: 'type', message: typeError });
 
     if (requiredErrors.length) {
       return res
@@ -147,31 +160,31 @@ async function createCliente(req, res, next) {
     const id = generateId('cli');
     const now = new Date().toISOString();
 
-    const insertQuery = `
-      INSERT INTO crm_clientes
-        (id, empresa_id, nombre, cif, email, telefono, direccion, ciudad, responsable_id, tipo, notas, created_at, updated_at)
-      VALUES
-        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-      RETURNING *
-    `;
+    const { data, error } = await supabase
+      .from('crm_clients')
+      .insert([{
+        id,
+        company_id: req.body.companyId || null,
+        name: req.body.name,
+        tax_id: req.body.taxId || null,
+        email: req.body.email || null,
+        phone: req.body.phone || null,
+        address: req.body.address || null,
+        city: req.body.city || null,
+        responsible_id: req.body.responsibleId || null,
+        type: req.body.type,
+        notes: req.body.notes || null,
+        created_at: now,
+        updated_at: now
+      }])
+      .select()
+      .single();
 
-    const result = await pool.query(insertQuery, [
-      id,
-      req.body.empresaId || null,
-      req.body.nombre,
-      req.body.cif || null,
-      req.body.email || null,
-      req.body.telefono || null,
-      req.body.direccion || null,
-      req.body.ciudad || null,
-      req.body.responsableId || null,
-      req.body.tipo,
-      req.body.notas || null,
-      now,
-      now
-    ]);
+    if (error) {
+      throw error;
+    }
 
-    return res.status(201).json(envelopeSuccess(mapCliente(result.rows[0])));
+    return res.status(201).json(envelopeSuccess(mapCliente(data)));
   } catch (err) {
     return next(err);
   }
@@ -180,9 +193,9 @@ async function createCliente(req, res, next) {
 async function updateCliente(req, res, next) {
   try {
     const { id } = req.params;
-    const requiredErrors = validateRequiredFields(req.body, ['nombre', 'tipo']);
-    const tipoError = validateEnum(req.body.tipo, CLIENTE_TIPOS);
-    if (tipoError) requiredErrors.push({ field: 'tipo', message: tipoError });
+    const requiredErrors = validateRequiredFields(req.body, ['name', 'type']);
+    const typeError = validateEnum(req.body.type, CLIENTE_TIPOS);
+    if (typeError) requiredErrors.push({ field: 'type', message: typeError });
 
     if (requiredErrors.length) {
       return res
@@ -191,41 +204,30 @@ async function updateCliente(req, res, next) {
     }
 
     const now = new Date().toISOString();
-    const updateQuery = `
-      UPDATE crm_clientes
-      SET nombre = $1,
-          cif = $2,
-          email = $3,
-          telefono = $4,
-          direccion = $5,
-          ciudad = $6,
-          responsable_id = $7,
-          tipo = $8,
-          notas = $9,
-          updated_at = $10
-      WHERE id = $11
-      RETURNING *
-    `;
 
-    const result = await pool.query(updateQuery, [
-      req.body.nombre,
-      req.body.cif || null,
-      req.body.email || null,
-      req.body.telefono || null,
-      req.body.direccion || null,
-      req.body.ciudad || null,
-      req.body.responsableId || null,
-      req.body.tipo,
-      req.body.notas || null,
-      now,
-      id
-    ]);
+    const { data, error } = await supabase
+      .from('crm_clients')
+      .update({
+        name: req.body.name,
+        tax_id: req.body.taxId || null,
+        email: req.body.email || null,
+        phone: req.body.phone || null,
+        address: req.body.address || null,
+        city: req.body.city || null,
+        responsible_id: req.body.responsibleId || null,
+        type: req.body.type,
+        notes: req.body.notes || null,
+        updated_at: now
+      })
+      .eq('id', id)
+      .select()
+      .single();
 
-    if (!result.rows.length) {
+    if (error || !data) {
       return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Cliente no encontrado'));
     }
 
-    return res.json(envelopeSuccess(mapCliente(result.rows[0])));
+    return res.json(envelopeSuccess(mapCliente(data)));
   } catch (err) {
     return next(err);
   }
@@ -234,9 +236,15 @@ async function updateCliente(req, res, next) {
 async function deleteCliente(req, res, next) {
   try {
     const { id } = req.params;
-    const result = await pool.query('DELETE FROM crm_clientes WHERE id = $1 RETURNING id', [id]);
+    
+    const { data, error } = await supabase
+      .from('crm_clients')
+      .delete()
+      .eq('id', id)
+      .select('id')
+      .single();
 
-    if (!result.rows.length) {
+    if (error || !data) {
       return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Cliente no encontrado'));
     }
 
@@ -251,22 +259,23 @@ async function convertirCliente(req, res, next) {
     const { id } = req.params;
     const now = new Date().toISOString();
 
-    const updateQuery = `
-      UPDATE crm_clientes
-      SET tipo = 'cliente',
-          updated_at = $1
-      WHERE id = $2 AND tipo = 'lead'
-      RETURNING *
-    `;
+    const { data, error } = await supabase
+      .from('crm_clients')
+      .update({
+        type: 'customer',
+        updated_at: now
+      })
+      .eq('id', id)
+      .eq('type', 'lead')
+      .select()
+      .single();
 
-    const result = await pool.query(updateQuery, [now, id]);
-
-    if (!result.rows.length) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Lead no encontrado o ya es cliente'));
+    if (error || !data) {
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Lead not found or already a customer'));
     }
 
-    const cliente = mapCliente(result.rows[0]);
-    cliente.sincronizadoConErp = true; // Simular sincronización con ERP
+    const cliente = mapCliente(data);
+    cliente.syncedWithErp = true; // Simular sincronización con ERP
 
     return res.json(envelopeSuccess(cliente));
   } catch (err) {

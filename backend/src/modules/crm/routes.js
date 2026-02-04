@@ -42,16 +42,15 @@ router.put('/actividades/:id', actividades.updateActividad);
 router.delete('/actividades/:id', actividades.deleteActividad);
 router.patch('/actividades/:id/completar', actividades.marcarCompletada);
 
-// Configuración - Pipelines
+// Configuración
 router.get('/config/pipelines', config.listPipelines);
 router.post('/config/pipelines', config.createPipeline);
 router.get('/config/pipelines/:id', config.getPipeline);
 router.put('/config/pipelines/:id', config.updatePipeline);
 router.delete('/config/pipelines/:id', config.deletePipeline);
 
-// Configuración - Fases
-router.post('/config/fases', config.createFase);
-router.put('/config/fases/:id', config.updateFase);
-router.delete('/config/fases/:id', config.deleteFase);
+router.post('/config/stages', config.createStage);
+router.put('/config/stages/:id', config.updateStage);
+router.delete('/config/stages/:id', config.deleteStage);
 
 module.exports = router;

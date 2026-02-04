@@ -1,4 +1,4 @@
-const { pool } = require('../../config/db');
+const supabase = require('../core/src/config/supabaseClient');
 const { envelopeSuccess, envelopeError } = require('../../utils/envelope');
 const { validateRequiredFields } = require('../../utils/validation');
 const { generateId } = require('../../utils/id');
@@ -6,23 +6,23 @@ const { generateId } = require('../../utils/id');
 function mapPipeline(row) {
   return {
     id: row.id,
-    empresaId: row.empresa_id,
-    nombre: row.nombre,
-    descripcion: row.descripcion,
-    activo: row.activo,
+    companyId: row.company_id,
+    name: row.name,
+    description: row.description,
+    isActive: row.is_active,
     createdAt: row.created_at,
     updatedAt: row.updated_at
   };
 }
 
-function mapFase(row) {
+function mapStage(row) {
   return {
     id: row.id,
-    empresaId: row.empresa_id,
+    companyId: row.company_id,
     pipelineId: row.pipeline_id,
-    nombre: row.nombre,
-    orden: row.orden,
-    probabilidadDefecto: row.probabilidad_defecto,
+    name: row.name,
+    sortOrder: row.sort_order,
+    defaultProbability: row.default_probability,
     createdAt: row.created_at,
     updatedAt: row.updated_at
   };
@@ -30,38 +30,42 @@ function mapFase(row) {
 
 async function listPipelines(req, res, next) {
   try {
-    const filters = [];
-    const values = [];
+    let query = supabase.from('crm_pipelines').select('*');
 
-    if (req.query.empresaId) {
-      values.push(req.query.empresaId);
-      filters.push(`empresa_id = $${values.length}`);
+    if (req.query.companyId) {
+      query = query.eq('company_id', req.query.companyId);
     }
-    if (req.query.activo !== undefined) {
-      values.push(req.query.activo === 'true');
-      filters.push(`activo = $${values.length}`);
+    if (req.query.isActive !== undefined) {
+      query = query.eq('is_active', req.query.isActive === 'true');
     }
 
-    const whereClause = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
+    query = query.order('created_at', { ascending: false });
 
-    const pipelinesQuery = `
-      SELECT * FROM crm_pipelines
-      ${whereClause}
-      ORDER BY created_at DESC
-    `;
-    const pipelinesResult = await pool.query(pipelinesQuery, values);
-    const pipelines = pipelinesResult.rows.map(mapPipeline);
+    const { data: pipelines, error } = await query;
 
-    // Obtener fases para cada pipeline
-    for (const pipeline of pipelines) {
-      const fasesResult = await pool.query(
-        'SELECT * FROM crm_fases WHERE pipeline_id = $1 ORDER BY orden ASC',
-        [pipeline.id]
-      );
-      pipeline.fases = fasesResult.rows.map(mapFase);
+    if (error) {
+      console.error('Supabase error:', error);
+      return res.status(500).json(envelopeError('INTERNAL_ERROR', 'Error al obtener pipelines'));
     }
 
-    return res.json(envelopeSuccess(pipelines));
+    const mappedPipelines = pipelines.map(mapPipeline);
+
+    // Obtener stages para cada pipeline
+    for (const pipeline of mappedPipelines) {
+      const { data: stages, error: stagesError } = await supabase
+        .from('crm_stages')
+        .select('*')
+        .eq('pipeline_id', pipeline.id)
+        .order('sort_order', { ascending: true });
+
+      if (!stagesError) {
+        pipeline.stages = stages.map(mapStage);
+      } else {
+        pipeline.stages = [];
+      }
+    }
+
+    return res.json(envelopeSuccess(mappedPipelines));
   } catch (err) {
     return next(err);
   }
@@ -71,19 +75,30 @@ async function getPipeline(req, res, next) {
   try {
     const { id } = req.params;
 
-    const pipelineResult = await pool.query('SELECT * FROM crm_pipelines WHERE id = $1', [id]);
-    if (!pipelineResult.rows.length) {
+    const { data: pipelineData, error } = await supabase
+      .from('crm_pipelines')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error || !pipelineData) {
       return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Pipeline no encontrado'));
     }
 
-    const pipeline = mapPipeline(pipelineResult.rows[0]);
+    const pipeline = mapPipeline(pipelineData);
 
-    // Obtener fases
-    const fasesResult = await pool.query(
-      'SELECT * FROM crm_fases WHERE pipeline_id = $1 ORDER BY orden ASC',
-      [id]
-    );
-    pipeline.fases = fasesResult.rows.map(mapFase);
+    // Obtener stages
+    const { data: stages, error: stagesError } = await supabase
+      .from('crm_stages')
+      .select('*')
+      .eq('pipeline_id', id)
+      .order('sort_order', { ascending: true });
+
+    if (!stagesError) {
+      pipeline.stages = stages.map(mapStage);
+    } else {
+      pipeline.stages = [];
+    }
 
     return res.json(envelopeSuccess(pipeline));
   } catch (err) {
@@ -93,7 +108,7 @@ async function getPipeline(req, res, next) {
 
 async function createPipeline(req, res, next) {
   try {
-    const requiredErrors = validateRequiredFields(req.body, ['nombre']);
+    const requiredErrors = validateRequiredFields(req.body, ['name']);
 
     if (requiredErrors.length) {
       return res
@@ -104,26 +119,27 @@ async function createPipeline(req, res, next) {
     const id = generateId('pipe');
     const now = new Date().toISOString();
 
-    const insertQuery = `
-      INSERT INTO crm_pipelines
-        (id, empresa_id, nombre, descripcion, activo, created_at, updated_at)
-      VALUES
-        ($1, $2, $3, $4, $5, $6, $7)
-      RETURNING *
-    `;
+    const { data, error } = await supabase
+      .from('crm_pipelines')
+      .insert([{
+        id,
+        company_id: req.body.companyId || null,
+        name: req.body.name,
+        description: req.body.description || null,
+        is_active: req.body.isActive !== undefined ? req.body.isActive : true,
+        created_at: now,
+        updated_at: now
+      }])
+      .select()
+      .single();
 
-    const result = await pool.query(insertQuery, [
-      id,
-      req.body.empresaId || null,
-      req.body.nombre,
-      req.body.descripcion || null,
-      req.body.activo !== undefined ? req.body.activo : true,
-      now,
-      now
-    ]);
+    if (error) {
+      console.error('Supabase error:', error);
+      return res.status(500).json(envelopeError('INTERNAL_ERROR', 'Error al crear pipeline'));
+    }
 
-    const pipeline = mapPipeline(result.rows[0]);
-    pipeline.fases = [];
+    const pipeline = mapPipeline(data);
+    pipeline.stages = [];
 
     return res.status(201).json(envelopeSuccess(pipeline));
   } catch (err) {
@@ -134,7 +150,7 @@ async function createPipeline(req, res, next) {
 async function updatePipeline(req, res, next) {
   try {
     const { id } = req.params;
-    const requiredErrors = validateRequiredFields(req.body, ['nombre']);
+    const requiredErrors = validateRequiredFields(req.body, ['name']);
 
     if (requiredErrors.length) {
       return res
@@ -143,29 +159,24 @@ async function updatePipeline(req, res, next) {
     }
 
     const now = new Date().toISOString();
-    const updateQuery = `
-      UPDATE crm_pipelines
-      SET nombre = $1,
-          descripcion = $2,
-          activo = $3,
-          updated_at = $4
-      WHERE id = $5
-      RETURNING *
-    `;
 
-    const result = await pool.query(updateQuery, [
-      req.body.nombre,
-      req.body.descripcion || null,
-      req.body.activo !== undefined ? req.body.activo : true,
-      now,
-      id
-    ]);
+    const { data, error } = await supabase
+      .from('crm_pipelines')
+      .update({
+        name: req.body.name,
+        description: req.body.description || null,
+        is_active: req.body.isActive !== undefined ? req.body.isActive : true,
+        updated_at: now
+      })
+      .eq('id', id)
+      .select()
+      .single();
 
-    if (!result.rows.length) {
+    if (error || !data) {
       return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Pipeline no encontrado'));
     }
 
-    return res.json(envelopeSuccess(mapPipeline(result.rows[0])));
+    return res.json(envelopeSuccess(mapPipeline(data)));
   } catch (err) {
     return next(err);
   }
@@ -174,9 +185,14 @@ async function updatePipeline(req, res, next) {
 async function deletePipeline(req, res, next) {
   try {
     const { id } = req.params;
-    const result = await pool.query('DELETE FROM crm_pipelines WHERE id = $1 RETURNING id', [id]);
+    const { data, error } = await supabase
+      .from('crm_pipelines')
+      .delete()
+      .eq('id', id)
+      .select()
+      .single();
 
-    if (!result.rows.length) {
+    if (error || !data) {
       return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Pipeline no encontrado'));
     }
 
@@ -186,9 +202,9 @@ async function deletePipeline(req, res, next) {
   }
 }
 
-async function createFase(req, res, next) {
+async function createStage(req, res, next) {
   try {
-    const requiredErrors = validateRequiredFields(req.body, ['pipelineId', 'nombre', 'orden']);
+    const requiredErrors = validateRequiredFields(req.body, ['pipelineId', 'name', 'sortOrder']);
 
     if (requiredErrors.length) {
       return res
@@ -196,38 +212,39 @@ async function createFase(req, res, next) {
         .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
     }
 
-    const id = generateId('fase');
+    const id = generateId('stage');
     const now = new Date().toISOString();
 
-    const insertQuery = `
-      INSERT INTO crm_fases
-        (id, empresa_id, pipeline_id, nombre, orden, probabilidad_defecto, created_at, updated_at)
-      VALUES
-        ($1, $2, $3, $4, $5, $6, $7, $8)
-      RETURNING *
-    `;
+    const { data, error } = await supabase
+      .from('crm_stages')
+      .insert([{
+        id,
+        company_id: req.body.companyId || null,
+        pipeline_id: req.body.pipelineId,
+        name: req.body.name,
+        sort_order: req.body.sortOrder,
+        default_probability: req.body.defaultProbability || 0,
+        created_at: now,
+        updated_at: now
+      }])
+      .select()
+      .single();
 
-    const result = await pool.query(insertQuery, [
-      id,
-      req.body.empresaId || null,
-      req.body.pipelineId,
-      req.body.nombre,
-      req.body.orden,
-      req.body.probabilidadDefecto || 0,
-      now,
-      now
-    ]);
+    if (error) {
+      console.error('Supabase error:', error);
+      return res.status(500).json(envelopeError('INTERNAL_ERROR', 'Error al crear stage'));
+    }
 
-    return res.status(201).json(envelopeSuccess(mapFase(result.rows[0])));
+    return res.status(201).json(envelopeSuccess(mapStage(data)));
   } catch (err) {
     return next(err);
   }
 }
 
-async function updateFase(req, res, next) {
+async function updateStage(req, res, next) {
   try {
     const { id } = req.params;
-    const requiredErrors = validateRequiredFields(req.body, ['nombre', 'orden']);
+    const requiredErrors = validateRequiredFields(req.body, ['name', 'sortOrder']);
 
     if (requiredErrors.length) {
       return res
@@ -236,41 +253,41 @@ async function updateFase(req, res, next) {
     }
 
     const now = new Date().toISOString();
-    const updateQuery = `
-      UPDATE crm_fases
-      SET nombre = $1,
-          orden = $2,
-          probabilidad_defecto = $3,
-          updated_at = $4
-      WHERE id = $5
-      RETURNING *
-    `;
 
-    const result = await pool.query(updateQuery, [
-      req.body.nombre,
-      req.body.orden,
-      req.body.probabilidadDefecto || 0,
-      now,
-      id
-    ]);
+    const { data, error } = await supabase
+      .from('crm_stages')
+      .update({
+        name: req.body.name,
+        sort_order: req.body.sortOrder,
+        default_probability: req.body.defaultProbability || 0,
+        updated_at: now
+      })
+      .eq('id', id)
+      .select()
+      .single();
 
-    if (!result.rows.length) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Fase no encontrada'));
+    if (error || !data) {
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Stage not found'));
     }
 
-    return res.json(envelopeSuccess(mapFase(result.rows[0])));
+    return res.json(envelopeSuccess(mapStage(data)));
   } catch (err) {
     return next(err);
   }
 }
 
-async function deleteFase(req, res, next) {
+async function deleteStage(req, res, next) {
   try {
     const { id } = req.params;
-    const result = await pool.query('DELETE FROM crm_fases WHERE id = $1 RETURNING id', [id]);
+    const { data, error } = await supabase
+      .from('crm_stages')
+      .delete()
+      .eq('id', id)
+      .select()
+      .single();
 
-    if (!result.rows.length) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Fase no encontrada'));
+    if (error || !data) {
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Stage not found'));
     }
 
     return res.status(204).send();
@@ -285,7 +302,7 @@ module.exports = {
   createPipeline,
   updatePipeline,
   deletePipeline,
-  createFase,
-  updateFase,
-  deleteFase
+  createStage,
+  updateStage,
+  deleteStage
 };

@@ -1,107 +1,95 @@
-const { pool } = require('../../config/db');
+const supabase = require('../core/src/config/supabaseClient');
 const { envelopeSuccess, envelopeError } = require('../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../utils/pagination');
 const { validateRequiredFields, validateEnum } = require('../../utils/validation');
 const { generateId } = require('../../utils/id');
 
-const ACTIVIDAD_TIPOS = ['llamada', 'email', 'reunion', 'nota'];
+const ACTIVIDAD_TIPOS = ['call', 'email', 'meeting', 'note'];
 
 function mapActividad(row) {
   return {
     id: row.id,
-    empresaId: row.empresa_id,
-    usuarioId: row.usuario_id,
-    clienteId: row.cliente_id,
-    oportunidadId: row.oportunidad_id,
-    tipo: row.tipo,
-    asunto: row.asunto,
-    descripcion: row.descripcion,
-    fecha: row.fecha,
-    fechaVencimiento: row.fecha_vencimiento,
-    completada: row.completada,
+    companyId: row.company_id,
+    userId: row.user_id,
+    clientId: row.client_id,
+    opportunityId: row.opportunity_id,
+    type: row.type,
+    subject: row.subject,
+    description: row.description,
+    activityAt: row.activity_at,
+    dueDate: row.due_date,
+    completed: row.completed,
     createdAt: row.created_at,
     updatedAt: row.updated_at
   };
 }
 
 function parseSort(sort) {
-  if (!sort) return 'fecha DESC';
+  if (!sort) return 'activity_at DESC';
   const direction = sort.startsWith('-') ? 'DESC' : 'ASC';
   const field = sort.replace('-', '');
   const map = {
-    fecha: 'fecha',
-    fechaVencimiento: 'fecha_vencimiento',
-    tipo: 'tipo',
-    completada: 'completada',
+    activityAt: 'activity_at',
+    dueDate: 'due_date',
+    type: 'type',
+    completed: 'completed',
     createdAt: 'created_at'
   };
-  if (!map[field]) return 'fecha DESC';
+  if (!map[field]) return 'activity_at DESC';
   return `${map[field]} ${direction}`;
 }
 
 async function listActividades(req, res, next) {
   try {
     const { page, limit, offset } = getPaginationParams(req.query);
-    const filters = [];
-    const values = [];
+    
+    let query = supabase.from('crm_activities').select('*', { count: 'exact' });
 
-    if (req.query.empresaId) {
-      values.push(req.query.empresaId);
-      filters.push(`empresa_id = $${values.length}`);
+    if (req.query.companyId) {
+      query = query.eq('company_id', req.query.companyId);
     }
-    if (req.query.usuarioId) {
-      values.push(req.query.usuarioId);
-      filters.push(`usuario_id = $${values.length}`);
+    if (req.query.userId) {
+      query = query.eq('user_id', req.query.userId);
     }
-    if (req.query.clienteId) {
-      values.push(req.query.clienteId);
-      filters.push(`cliente_id = $${values.length}`);
+    if (req.query.clientId) {
+      query = query.eq('client_id', req.query.clientId);
     }
-    if (req.query.oportunidadId) {
-      values.push(req.query.oportunidadId);
-      filters.push(`oportunidad_id = $${values.length}`);
+    if (req.query.opportunityId) {
+      query = query.eq('opportunity_id', req.query.opportunityId);
     }
-    if (req.query.tipo) {
-      values.push(req.query.tipo);
-      filters.push(`tipo = $${values.length}`);
+    if (req.query.type) {
+      query = query.eq('type', req.query.type);
     }
     if (req.query.estado === 'pendiente') {
-      filters.push('completada = false');
+      query = query.eq('completed', false);
     } else if (req.query.estado === 'completada') {
-      filters.push('completada = true');
+      query = query.eq('completed', true);
     }
     if (req.query.entidadTipo && req.query.entidadId) {
       if (req.query.entidadTipo === 'cliente') {
-        values.push(req.query.entidadId);
-        filters.push(`cliente_id = $${values.length}`);
+        query = query.eq('client_id', req.query.entidadId);
       } else if (req.query.entidadTipo === 'oportunidad') {
-        values.push(req.query.entidadId);
-        filters.push(`oportunidad_id = $${values.length}`);
+        query = query.eq('opportunity_id', req.query.entidadId);
       }
     }
 
-    const whereClause = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
     const orderBy = parseSort(req.query.sort);
+    const [field, direction] = orderBy.split(' ');
+    query = query.order(field, { ascending: direction === 'ASC' });
 
-    const countQuery = `SELECT COUNT(*)::int AS total FROM crm_actividades ${whereClause}`;
-    const countResult = await pool.query(countQuery, values);
-    const totalItems = countResult.rows[0]?.total || 0;
+    query = query.range(offset, offset + limit - 1);
 
-    values.push(limit);
-    values.push(offset);
-    const listQuery = `
-      SELECT *
-      FROM crm_actividades
-      ${whereClause}
-      ORDER BY ${orderBy}
-      LIMIT $${values.length - 1} OFFSET $${values.length}
-    `;
+    const { data, error, count } = await query;
 
-    const result = await pool.query(listQuery, values);
-    const data = result.rows.map(mapActividad);
-    const meta = buildPaginationMeta(page, limit, totalItems);
+    if (error) {
+      console.error('Supabase error:', error);
+      return res.status(500).json(envelopeError('INTERNAL_ERROR', 'Error al obtener actividades'));
+    }
 
-    return res.json(envelopeSuccess(data, meta));
+    const mappedData = data.map(mapActividad);
+    const meta = buildPaginationMeta(page, limit, count || 0);
+
+    return res.json(envelopeSuccess(mappedData, meta));
   } catch (err) {
     return next(err);
   }
@@ -110,11 +98,17 @@ async function listActividades(req, res, next) {
 async function getActividad(req, res, next) {
   try {
     const { id } = req.params;
-    const result = await pool.query('SELECT * FROM crm_actividades WHERE id = $1', [id]);
-    if (!result.rows.length) {
+    const { data, error } = await supabase
+      .from('crm_activities')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error || !data) {
       return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Actividad no encontrada'));
     }
-    return res.json(envelopeSuccess(mapActividad(result.rows[0])));
+
+    return res.json(envelopeSuccess(mapActividad(data)));
   } catch (err) {
     return next(err);
   }
@@ -122,9 +116,9 @@ async function getActividad(req, res, next) {
 
 async function createActividad(req, res, next) {
   try {
-    const requiredErrors = validateRequiredFields(req.body, ['usuarioId', 'tipo', 'asunto', 'fecha']);
-    const tipoError = validateEnum(req.body.tipo, ACTIVIDAD_TIPOS);
-    if (tipoError) requiredErrors.push({ field: 'tipo', message: tipoError });
+    const requiredErrors = validateRequiredFields(req.body, ['userId', 'type', 'subject', 'activityAt']);
+    const tipoError = validateEnum(req.body.type, ACTIVIDAD_TIPOS);
+    if (tipoError) requiredErrors.push({ field: 'type', message: tipoError });
 
     if (requiredErrors.length) {
       return res
@@ -135,32 +129,32 @@ async function createActividad(req, res, next) {
     const id = generateId('act');
     const now = new Date().toISOString();
 
-    const insertQuery = `
-      INSERT INTO crm_actividades
-        (id, empresa_id, usuario_id, cliente_id, oportunidad_id, tipo, asunto, descripcion, 
-         fecha, fecha_vencimiento, completada, created_at, updated_at)
-      VALUES
-        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-      RETURNING *
-    `;
+    const { data, error } = await supabase
+      .from('crm_activities')
+      .insert([{
+        id,
+        company_id: req.body.companyId || null,
+        user_id: req.body.userId,
+        client_id: req.body.clientId || null,
+        opportunity_id: req.body.opportunityId || null,
+        type: req.body.type,
+        subject: req.body.subject,
+        description: req.body.description || null,
+        activity_at: req.body.activityAt,
+        due_date: req.body.dueDate || null,
+        completed: req.body.completed || false,
+        created_at: now,
+        updated_at: now
+      }])
+      .select()
+      .single();
 
-    const result = await pool.query(insertQuery, [
-      id,
-      req.body.empresaId || null,
-      req.body.usuarioId,
-      req.body.clienteId || null,
-      req.body.oportunidadId || null,
-      req.body.tipo,
-      req.body.asunto,
-      req.body.descripcion || null,
-      req.body.fecha,
-      req.body.fechaVencimiento || null,
-      req.body.completada || false,
-      now,
-      now
-    ]);
+    if (error) {
+      console.error('Supabase error:', error);
+      return res.status(500).json(envelopeError('INTERNAL_ERROR', 'Error al crear actividad'));
+    }
 
-    return res.status(201).json(envelopeSuccess(mapActividad(result.rows[0])));
+    return res.status(201).json(envelopeSuccess(mapActividad(data)));
   } catch (err) {
     return next(err);
   }
@@ -169,9 +163,9 @@ async function createActividad(req, res, next) {
 async function updateActividad(req, res, next) {
   try {
     const { id } = req.params;
-    const requiredErrors = validateRequiredFields(req.body, ['usuarioId', 'tipo', 'asunto', 'fecha']);
-    const tipoError = validateEnum(req.body.tipo, ACTIVIDAD_TIPOS);
-    if (tipoError) requiredErrors.push({ field: 'tipo', message: tipoError });
+    const requiredErrors = validateRequiredFields(req.body, ['userId', 'type', 'subject', 'activityAt']);
+    const typeError = validateEnum(req.body.type, ACTIVIDAD_TIPOS);
+    if (typeError) requiredErrors.push({ field: 'type', message: typeError });
 
     if (requiredErrors.length) {
       return res
@@ -180,41 +174,30 @@ async function updateActividad(req, res, next) {
     }
 
     const now = new Date().toISOString();
-    const updateQuery = `
-      UPDATE crm_actividades
-      SET usuario_id = $1,
-          cliente_id = $2,
-          oportunidad_id = $3,
-          tipo = $4,
-          asunto = $5,
-          descripcion = $6,
-          fecha = $7,
-          fecha_vencimiento = $8,
-          completada = $9,
-          updated_at = $10
-      WHERE id = $11
-      RETURNING *
-    `;
 
-    const result = await pool.query(updateQuery, [
-      req.body.usuarioId,
-      req.body.clienteId || null,
-      req.body.oportunidadId || null,
-      req.body.tipo,
-      req.body.asunto,
-      req.body.descripcion || null,
-      req.body.fecha,
-      req.body.fechaVencimiento || null,
-      req.body.completada || false,
-      now,
-      id
-    ]);
+    const { data, error } = await supabase
+      .from('crm_activities')
+      .update({
+        user_id: req.body.userId,
+        client_id: req.body.clientId || null,
+        opportunity_id: req.body.opportunityId || null,
+        type: req.body.type,
+        subject: req.body.subject,
+        description: req.body.description || null,
+        activity_at: req.body.activityAt,
+        due_date: req.body.dueDate || null,
+        completed: req.body.completed || false,
+        updated_at: now
+      })
+      .eq('id', id)
+      .select()
+      .single();
 
-    if (!result.rows.length) {
+    if (error || !data) {
       return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Actividad no encontrada'));
     }
 
-    return res.json(envelopeSuccess(mapActividad(result.rows[0])));
+    return res.json(envelopeSuccess(mapActividad(data)));
   } catch (err) {
     return next(err);
   }
@@ -223,12 +206,14 @@ async function updateActividad(req, res, next) {
 async function deleteActividad(req, res, next) {
   try {
     const { id } = req.params;
-    const result = await pool.query(
-      'DELETE FROM crm_actividades WHERE id = $1 RETURNING id',
-      [id]
-    );
+    const { data, error } = await supabase
+      .from('crm_activities')
+      .delete()
+      .eq('id', id)
+      .select()
+      .single();
 
-    if (!result.rows.length) {
+    if (error || !data) {
       return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Actividad no encontrada'));
     }
 
@@ -243,21 +228,21 @@ async function marcarCompletada(req, res, next) {
     const { id } = req.params;
     const now = new Date().toISOString();
 
-    const updateQuery = `
-      UPDATE crm_actividades
-      SET completada = true,
-          updated_at = $1
-      WHERE id = $2
-      RETURNING *
-    `;
+    const { data, error } = await supabase
+      .from('crm_activities')
+      .update({
+        completed: true,
+        updated_at: now
+      })
+      .eq('id', id)
+      .select()
+      .single();
 
-    const result = await pool.query(updateQuery, [now, id]);
-
-    if (!result.rows.length) {
+    if (error || !data) {
       return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Actividad no encontrada'));
     }
 
-    return res.json(envelopeSuccess(mapActividad(result.rows[0])));
+    return res.json(envelopeSuccess(mapActividad(data)));
   } catch (err) {
     return next(err);
   }
