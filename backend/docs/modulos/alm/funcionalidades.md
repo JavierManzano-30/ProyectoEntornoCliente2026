@@ -12,13 +12,13 @@ ALM gestiona la **entidad proyecto** como núcleo de planificación y seguimient
 
 ### Esta funcionalidad permite:
 - Crear, actualizar y consultar proyectos.
-- Definir estado del proyecto (planificacion, en_curso, pausado, completado).
+- Definir estado del proyecto (planned, in_progress, paused, completed).
 - Asociar responsable del proyecto (usuario).
 - Vincular proyectos a clientes (CRM) cuando aplica.
 - Mantener histórico y trazabilidad de cambios.
 
 ### 🔗 Integración con otros módulos
-- **CORE:** Consume usuarios y empresas para responsables y permisos.
+- **CORE:** Consume usuarios para responsables y equipos.
 - **CRM:** Vincula proyectos con clientes.
 - **BI:** Consume estados y avance de proyectos para métricas.
 
@@ -29,26 +29,24 @@ ALM organiza el trabajo en **tareas** vinculadas a un proyecto.
 
 ### Esta funcionalidad permite:
 - Crear y asignar tareas a usuarios.
-- Gestionar estados (pendiente, en_progreso, completada).
-- Priorizar tareas (baja, media, alta).
+- Gestionar estados (pending, in_progress, completed).
+- Priorizar tareas (low, medium, high).
 - Consultar tareas por proyecto y por estado.
 - Mantener trazabilidad de modificaciones.
 
 ### 🔗 Integración con otros módulos
-- **CORE:** Identidad de usuarios asignados.
-- **RRHH:** Referencia para disponibilidad de recursos.
+- **CORE:** Identidad y disponibilidad de usuarios asignados.
 - **BI:** Métricas de productividad y cumplimiento.
 
 ---
 
 ## 2.1 🔑 Relaciones y claves foráneas
-- `proyectos.responsable_id -> usuarios.id` (CORE)
-- `proyectos.cliente_id -> clientes.id` (CRM)
-- `tareas.asignado_a -> usuarios.id` (CORE)
-- `tareas.proyecto_id -> proyectos.id` (ALM)
-- `registro_horas.usuario_id -> usuarios.id` (CORE)
-- `registro_horas.tarea_id -> tareas.id` (ALM)
-- `tareas.ticket_id -> tickets.id` (Soporte, opcional)
+- `projects.responsible_id -> core_users.id` (CORE)
+- `projects.client_id -> crm_clients.id` (CRM)
+- `tasks.assigned_to -> core_users.id` (CORE)
+- `tasks.project_id -> projects.id` (ALM)
+- `time_entries.user_id -> core_users.id` (CORE)
+- `time_entries.task_id -> tasks.id` (ALM)
 
 ---
 
@@ -71,7 +69,6 @@ ALM actua como **proveedor de informacion operativa**, publicando datos de avanc
 
 ### 🔗 Integración con otros módulos
 - **BI:** KPIs de productividad y avance.
-- **Soporte:** Posible conversión de tickets a tareas.
 - **BPM:** Coordinación con procesos de aprobacion.
 
 Toda la exposición respeta el aislamiento multiempresa y los controles de acceso.

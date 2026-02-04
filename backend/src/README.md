@@ -58,7 +58,7 @@ cp .env.example .env
 
 3) Crear la base de datos y tablas
 
-Ejecuta `backend/db/schema.sql` en tu Postgres.
+Ejecuta `backend/db/syneraDb.sql` en tu Postgres.
 
 4) Arrancar
 

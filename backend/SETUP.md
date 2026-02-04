@@ -17,7 +17,7 @@ Update DB and JWT values in `.env`.
 
 ## 3) Create schema
 
-Run the SQL in `backend/db/schema.sql` on your Postgres database.
+Run the SQL in `backend/db/syneraDb.sql` on your Postgres database.
 
 ## 4) Start server
 

@@ -146,7 +146,7 @@ Pipeline comercial.
 * **fase**: contacto | propuesta | negociacion | ganada | perdida
 * **probabilidad**
 * **fecha_cierre_estimada**
-* **responsable_id**
+* **responsable_employee_id**
 * **created_at**
 * **updated_at**
 
@@ -178,15 +178,15 @@ Historial de interacciones comerciales.
 Gestión de proyectos internos o para clientes.
 
 * **id**
-* **empresa_id**
-* **nombre**
-* **descripcion**
-* **fecha_inicio**
-* **fecha_fin**
-* **responsable_id**
-* **estado**: planificacion | en_curso | pausado | completado
-* **presupuesto**
-* **cliente_id** (opcional)
+* **company_id**
+* **name**
+* **description**
+* **start_date**
+* **end_date**
+* **responsible_id**
+* **status**: planned | in_progress | paused | completed
+* **budget**
+* **client_id** (opcional)
 * **created_at**
 * **updated_at**
 
@@ -197,15 +197,15 @@ Gestión de proyectos internos o para clientes.
 Unidades de trabajo dentro de proyectos.
 
 * **id**
-* **empresa_id**
-* **proyecto_id**
-* **titulo**
-* **descripcion**
-* **estado**: pendiente | en_progreso | completada
-* **prioridad**: baja | media | alta
-* **asignado_a** → usuario
-* **fecha_vencimiento**
-* **tiempo_estimado** (horas)
+* **company_id**
+* **project_id**
+* **title**
+* **description**
+* **status**: pending | in_progress | completed
+* **priority**: low | medium | high
+* **assigned_to** → usuario
+* **due_date**
+* **estimated_time** (horas)
 * **created_at**
 * **updated_at**
 
@@ -216,13 +216,14 @@ Unidades de trabajo dentro de proyectos.
 Timesheet por tarea.
 
 * **id**
-* **empresa_id**
-* **tarea_id**
-* **usuario_id**
-* **fecha**
-* **horas**
-* **descripcion**
+* **company_id**
+* **task_id**
+* **user_id**
+* **entry_date**
+* **hours**
+* **description**
 * **created_at**
+* **updated_at**
 
 ---
 
