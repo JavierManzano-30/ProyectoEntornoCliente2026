@@ -20,6 +20,12 @@ export const API_ENDPOINTS = {
     escalation: '/soporte/escalados',
     dashboard: '/soporte/dashboard',
     stats: '/soporte/estadisticas',
+    reports: '/soporte/reportes',
+    tablones: '/soporte/tablones',
+    categorias: '/soporte/categorias',
+    prioridades: '/soporte/prioridades',
+    notificaciones: '/soporte/notificaciones',
+    config: '/soporte/config',
   },
   // Módulo CRM
   crm: {

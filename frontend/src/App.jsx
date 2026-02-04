@@ -6,6 +6,10 @@ import MainLayout from "./components/layout/MainLayout";
 import SupportDashboard from "./modules/soporte/pages/SupportDashboard";
 import TicketList from "./modules/soporte/pages/TicketList";
 import TicketDetail from "./modules/soporte/pages/TicketDetail";
+import SLAManagement from "./modules/soporte/pages/SLAManagement";
+import Reports from "./modules/soporte/pages/Reports";
+import Configuration from "./modules/soporte/pages/Configuration";
+import { SoporteProvider } from "./modules/soporte/context/SoporteContext";
 
 // Páginas del módulo RRHH
 import EmployeeList from "./modules/rrhh/pages/EmployeeList";
@@ -82,41 +86,23 @@ function App() {
     <BrowserRouter>
       <ERPProvider>
         <BPMProvider>
-          <Routes>
-            {/* Redirección inicial */}
-            <Route path="/" element={<Navigate to="/core" replace />} />
+          <SoporteProvider>
+            <Routes>
+              {/* Redirección inicial */}
+              <Route path="/" element={<Navigate to="/core" replace />} />
 
-            {/* Ruta de Login (pública) */}
-            <Route path="/login" element={<Login />} />
+              {/* Ruta de Login (pública) */}
+              <Route path="/login" element={<Login />} />
 
-            {/* Rutas del módulo de soporte */}
-            <Route path="/soporte" element={<MainLayout module="soporte" />}>
-              <Route index element={<SupportDashboard />} />
-              <Route path="tickets" element={<TicketList />} />
-              <Route path="tickets/:id" element={<TicketDetail />} />
-              <Route
-                path="sla"
-                element={
-                  <div style={{ padding: "2rem" }}>Página SLA (Próximamente)</div>
-                }
-              />
-              <Route
-                path="reportes"
-                element={
-                  <div style={{ padding: "2rem" }}>
-                    Página Reportes (Próximamente)
-                  </div>
-                }
-              />
-              <Route
-                path="config"
-                element={
-                  <div style={{ padding: "2rem" }}>
-                    Configuración (Próximamente)
-                  </div>
-                }
-              />
-            </Route>
+              {/* Rutas del módulo de soporte */}
+              <Route path="/soporte" element={<MainLayout module="soporte" />}>
+                <Route index element={<SupportDashboard />} />
+                <Route path="tickets" element={<TicketList />} />
+                <Route path="tickets/:id" element={<TicketDetail />} />
+                <Route path="sla" element={<SLAManagement />} />
+                <Route path="reportes" element={<Reports />} />
+                <Route path="config" element={<Configuration />} />
+              </Route>
 
             {/* Rutas del módulo RRHH */}
             <Route path="/rrhh" element={<MainLayout module="rrhh" />}>
@@ -206,6 +192,7 @@ function App() {
               }
             />
           </Routes>
+          </SoporteProvider>
         </BPMProvider>
       </ERPProvider>
     </BrowserRouter>

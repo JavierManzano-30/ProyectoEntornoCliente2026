@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import soporteService from '../services/soporteService';
 import { filterTickets, sortTickets } from '../utils/ticketHelpers';
+import { useSoporteContext } from '../context/SoporteContext';
 
 export const useTickets = (initialFilters = {}) => {
+  const { usuario } = useSoporteContext();
   const [tickets, setTickets] = useState([]);
   const [filteredTickets, setFilteredTickets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,7 +17,11 @@ export const useTickets = (initialFilters = {}) => {
     try {
       setLoading(true);
       setError(null);
-      const data = await soporteService.getTickets(filters);
+      // Agregar empresaId a los filtros
+      const data = await soporteService.getTickets({
+        ...filters,
+        empresaId: usuario.empresaId,
+      });
       setTickets(data);
     } catch (err) {
       setError(err.response?.data?.message || 'Error al cargar los tickets');
@@ -23,7 +29,7 @@ export const useTickets = (initialFilters = {}) => {
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, [filters, usuario.empresaId]);
 
   useEffect(() => {
     fetchTickets();
