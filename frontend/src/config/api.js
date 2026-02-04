@@ -40,4 +40,16 @@ export const API_ENDPOINTS = {
     dashboard: '/crm/dashboard',
     stats: '/crm/estadisticas',
   },
+  // Módulo BI
+  bi: {
+    kpis: '/bi/kpis',
+    dashboard: '/bi/dashboard',
+    reports: '/bi/reportes',
+    reportById: (id) => `/bi/reportes/${id}`,
+    datasets: '/bi/datasets',
+    datasetById: (id) => `/bi/datasets/${id}`,
+    alerts: '/bi/alertas',
+    metrics: '/bi/metricas',
+    metricById: (id) => `/bi/metricas/${id}`,
+  },
 };
