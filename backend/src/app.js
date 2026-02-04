@@ -24,6 +24,17 @@ app.get('/health', (req, res) => {
   res.json({ success: true, data: { status: 'ok' } });
 });
 
+console.log('Módulos cargados:', {
+  alm: !!alm.routes,
+  core: !!core.routes,
+  rrhh: !!rrhh.routes,
+  crm: !!crm.routes,
+  bpm: !!bpm.routes,
+  erp: !!erp.routes,
+  soporte: !!soporte.routes,
+  bi: !!bi.routes
+});
+
 app.use('/api/v1/alm', alm.routes);
 app.use('/api/v1/core', core.routes);
 app.use('/api/v1/rrhh', rrhh.routes);

@@ -1,4 +1,4 @@
-const { pool } = require('../../config/db');
+const supabase = require('../core/src/config/supabaseClient');
 const { envelopeSuccess, envelopeError } = require('../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../utils/pagination');
 const { validateRequiredFields } = require('../../utils/validation');
@@ -7,18 +7,18 @@ const { generateId } = require('../../utils/id');
 function mapOportunidad(row) {
   return {
     id: row.id,
-    empresaId: row.empresa_id,
-    clienteId: row.cliente_id,
+    companyId: row.company_id,
+    clientId: row.client_id,
     pipelineId: row.pipeline_id,
-    faseId: row.fase_id,
-    titulo: row.titulo,
-    descripcion: row.descripcion,
-    valorEstimado: parseFloat(row.valor_estimado || 0),
-    moneda: row.moneda,
-    probabilidad: row.probabilidad,
-    fechaCierrePrevista: row.fecha_cierre_prevista,
-    responsableId: row.responsable_id,
-    orden: row.orden,
+    stageId: row.stage_id,
+    title: row.title,
+    description: row.description,
+    estimatedValue: parseFloat(row.estimated_value || 0),
+    currency: row.currency,
+    probability: row.probability,
+    expectedCloseDate: row.expected_close_date,
+    responsibleId: row.responsible_id,
+    sortOrder: row.sort_order,
     createdAt: row.created_at,
     updatedAt: row.updated_at
   };
@@ -29,10 +29,10 @@ function parseSort(sort) {
   const direction = sort.startsWith('-') ? 'DESC' : 'ASC';
   const field = sort.replace('-', '');
   const map = {
-    titulo: 'titulo',
-    valorEstimado: 'valor_estimado',
-    probabilidad: 'probabilidad',
-    fechaCierrePrevista: 'fecha_cierre_prevista',
+    title: 'title',
+    estimatedValue: 'estimated_value',
+    probability: 'probability',
+    expectedCloseDate: 'expected_close_date',
     createdAt: 'created_at'
   };
   if (!map[field]) return 'created_at DESC';
@@ -42,52 +42,42 @@ function parseSort(sort) {
 async function listOportunidades(req, res, next) {
   try {
     const { page, limit, offset } = getPaginationParams(req.query);
-    const filters = [];
-    const values = [];
+    
+    let query = supabase.from('crm_opportunities').select('*', { count: 'exact' });
 
-    if (req.query.empresaId) {
-      values.push(req.query.empresaId);
-      filters.push(`empresa_id = $${values.length}`);
+    if (req.query.companyId) {
+      query = query.eq('company_id', req.query.companyId);
     }
     if (req.query.pipelineId) {
-      values.push(req.query.pipelineId);
-      filters.push(`pipeline_id = $${values.length}`);
+      query = query.eq('pipeline_id', req.query.pipelineId);
     }
-    if (req.query.faseId) {
-      values.push(req.query.faseId);
-      filters.push(`fase_id = $${values.length}`);
+    if (req.query.stageId) {
+      query = query.eq('stage_id', req.query.stageId);
     }
-    if (req.query.responsableId) {
-      values.push(req.query.responsableId);
-      filters.push(`responsable_id = $${values.length}`);
+    if (req.query.responsibleId) {
+      query = query.eq('responsible_id', req.query.responsibleId);
     }
-    if (req.query.clienteId) {
-      values.push(req.query.clienteId);
-      filters.push(`cliente_id = $${values.length}`);
+    if (req.query.clientId) {
+      query = query.eq('client_id', req.query.clientId);
     }
 
-    const whereClause = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
     const orderBy = parseSort(req.query.sort);
+    const [field, direction] = orderBy.split(' ');
+    query = query.order(field, { ascending: direction === 'ASC' });
 
-    const countQuery = `SELECT COUNT(*)::int AS total FROM crm_oportunidades ${whereClause}`;
-    const countResult = await pool.query(countQuery, values);
-    const totalItems = countResult.rows[0]?.total || 0;
+    query = query.range(offset, offset + limit - 1);
 
-    values.push(limit);
-    values.push(offset);
-    const listQuery = `
-      SELECT *
-      FROM crm_oportunidades
-      ${whereClause}
-      ORDER BY ${orderBy}
-      LIMIT $${values.length - 1} OFFSET $${values.length}
-    `;
+    const { data, error, count } = await query;
 
-    const result = await pool.query(listQuery, values);
-    const data = result.rows.map(mapOportunidad);
-    const meta = buildPaginationMeta(page, limit, totalItems);
+    if (error) {
+      console.error('Supabase error:', error);
+      return res.status(500).json(envelopeError('INTERNAL_ERROR', 'Error al obtener oportunidades'));
+    }
 
-    return res.json(envelopeSuccess(data, meta));
+    const mappedData = data.map(mapOportunidad);
+    const meta = buildPaginationMeta(page, limit, count || 0);
+
+    return res.json(envelopeSuccess(mappedData, meta));
   } catch (err) {
     return next(err);
   }
@@ -96,11 +86,17 @@ async function listOportunidades(req, res, next) {
 async function getOportunidad(req, res, next) {
   try {
     const { id } = req.params;
-    const result = await pool.query('SELECT * FROM crm_oportunidades WHERE id = $1', [id]);
-    if (!result.rows.length) {
+    const { data, error } = await supabase
+      .from('crm_opportunities')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error || !data) {
       return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Oportunidad no encontrada'));
     }
-    return res.json(envelopeSuccess(mapOportunidad(result.rows[0])));
+
+    return res.json(envelopeSuccess(mapOportunidad(data)));
   } catch (err) {
     return next(err);
   }
@@ -109,10 +105,10 @@ async function getOportunidad(req, res, next) {
 async function createOportunidad(req, res, next) {
   try {
     const requiredErrors = validateRequiredFields(req.body, [
-      'clienteId',
+      'clientId',
       'pipelineId',
-      'faseId',
-      'titulo'
+      'stageId',
+      'title'
     ]);
 
     if (requiredErrors.length) {
@@ -124,34 +120,34 @@ async function createOportunidad(req, res, next) {
     const id = generateId('opor');
     const now = new Date().toISOString();
 
-    const insertQuery = `
-      INSERT INTO crm_oportunidades
-        (id, empresa_id, cliente_id, pipeline_id, fase_id, titulo, descripcion, valor_estimado, 
-         moneda, probabilidad, fecha_cierre_prevista, responsable_id, orden, created_at, updated_at)
-      VALUES
-        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
-      RETURNING *
-    `;
+    const { data, error } = await supabase
+      .from('crm_opportunities')
+      .insert([{
+        id,
+        company_id: req.body.companyId || null,
+        client_id: req.body.clientId,
+        pipeline_id: req.body.pipelineId,
+        stage_id: req.body.stageId,
+        title: req.body.title,
+        description: req.body.description || null,
+        estimated_value: req.body.estimatedValue || 0,
+        currency: req.body.currency || 'EUR',
+        probability: req.body.probability || 0,
+        expected_close_date: req.body.expectedCloseDate || null,
+        responsible_id: req.body.responsibleId || null,
+        sort_order: req.body.sortOrder || 0,
+        created_at: now,
+        updated_at: now
+      }])
+      .select()
+      .single();
 
-    const result = await pool.query(insertQuery, [
-      id,
-      req.body.empresaId || null,
-      req.body.clienteId,
-      req.body.pipelineId,
-      req.body.faseId,
-      req.body.titulo,
-      req.body.descripcion || null,
-      req.body.valorEstimado || 0,
-      req.body.moneda || 'EUR',
-      req.body.probabilidad || 0,
-      req.body.fechaCierrePrevista || null,
-      req.body.responsableId || null,
-      req.body.orden || 0,
-      now,
-      now
-    ]);
+    if (error) {
+      console.error('Supabase error:', error);
+      return res.status(500).json(envelopeError('INTERNAL_ERROR', 'Error al crear oportunidad'));
+    }
 
-    return res.status(201).json(envelopeSuccess(mapOportunidad(result.rows[0])));
+    return res.status(201).json(envelopeSuccess(mapOportunidad(data)));
   } catch (err) {
     return next(err);
   }
@@ -161,10 +157,10 @@ async function updateOportunidad(req, res, next) {
   try {
     const { id } = req.params;
     const requiredErrors = validateRequiredFields(req.body, [
-      'clienteId',
+      'clientId',
       'pipelineId',
-      'faseId',
-      'titulo'
+      'stageId',
+      'title'
     ]);
 
     if (requiredErrors.length) {
@@ -174,45 +170,32 @@ async function updateOportunidad(req, res, next) {
     }
 
     const now = new Date().toISOString();
-    const updateQuery = `
-      UPDATE crm_oportunidades
-      SET cliente_id = $1,
-          pipeline_id = $2,
-          fase_id = $3,
-          titulo = $4,
-          descripcion = $5,
-          valor_estimado = $6,
-          moneda = $7,
-          probabilidad = $8,
-          fecha_cierre_prevista = $9,
-          responsable_id = $10,
-          orden = $11,
-          updated_at = $12
-      WHERE id = $13
-      RETURNING *
-    `;
 
-    const result = await pool.query(updateQuery, [
-      req.body.clienteId,
-      req.body.pipelineId,
-      req.body.faseId,
-      req.body.titulo,
-      req.body.descripcion || null,
-      req.body.valorEstimado || 0,
-      req.body.moneda || 'EUR',
-      req.body.probabilidad || 0,
-      req.body.fechaCierrePrevista || null,
-      req.body.responsableId || null,
-      req.body.orden || 0,
-      now,
-      id
-    ]);
+    const { data, error } = await supabase
+      .from('crm_opportunities')
+      .update({
+        client_id: req.body.clientId,
+        pipeline_id: req.body.pipelineId,
+        stage_id: req.body.stageId,
+        title: req.body.title,
+        description: req.body.description || null,
+        estimated_value: req.body.estimatedValue || 0,
+        currency: req.body.currency || 'EUR',
+        probability: req.body.probability || 0,
+        expected_close_date: req.body.expectedCloseDate || null,
+        responsible_id: req.body.responsibleId || null,
+        sort_order: req.body.sortOrder || 0,
+        updated_at: now
+      })
+      .eq('id', id)
+      .select()
+      .single();
 
-    if (!result.rows.length) {
+    if (error || !data) {
       return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Oportunidad no encontrada'));
     }
 
-    return res.json(envelopeSuccess(mapOportunidad(result.rows[0])));
+    return res.json(envelopeSuccess(mapOportunidad(data)));
   } catch (err) {
     return next(err);
   }
@@ -221,12 +204,14 @@ async function updateOportunidad(req, res, next) {
 async function deleteOportunidad(req, res, next) {
   try {
     const { id } = req.params;
-    const result = await pool.query(
-      'DELETE FROM crm_oportunidades WHERE id = $1 RETURNING id',
-      [id]
-    );
+    const { data, error } = await supabase
+      .from('crm_opportunities')
+      .delete()
+      .eq('id', id)
+      .select()
+      .single();
 
-    if (!result.rows.length) {
+    if (error || !data) {
       return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Oportunidad no encontrada'));
     }
 
@@ -239,7 +224,7 @@ async function deleteOportunidad(req, res, next) {
 async function updateFase(req, res, next) {
   try {
     const { id } = req.params;
-    const requiredErrors = validateRequiredFields(req.body, ['faseId']);
+    const requiredErrors = validateRequiredFields(req.body, ['stageId']);
 
     if (requiredErrors.length) {
       return res
@@ -248,27 +233,23 @@ async function updateFase(req, res, next) {
     }
 
     const now = new Date().toISOString();
-    const updateQuery = `
-      UPDATE crm_oportunidades
-      SET fase_id = $1,
-          orden = $2,
-          updated_at = $3
-      WHERE id = $4
-      RETURNING *
-    `;
 
-    const result = await pool.query(updateQuery, [
-      req.body.faseId,
-      req.body.orden || 0,
-      now,
-      id
-    ]);
+    const { data, error } = await supabase
+      .from('crm_opportunities')
+      .update({
+        stage_id: req.body.stageId,
+        sort_order: req.body.sortOrder || 0,
+        updated_at: now
+      })
+      .eq('id', id)
+      .select()
+      .single();
 
-    if (!result.rows.length) {
+    if (error || !data) {
       return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Oportunidad no encontrada'));
     }
 
-    return res.json(envelopeSuccess(mapOportunidad(result.rows[0])));
+    return res.json(envelopeSuccess(mapOportunidad(data)));
   } catch (err) {
     return next(err);
   }

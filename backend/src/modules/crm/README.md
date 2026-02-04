@@ -1,295 +1,535 @@
-# CRM Backend - Guía rápida para Frontend
+# CRM Backend API - Guía para Frontend
 
-Este documento resume qué endpoints existen en el backend CRM y cómo consumirlos.
+## 📋 Información General
 
-Base URL: `/api/v1/crm`  
-Auth: `Authorization: Bearer <token>`
+**Base URL**: `/api/v1/crm`  
+**Autenticación**: `Authorization: Bearer <token>`  
+**Base de Datos**: Supabase (PostgreSQL)
 
-Este módulo sigue las convenciones de `backend/docs/api/convenciones-api.md`:
-- Envelope obligatorio (`success`, `data`, `meta/error`)
-- JSON en `camelCase`
-- Fechas en ISO 8601 UTC (`YYYY-MM-DDTHH:mm:ssZ`)
-- Paginación con `page` y `limit`
+### Convenciones de la API
 
-## Clientes
+Este módulo sigue las convenciones definidas en `backend/docs/api/convenciones-api.md`:
 
-- `GET /clientes`
-- `POST /clientes`
-- `GET /clientes/{id}`
-- `PUT /clientes/{id}`
-- `DELETE /clientes/{id}`
-- `POST /clientes/{id}/convertir`
+- ✅ **Envelope obligatorio** en todas las respuestas
+- ✅ **JSON en camelCase** para requests/responses
+- ✅ **Fechas en ISO 8601 UTC** (`YYYY-MM-DDTHH:mm:ss.sssZ`)
+- ✅ **Paginación estándar** con `page` y `limit`
 
-Filtros en listado:
-- `tipo`, `responsableId`, `search`
-- `page`, `limit`, `sort`
+### Formato de Respuestas
 
-`sort` soporta: `nombre`, `tipo`, `ciudad`, `createdAt` (prefijo `-` para DESC).
-
-Ejemplo POST `/clientes`:
+**Éxito**:
 ```json
 {
-  "empresaId": "emp_1",
-  "nombre": "Acme Corp",
-  "cif": "B12345678",
-  "email": "contacto@acme.com",
-  "telefono": "+34912345678",
-  "direccion": "Calle Mayor 1",
-  "ciudad": "Madrid",
-  "responsableId": "usr_10",
-  "tipo": "lead",
-  "notas": "Interesado en ERP"
+  "success": true,
+  "data": { /* ... */ },
+  "meta": { /* opcional, para listas paginadas */ }
 }
 ```
 
-Ejemplo response (listado con `meta`):
+**Error**:
+```json
+{
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Descripción del error",
+    "details": []
+  }
+}
+```
+
+---
+
+## 🏢 Clientes
+
+### Endpoints
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/clientes` | Listar clientes (paginado) |
+| POST | `/clientes` | Crear cliente |
+| GET | `/clientes/:id` | Obtener cliente por ID |
+| PUT | `/clientes/:id` | Actualizar cliente |
+| DELETE | `/clientes/:id` | Eliminar cliente |
+| POST | `/clientes/:id/convertir` | Convertir lead a customer |
+
+### Query Parameters (GET /clientes)
+
+- `type` - Filtrar por tipo: `lead` | `customer`
+- `responsibleId` - Filtrar por responsable
+- `search` - Búsqueda en nombre o taxId
+- `page` - Número de página (default: 1)
+- `limit` - Items por página (default: 10)
+- `sort` - Ordenamiento: `name`, `type`, `city`, `createdAt` (prefijo `-` para DESC)
+
+### Ejemplos
+
+**POST /clientes** - Crear cliente:
+```json
+{
+  "companyId": "11111111-1111-1111-1111-111111111111",
+  "name": "Acme Corporation",
+  "taxId": "B12345678",
+  "email": "contact@acme.com",
+  "phone": "+34912345678",
+  "address": "Calle Mayor 1",
+  "city": "Madrid",
+  "responsibleId": "usr_10",
+  "type": "lead",
+  "notes": "Interesado en solución ERP"
+}
+```
+
+**Response 201**:
+```json
+{
+  "success": true,
+  "data": {
+    "id": "cli_1234567890",
+    "companyId": "11111111-1111-1111-1111-111111111111",
+    "name": "Acme Corporation",
+    "taxId": "B12345678",
+    "email": "contact@acme.com",
+    "phone": "+34912345678",
+    "address": "Calle Mayor 1",
+    "city": "Madrid",
+    "responsibleId": "usr_10",
+    "type": "lead",
+    "notes": "Interesado en solución ERP",
+    "createdAt": "2026-02-04T12:00:00.000Z",
+    "updatedAt": "2026-02-04T12:00:00.000Z"
+  }
+}
+```
+
+**GET /clientes?type=lead&limit=5** - Listar leads:
 ```json
 {
   "success": true,
   "data": [
     {
-      "id": "cli_100",
-      "empresaId": "emp_1",
-      "nombre": "Acme Corp",
-      "cif": "B12345678",
-      "email": "contacto@acme.com",
-      "telefono": "+34912345678",
-      "direccion": "Calle Mayor 1",
-      "ciudad": "Madrid",
-      "responsableId": "usr_10",
-      "tipo": "lead",
-      "notas": "Interesado en ERP",
-      "createdAt": "2026-01-15T10:30:00Z",
-      "updatedAt": "2026-01-15T10:30:00Z"
+      "id": "cli_1234567890",
+      "companyId": "11111111-1111-1111-1111-111111111111",
+      "name": "Acme Corporation",
+      "taxId": "B12345678",
+      "email": "contact@acme.com",
+      "phone": "+34912345678",
+      "address": "Calle Mayor 1",
+      "city": "Madrid",
+      "responsibleId": "usr_10",
+      "type": "lead",
+      "notes": "Interesado en solución ERP",
+      "createdAt": "2026-02-04T12:00:00.000Z",
+      "updatedAt": "2026-02-04T12:00:00.000Z"
     }
   ],
   "meta": {
     "page": 1,
-    "limit": 10,
-    "totalItems": 1,
-    "totalPages": 1
+    "limit": 5,
+    "totalItems": 15,
+    "totalPages": 3
   }
 }
 ```
 
-Respuesta `GET /clientes/{id}` (detalle completo):
+**GET /clientes/:id** - Detalle completo con relaciones:
 ```json
 {
   "success": true,
   "data": {
-    "id": "cli_100",
-    "nombre": "Acme Corp",
-    "tipo": "cliente",
-    "contactos": [
+    "id": "cli_1234567890",
+    "companyId": "11111111-1111-1111-1111-111111111111",
+    "name": "Acme Corporation",
+    "type": "customer",
+    "contacts": [
       {
-        "id": "cont_500",
-        "nombre": "Juan",
-        "apellidos": "Pérez García",
-        "cargo": "CTO",
+        "id": "cont_9876543210",
+        "name": "Juan",
+        "lastName": "Pérez García",
+        "jobTitle": "CTO",
         "email": "juan.perez@acme.com",
-        "esDecisor": true
+        "phone": "+34600111222",
+        "isDecisionMaker": true
       }
     ],
-    "oportunidadesAbiertas": 3,
-    "valorPipelineTotal": 150000
+    "openOpportunities": 3,
+    "totalPipelineValue": 150000
   }
 }
 ```
 
-Ejemplo POST `/clientes/{id}/convertir` (Lead → Cliente):
+**POST /clientes/:id/convertir** - Convertir lead a customer:
 ```json
 {
   "success": true,
   "data": {
-    "id": "cli_100",
-    "tipo": "cliente",
-    "sincronizadoConErp": true
+    "id": "cli_1234567890",
+    "type": "customer",
+    "syncedWithErp": true,
+    "updatedAt": "2026-02-04T12:30:00.000Z"
   }
 }
 ```
 
-## Contactos
+---
 
-- `GET /contactos`
-- `POST /contactos`
-- `GET /contactos/{id}`
-- `PUT /contactos/{id}`
-- `DELETE /contactos/{id}`
+## 👤 Contactos
 
-Filtros en listado:
-- `clienteId`, `empresaId`
-- `page`, `limit`
+### Endpoints
 
-Ejemplo POST `/contactos`:
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/contactos` | Listar contactos (paginado) |
+| POST | `/contactos` | Crear contacto |
+| GET | `/contactos/:id` | Obtener contacto por ID |
+| PUT | `/contactos/:id` | Actualizar contacto |
+| DELETE | `/contactos/:id` | Eliminar contacto |
+
+### Query Parameters (GET /contactos)
+
+- `clientId` - Filtrar por cliente
+- `companyId` - Filtrar por empresa
+- `page` - Número de página (default: 1)
+- `limit` - Items por página (default: 10)
+
+### Ejemplos
+
+**POST /contactos** - Crear contacto:
 ```json
 {
-  "empresaId": "emp_1",
-  "clienteId": "cli_100",
-  "nombre": "Juan",
-  "apellidos": "Pérez García",
-  "cargo": "CTO",
+  "companyId": "11111111-1111-1111-1111-111111111111",
+  "clientId": "cli_1234567890",
+  "name": "Juan",
+  "lastName": "Pérez García",
+  "jobTitle": "CTO",
   "email": "juan.perez@acme.com",
-  "telefono": "+34600111222",
-  "esDecisor": true
+  "phone": "+34600111222",
+  "isDecisionMaker": true
 }
 ```
 
-## Oportunidades
-
-- `GET /oportunidades`
-- `POST /oportunidades`
-- `GET /oportunidades/{id}`
-- `PUT /oportunidades/{id}`
-- `DELETE /oportunidades/{id}`
-- `PATCH /oportunidades/{id}/fase`
-
-Filtros en listado:
-- `empresaId`, `pipelineId`, `faseId`, `responsableId`, `clienteId`
-- `page`, `limit`, `sort`
-
-`sort` soporta: `titulo`, `valorEstimado`, `probabilidad`, `fechaCierrePrevista`, `createdAt` (prefijo `-` para DESC).
-
-Ejemplo POST `/oportunidades`:
-```json
-{
-  "empresaId": "emp_1",
-  "clienteId": "cli_100",
-  "pipelineId": "pipe_1",
-  "faseId": "fase_10",
-  "titulo": "Venta Software ERP",
-  "descripcion": "Implementación completa del ERP",
-  "valorEstimado": 50000,
-  "moneda": "EUR",
-  "probabilidad": 60,
-  "fechaCierrePrevista": "2026-03-31",
-  "responsableId": "usr_10",
-  "orden": 0
-}
-```
-
-Ejemplo PATCH `/oportunidades/{id}/fase` (Kanban drag & drop):
-```json
-{
-  "faseId": "fase_20",
-  "orden": 2
-}
-```
-
-## Actividades
-
-- `GET /actividades`
-- `POST /actividades`
-- `GET /actividades/{id}`
-- `PUT /actividades/{id}`
-- `DELETE /actividades/{id}`
-- `PATCH /actividades/{id}/completar`
-
-Filtros en listado:
-- `empresaId`, `usuarioId`, `clienteId`, `oportunidadId`, `tipo`, `estado`
-- `entidadTipo` + `entidadId` (para filtrar por cliente u oportunidad)
-- `page`, `limit`, `sort`
-
-`sort` soporta: `fecha`, `fechaVencimiento`, `tipo`, `completada`, `createdAt` (prefijo `-` para DESC).
-
-Ejemplo POST `/actividades`:
-```json
-{
-  "empresaId": "emp_1",
-  "usuarioId": "usr_10",
-  "clienteId": "cli_100",
-  "oportunidadId": "opor_200",
-  "tipo": "llamada",
-  "asunto": "Primera toma de contacto",
-  "descripcion": "Conversación inicial sobre necesidades...",
-  "fecha": "2026-01-20T10:00:00Z",
-  "fechaVencimiento": "2026-01-20T15:00:00Z",
-  "completada": false
-}
-```
-
-Ejemplo PATCH `/actividades/{id}/completar`:
+**Response 201**:
 ```json
 {
   "success": true,
   "data": {
-    "id": "act_300",
-    "completada": true
+    "id": "cont_9876543210",
+    "companyId": "11111111-1111-1111-1111-111111111111",
+    "clientId": "cli_1234567890",
+    "name": "Juan",
+    "lastName": "Pérez García",
+    "jobTitle": "CTO",
+    "email": "juan.perez@acme.com",
+    "phone": "+34600111222",
+    "isDecisionMaker": true,
+    "createdAt": "2026-02-04T12:00:00.000Z",
+    "updatedAt": "2026-02-04T12:00:00.000Z"
   }
 }
 ```
 
-## Configuración - Pipelines
+---
 
-- `GET /config/pipelines`
-- `POST /config/pipelines`
-- `GET /config/pipelines/{id}`
-- `PUT /config/pipelines/{id}`
-- `DELETE /config/pipelines/{id}`
+## 💼 Oportunidades
 
-Filtros en listado:
-- `empresaId`, `activo`
+### Endpoints
 
-Ejemplo POST `/config/pipelines`:
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/oportunidades` | Listar oportunidades (paginado) |
+| POST | `/oportunidades` | Crear oportunidad |
+| GET | `/oportunidades/:id` | Obtener oportunidad por ID |
+| PUT | `/oportunidades/:id` | Actualizar oportunidad |
+| DELETE | `/oportunidades/:id` | Eliminar oportunidad |
+| PATCH | `/oportunidades/:id/fase` | Cambiar fase (Kanban) |
+
+### Query Parameters (GET /oportunidades)
+
+- `companyId` - Filtrar por empresa
+- `pipelineId` - Filtrar por pipeline
+- `stageId` - Filtrar por fase/stage
+- `responsibleId` - Filtrar por responsable
+- `clientId` - Filtrar por cliente
+- `page` - Número de página (default: 1)
+- `limit` - Items por página (default: 10)
+- `sort` - Ordenamiento: `title`, `estimatedValue`, `probability`, `expectedCloseDate`, `createdAt` (prefijo `-` para DESC)
+
+### Ejemplos
+
+**POST /oportunidades** - Crear oportunidad:
 ```json
 {
-  "empresaId": "emp_1",
-  "nombre": "Venta Licencias",
-  "descripcion": "Pipeline para venta de software",
-  "activo": true
+  "companyId": "11111111-1111-1111-1111-111111111111",
+  "clientId": "cli_1234567890",
+  "pipelineId": "pipe_1111111111",
+  "stageId": "stage_2222222222",
+  "title": "Venta Software ERP",
+  "description": "Implementación completa del módulo ERP",
+  "estimatedValue": 50000,
+  "currency": "EUR",
+  "probability": 60,
+  "expectedCloseDate": "2026-03-31",
+  "responsibleId": "usr_10",
+  "sortOrder": 0
 }
 ```
 
-Respuesta `GET /config/pipelines` (con fases anidadas):
+**PATCH /oportunidades/:id/fase** - Mover en Kanban:
+```json
+{
+  "stageId": "stage_3333333333",
+  "sortOrder": 2
+}
+```
+
+---
+
+## 📅 Actividades
+
+### Endpoints
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/actividades` | Listar actividades (paginado) |
+| POST | `/actividades` | Crear actividad |
+| GET | `/actividades/:id` | Obtener actividad por ID |
+| PUT | `/actividades/:id` | Actualizar actividad |
+| DELETE | `/actividades/:id` | Eliminar actividad |
+| PATCH | `/actividades/:id/completar` | Marcar como completada |
+
+### Query Parameters (GET /actividades)
+
+- `companyId` - Filtrar por empresa
+- `userId` - Filtrar por usuario
+- `clientId` - Filtrar por cliente
+- `opportunityId` - Filtrar por oportunidad
+- `type` - Filtrar por tipo: `call` | `email` | `meeting` | `note`
+- `estado` - Filtrar por estado: `pendiente` | `completada`
+- `page` - Número de página (default: 1)
+- `limit` - Items por página (default: 10)
+- `sort` - Ordenamiento: `activityAt`, `dueDate`, `type`, `completed`, `createdAt` (prefijo `-` para DESC)
+
+### Ejemplos
+
+**POST /actividades** - Crear actividad:
+```json
+{
+  "companyId": "11111111-1111-1111-1111-111111111111",
+  "userId": "usr_10",
+  "clientId": "cli_1234567890",
+  "opportunityId": "opor_5555555555",
+  "type": "call",
+  "subject": "Primera toma de contacto",
+  "description": "Conversación inicial sobre necesidades del cliente",
+  "activityAt": "2026-02-05T10:00:00.000Z",
+  "dueDate": "2026-02-05T15:00:00.000Z",
+  "completed": false
+}
+```
+
+**PATCH /actividades/:id/completar** - Marcar como completada:
+```json
+{
+  "success": true,
+  "data": {
+    "id": "act_7777777777",
+    "completed": true,
+    "updatedAt": "2026-02-04T14:30:00.000Z"
+  }
+}
+```
+
+---
+
+## ⚙️ Configuración - Pipelines y Stages
+
+### Pipelines
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/config/pipelines` | Listar pipelines (con stages) |
+| POST | `/config/pipelines` | Crear pipeline |
+| GET | `/config/pipelines/:id` | Obtener pipeline por ID |
+| PUT | `/config/pipelines/:id` | Actualizar pipeline |
+| DELETE | `/config/pipelines/:id` | Eliminar pipeline |
+
+### Stages (Fases)
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| POST | `/config/stages` | Crear stage/fase |
+| PUT | `/config/stages/:id` | Actualizar stage |
+| DELETE | `/config/stages/:id` | Eliminar stage |
+
+### Ejemplos
+
+**POST /config/pipelines** - Crear pipeline:
+```json
+{
+  "companyId": "11111111-1111-1111-1111-111111111111",
+  "name": "Venta de Licencias",
+  "description": "Pipeline para venta de software",
+  "isActive": true
+}
+```
+
+**GET /config/pipelines** - Listar con stages anidados:
 ```json
 {
   "success": true,
   "data": [
     {
-      "id": "pipe_1",
-      "empresaId": "emp_1",
-      "nombre": "Venta Licencias",
-      "descripcion": "Pipeline para venta de software",
-      "activo": true,
-      "fases": [
+      "id": "pipe_1111111111",
+      "companyId": "11111111-1111-1111-1111-111111111111",
+      "name": "Venta de Licencias",
+      "description": "Pipeline para venta de software",
+      "isActive": true,
+      "stages": [
         {
-          "id": "fase_10",
-          "pipelineId": "pipe_1",
-          "nombre": "Cualificación",
-          "orden": 1,
-          "probabilidadDefecto": 20
+          "id": "stage_2222222222",
+          "pipelineId": "pipe_1111111111",
+          "name": "Cualificación",
+          "sortOrder": 1,
+          "defaultProbability": 20,
+          "createdAt": "2026-02-04T10:00:00.000Z",
+          "updatedAt": "2026-02-04T10:00:00.000Z"
         },
         {
-          "id": "fase_20",
-          "pipelineId": "pipe_1",
-          "nombre": "Propuesta",
-          "orden": 2,
-          "probabilidadDefecto": 40
+          "id": "stage_3333333333",
+          "pipelineId": "pipe_1111111111",
+          "name": "Propuesta",
+          "sortOrder": 2,
+          "defaultProbability": 40,
+          "createdAt": "2026-02-04T10:00:00.000Z",
+          "updatedAt": "2026-02-04T10:00:00.000Z"
         }
-      ]
+      ],
+      "createdAt": "2026-02-04T10:00:00.000Z",
+      "updatedAt": "2026-02-04T10:00:00.000Z"
     }
   ]
 }
 ```
 
-## Configuración - Fases
-
-- `POST /config/fases`
-- `PUT /config/fases/{id}`
-- `DELETE /config/fases/{id}`
-
-Ejemplo POST `/config/fases`:
+**POST /config/stages** - Crear stage:
 ```json
 {
-  "empresaId": "emp_1",
-  "pipelineId": "pipe_1",
-  "nombre": "Negociación",
-  "orden": 3,
-  "probabilidadDefecto": 70
+  "companyId": "11111111-1111-1111-1111-111111111111",
+  "pipelineId": "pipe_1111111111",
+  "name": "Negociación",
+  "sortOrder": 3,
+  "defaultProbability": 70
 }
 ```
 
-## Errores (formato estándar)
-Ejemplo `400` (validación):
+---
+
+## 🔧 Tipos de Datos (TypeScript Reference)
+
+```typescript
+type ClientType = 'lead' | 'customer';
+
+type ActivityType = 'call' | 'email' | 'meeting' | 'note';
+
+interface Client {
+  id: string;
+  companyId: string;
+  name: string;
+  taxId: string | null;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  city: string | null;
+  responsibleId: string | null;
+  type: ClientType;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Contact {
+  id: string;
+  companyId: string;
+  clientId: string;
+  name: string;
+  lastName: string | null;
+  jobTitle: string | null;
+  email: string | null;
+  phone: string | null;
+  isDecisionMaker: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Opportunity {
+  id: string;
+  companyId: string;
+  clientId: string;
+  pipelineId: string;
+  stageId: string;
+  title: string;
+  description: string | null;
+  estimatedValue: number;
+  currency: string;
+  probability: number;
+  expectedCloseDate: string | null;
+  responsibleId: string | null;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Activity {
+  id: string;
+  companyId: string;
+  userId: string;
+  clientId: string | null;
+  opportunityId: string | null;
+  type: ActivityType;
+  subject: string;
+  description: string | null;
+  activityAt: string;
+  dueDate: string | null;
+  completed: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Pipeline {
+  id: string;
+  companyId: string;
+  name: string;
+  description: string | null;
+  isActive: boolean;
+  stages?: Stage[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Stage {
+  id: string;
+  companyId: string;
+  pipelineId: string;
+  name: string;
+  sortOrder: number;
+  defaultProbability: number;
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+---
+
+## ❌ Códigos de Error
+
+| Código | Status | Descripción |
+|--------|--------|-------------|
+| `VALIDATION_ERROR` | 400 | Datos inválidos en la petición |
+| `UNAUTHORIZED` | 401 | Token no válido o ausente |
+| `RESOURCE_NOT_FOUND` | 404 | Recurso no encontrado |
+| `INTERNAL_ERROR` | 500 | Error interno del servidor |
+
+**Ejemplo de error de validación**:
 ```json
 {
   "success": false,
@@ -297,33 +537,79 @@ Ejemplo `400` (validación):
     "code": "VALIDATION_ERROR",
     "message": "Datos invalidos",
     "details": [
-      { "field": "tipo", "message": "Debe ser uno de: lead, cliente" }
+      {
+        "field": "type",
+        "message": "Must be one of: lead, customer"
+      },
+      {
+        "field": "name",
+        "message": "Field is required"
+      }
     ]
   }
 }
 ```
 
-Ejemplo `404`:
-```json
-{
-  "success": false,
-  "error": {
-    "code": "RESOURCE_NOT_FOUND",
-    "message": "Cliente no encontrado",
-    "details": []
-  }
-}
-```
+---
 
-## Enums
-- `cliente.tipo`: `lead | cliente`
-- `actividad.tipo`: `llamada | email | reunion | nota`
-- `actividad.estado`: `pendiente | completada` (filtro, no campo de BD)
+## 📊 Tablas de Base de Datos (Referencia)
 
-## Tablas (referencia DB)
-- `crm_clientes`
-- `crm_contactos`
-- `crm_pipelines`
-- `crm_fases`
-- `crm_oportunidades`
-- `crm_actividades`
+- `crm_clients` - Clientes y leads
+- `crm_contacts` - Contactos de clientes
+- `crm_pipelines` - Pipelines de ventas
+- `crm_stages` - Fases/stages de pipelines
+- `crm_opportunities` - Oportunidades de venta
+- `crm_activities` - Actividades (llamadas, emails, reuniones, notas)
+
+---
+
+## 🚀 Estado de Implementación
+
+| Módulo | Estado | Notas |
+|--------|--------|-------|
+| Clientes | ✅ Completo | Totalmente funcional con Supabase |
+| Contactos | ✅ Completo | Totalmente funcional con Supabase |
+| Oportunidades | ✅ Completo | Totalmente funcional con Supabase |
+| Actividades | ✅ Completo | Totalmente funcional con Supabase |
+| Configuración | ✅ Completo | Pipelines y Stages funcionales con Supabase |
+
+---
+
+## 💡 Notas para Frontend
+
+1. **Autenticación**: Todos los endpoints requieren JWT token válido en el header `Authorization: Bearer <token>`
+
+2. **Paginación**: 
+   - Por defecto: `page=1`, `limit=10`
+   - Máximo recomendado: `limit=100`
+
+3. **Ordenamiento**:
+   - Ascendente: `?sort=name`
+   - Descendente: `?sort=-name`
+
+4. **Fechas**: 
+   - Siempre en formato ISO 8601 UTC
+   - Al enviar: `"2026-02-04T12:00:00.000Z"`
+   - Al recibir: Parsear con `new Date(dateString)`
+
+5. **IDs**: 
+   - Generados por el backend con prefijos:
+     - `cli_` - Clientes
+     - `cont_` - Contactos
+     - `opor_` - Oportunidades
+     - `act_` - Actividades
+     - `pipe_` - Pipelines
+     - `stage_` - Stages
+
+6. **Validación**:
+   - El backend retorna detalles específicos en `error.details[]`
+   - Mostrar mensajes de campo específicos al usuario
+
+---
+
+## 🔗 Enlaces Útiles
+
+- [Documentación completa API](../../../docs/api/)
+- [Convenciones API](../../../docs/api/convenciones-api.md)
+- [Base de datos](../../../docs/database/modelo-datos-backend.md)
+- [Funcionalidades CRM](../../../docs/modulos/crm/funcionalidades.md)
