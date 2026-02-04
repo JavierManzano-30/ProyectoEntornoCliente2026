@@ -8,9 +8,9 @@ const KanbanBoard = ({ onTicketClick }) => {
   const { tickets, loading } = useTickets();
 
   const columns = [
-    { id: 'pendiente', title: 'Pendiente', status: 'pendiente' },
-    { id: 'en_progreso', title: 'En Progreso', status: 'en_progreso' },
-    { id: 'esperando_cliente', title: 'Esperando Cliente', status: 'esperando_cliente' },
+    { id: 'nuevo', title: 'Nuevo', status: 'nuevo' },
+    { id: 'asignado', title: 'Asignado', status: 'asignado' },
+    { id: 'en_proceso', title: 'En Proceso', status: 'en_proceso' },
     { id: 'resuelto', title: 'Resuelto', status: 'resuelto' },
   ];
 

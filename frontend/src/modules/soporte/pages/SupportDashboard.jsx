@@ -1,21 +1,24 @@
 import React, { useState } from 'react';
 import { useSupportDashboard } from '../hooks/useSupportDashboard';
 import { useNavigate } from 'react-router-dom';
+import { useSoporteContext } from '../context/SoporteContext';
 import Card from '../../../components/common/Card';
 import PageHeader from '../../../components/common/PageHeader';
 import LoadingSpinner from '../../../components/common/LoadingSpinner';
 import ErrorMessage from '../../../components/common/ErrorMessage';
 import KanbanBoard from '../components/kanban/KanbanBoard';
 import TicketDetailModal from '../components/kanban/TicketDetailModal';
-import { Ticket, Clock, CheckCircle, AlertTriangle, TrendingUp, Plus, LayoutGrid } from 'lucide-react';
+import { Ticket, Clock, CheckCircle, AlertTriangle, TrendingUp, Plus, LayoutGrid, Layers, Building2, RefreshCw } from 'lucide-react';
 import Button from '../../../components/common/Button';
 import './SupportDashboard.css';
 
 const SupportDashboard = () => {
   const { dashboardData, stats, loading, error, refetch } = useSupportDashboard();
+  const { usuario, empresaConfig, tieneMultiplesTablenes, tablonUnico, coloresTema, cambiarEmpresa } = useSoporteContext();
   const navigate = useNavigate();
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [viewMode, setViewMode] = useState('kanban'); // 'kanban' o 'stats'
+  const [selectedTablonId, setSelectedTablonId] = useState(null);
 
   const handleTicketClick = (ticket) => {
     setSelectedTicket(ticket);
@@ -27,6 +30,10 @@ const SupportDashboard = () => {
 
   const handleNewTicket = () => {
     navigate('/soporte/tickets/nuevo');
+  };
+
+  const handleChangeEmpresa = (empresaId) => {
+    cambiarEmpresa(Number(empresaId));
   };
 
   if (loading) return <LoadingSpinner fullScreen text="Cargando dashboard..." />;
@@ -63,13 +70,59 @@ const SupportDashboard = () => {
     },
   ];
 
+  const tablones = empresaConfig.tablones || [];
+  const selectedTablonData = selectedTablonId 
+    ? tablones.find((t) => t.id === selectedTablonId)
+    : tablonUnico;
+
   return (
     <div className="support-dashboard-page">
       <PageHeader
         title="Dashboard de Soporte"
-        subtitle="Gestión visual de tickets y seguimiento en tiempo real"
+        subtitle={
+          <div className="dashboard-subtitle">
+            <Building2 size={16} />
+            <span>{usuario.empresaNombre}</span>
+            {usuario.departamentoNombre && (
+              <span className="separator">•</span>
+            )}
+            {usuario.departamentoNombre && <span>{usuario.departamentoNombre}</span>}
+          </div>
+        }
         actions={
           <>
+            {/* DEMO: Selector de empresa para pruebas */}
+            <div className="empresa-selector-demo">
+              <Building2 size={16} />
+              <select
+                value={usuario.empresaId}
+                onChange={(e) => handleChangeEmpresa(e.target.value)}
+                className="empresa-select"
+                title="Cambiar empresa (solo en modo demo)"
+              >
+                <option value={1}>TechCorp Solutions</option>
+                <option value={2}>InnovaDigital S.A.</option>
+                <option value={3}>GlobalServices Ltd</option>
+              </select>
+            </div>
+            
+            {tieneMultiplesTablenes && (
+              <div className="tablon-selector">
+                <Layers size={18} />
+                <select
+                  value={selectedTablonId || ''}
+                  onChange={(e) => setSelectedTablonId(e.target.value ? Number(e.target.value) : null)}
+                  className="tablon-select"
+                >
+                  <option value="">Todos los tablones</option>
+                  {tablones.map((tablon) => (
+                    <option key={tablon.id} value={tablon.id}>
+                      {tablon.icono} {tablon.nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
             <Button 
               variant="secondary" 
               icon={LayoutGrid}
@@ -84,9 +137,30 @@ const SupportDashboard = () => {
         }
       />
 
+      {selectedTablonData && tieneMultiplesTablenes && (
+        <div 
+          className="tablon-info-banner"
+          style={{ borderLeftColor: selectedTablonData.color || coloresTema.primary }}
+        >
+          <span className="tablon-icon" style={{ color: selectedTablonData.color }}>
+            {selectedTablonData.icono}
+          </span>
+          <div className="tablon-details">
+            <strong>{selectedTablonData.nombre}</strong>
+            {selectedTablonData.descripcion && (
+              <span className="tablon-description">{selectedTablonData.descripcion}</span>
+            )}
+          </div>
+        </div>
+      )}
+
       {viewMode === 'kanban' ? (
         <div className="dashboard-kanban-section">
-          <KanbanBoard onTicketClick={handleTicketClick} />
+          <KanbanBoard 
+            onTicketClick={handleTicketClick} 
+            tablonId={selectedTablonId}
+            tablones={tablones}
+          />
         </div>
       ) : (
         <>
