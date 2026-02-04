@@ -52,6 +52,7 @@ import {
   ReportsPage,
   DatasetsPage,
   AlertsPage,
+  BIProvider,
 } from "./modules/bi";
 
 // Páginas del módulo BPM
@@ -86,8 +87,9 @@ function App() {
     <BrowserRouter>
       <ERPProvider>
         <BPMProvider>
-          <SoporteProvider>
-            <Routes>
+          <BIProvider>
+            <SoporteProvider>
+              <Routes>
               {/* Redirección inicial */}
               <Route path="/" element={<Navigate to="/core" replace />} />
 
@@ -192,7 +194,8 @@ function App() {
               }
             />
           </Routes>
-          </SoporteProvider>
+            </SoporteProvider>
+          </BIProvider>
         </BPMProvider>
       </ERPProvider>
     </BrowserRouter>
