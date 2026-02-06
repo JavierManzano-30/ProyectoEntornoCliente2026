@@ -1,8 +1,12 @@
-const { pool } = require('../../../config/db');
+const supabase = require('../../../config/supabase');
 const { envelopeSuccess, envelopeError } = require('../../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../../utils/pagination');
 const { validateRequiredFields } = require('../../../utils/validation');
 const { generateId } = require('../../../utils/id');
+
+function getAuthCompanyId(req) {
+  return req.user?.companyId || req.user?.company_id || null;
+}
 
 function mapTime(row) {
   return {
@@ -18,48 +22,42 @@ function mapTime(row) {
   };
 }
 
+async function ensureTaskInCompany(taskId, companyId) {
+  const { data, error } = await supabase
+    .from('alm_tasks')
+    .select('id')
+    .eq('id', taskId)
+    .eq('company_id', companyId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return Boolean(data);
+}
+
 async function listTimes(req, res, next) {
   try {
+    const companyId = getAuthCompanyId(req);
+    if (!companyId) {
+      return res.status(403).json(envelopeError('FORBIDDEN', 'companyId no disponible en token'));
+    }
+
     const { page, limit, offset } = getPaginationParams(req.query);
-    const filters = [];
-    const values = [];
+    let query = supabase
+      .from('alm_time_entries')
+      .select('*', { count: 'exact' })
+      .eq('company_id', companyId);
 
-    if (req.query.companyId) {
-      values.push(req.query.companyId);
-      filters.push(`company_id = $${values.length}`);
-    }
-    if (req.query.taskId) {
-      values.push(req.query.taskId);
-      filters.push(`task_id = $${values.length}`);
-    }
-    if (req.query.userId) {
-      values.push(req.query.userId);
-      filters.push(`user_id = $${values.length}`);
-    }
-    if (req.query.entryDate) {
-      values.push(req.query.entryDate);
-      filters.push(`entry_date = $${values.length}`);
-    }
+    if (req.query.taskId) query = query.eq('task_id', req.query.taskId);
+    if (req.query.userId) query = query.eq('user_id', req.query.userId);
+    if (req.query.entryDate) query = query.eq('entry_date', req.query.entryDate);
 
-    const whereClause = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
-    const countQuery = `SELECT COUNT(*)::int AS total FROM alm_time_entries ${whereClause}`;
-    const countResult = await pool.query(countQuery, values);
-    const totalItems = countResult.rows[0]?.total || 0;
+    const { data, error, count } = await query
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
 
-    values.push(limit, offset);
-    const listQuery = `
-      SELECT *
-      FROM alm_time_entries
-      ${whereClause}
-      ORDER BY created_at DESC
-      LIMIT $${values.length - 1} OFFSET $${values.length}
-    `;
+    if (error) throw error;
 
-    const result = await pool.query(listQuery, values);
-    const data = result.rows.map(mapTime);
-    const meta = buildPaginationMeta(page, limit, totalItems);
-
-    return res.json(envelopeSuccess(data, meta));
+    return res.json(envelopeSuccess((data || []).map(mapTime), buildPaginationMeta(page, limit, count || 0)));
   } catch (err) {
     return next(err);
   }
@@ -67,43 +65,43 @@ async function listTimes(req, res, next) {
 
 async function createTime(req, res, next) {
   try {
-    const requiredErrors = validateRequiredFields(req.body, [
-      'companyId',
-      'taskId',
-      'userId',
-      'entryDate',
-      'hours'
-    ]);
-
-    if (requiredErrors.length) {
-      return res
-        .status(400)
-        .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
+    const companyId = getAuthCompanyId(req);
+    if (!companyId) {
+      return res.status(403).json(envelopeError('FORBIDDEN', 'companyId no disponible en token'));
     }
 
-    const insertQuery = `
-      INSERT INTO alm_time_entries
-        (id, company_id, task_id, user_id, entry_date, hours, description, created_at, updated_at)
-      VALUES
-        ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-      RETURNING *
-    `;
+    const requiredErrors = validateRequiredFields(req.body, ['taskId', 'userId', 'entryDate', 'hours']);
 
-    const id = generateId('time');
+    if (requiredErrors.length) {
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
+    }
+
+    const taskExists = await ensureTaskInCompany(req.body.taskId, companyId);
+    if (!taskExists) {
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', [
+        { field: 'taskId', message: 'Tarea no encontrada para la empresa del token' }
+      ]));
+    }
+
     const now = new Date().toISOString();
-    const result = await pool.query(insertQuery, [
-      id,
-      req.body.companyId,
-      req.body.taskId,
-      req.body.userId,
-      req.body.entryDate,
-      req.body.hours,
-      req.body.description || null,
-      now,
-      now
-    ]);
+    const { data, error } = await supabase
+      .from('alm_time_entries')
+      .insert([{
+        id: generateId('time'),
+        company_id: companyId,
+        task_id: req.body.taskId,
+        user_id: req.body.userId,
+        entry_date: req.body.entryDate,
+        hours: req.body.hours,
+        description: req.body.description || null,
+        created_at: now,
+        updated_at: now
+      }])
+      .select('*')
+      .single();
 
-    return res.status(201).json(envelopeSuccess(mapTime(result.rows[0])));
+    if (error) throw error;
+    return res.status(201).json(envelopeSuccess(mapTime(data)));
   } catch (err) {
     return next(err);
   }
@@ -111,51 +109,47 @@ async function createTime(req, res, next) {
 
 async function updateTime(req, res, next) {
   try {
-    const { id } = req.params;
-    const requiredErrors = validateRequiredFields(req.body, [
-      'companyId',
-      'taskId',
-      'userId',
-      'entryDate',
-      'hours'
-    ]);
-
-    if (requiredErrors.length) {
-      return res
-        .status(400)
-        .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
+    const companyId = getAuthCompanyId(req);
+    if (!companyId) {
+      return res.status(403).json(envelopeError('FORBIDDEN', 'companyId no disponible en token'));
     }
 
-    const updateQuery = `
-      UPDATE alm_time_entries
-      SET company_id = $1,
-          task_id = $2,
-          user_id = $3,
-          entry_date = $4,
-          hours = $5,
-          description = $6,
-          updated_at = $7
-      WHERE id = $8
-      RETURNING *
-    `;
+    const { id } = req.params;
+    const requiredErrors = validateRequiredFields(req.body, ['taskId', 'userId', 'entryDate', 'hours']);
 
-    const now = new Date().toISOString();
-    const result = await pool.query(updateQuery, [
-      req.body.companyId,
-      req.body.taskId,
-      req.body.userId,
-      req.body.entryDate,
-      req.body.hours,
-      req.body.description || null,
-      now,
-      id
-    ]);
+    if (requiredErrors.length) {
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
+    }
 
-    if (!result.rows.length) {
+    const taskExists = await ensureTaskInCompany(req.body.taskId, companyId);
+    if (!taskExists) {
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', [
+        { field: 'taskId', message: 'Tarea no encontrada para la empresa del token' }
+      ]));
+    }
+
+    const { data, error } = await supabase
+      .from('alm_time_entries')
+      .update({
+        company_id: companyId,
+        task_id: req.body.taskId,
+        user_id: req.body.userId,
+        entry_date: req.body.entryDate,
+        hours: req.body.hours,
+        description: req.body.description || null,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .eq('company_id', companyId)
+      .select('*')
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) {
       return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Registro de tiempo no encontrado'));
     }
 
-    return res.json(envelopeSuccess(mapTime(result.rows[0])));
+    return res.json(envelopeSuccess(mapTime(data)));
   } catch (err) {
     return next(err);
   }
@@ -163,11 +157,25 @@ async function updateTime(req, res, next) {
 
 async function deleteTime(req, res, next) {
   try {
+    const companyId = getAuthCompanyId(req);
+    if (!companyId) {
+      return res.status(403).json(envelopeError('FORBIDDEN', 'companyId no disponible en token'));
+    }
+
     const { id } = req.params;
-    const result = await pool.query('DELETE FROM alm_time_entries WHERE id = $1', [id]);
-    if (!result.rowCount) {
+    const { data, error } = await supabase
+      .from('alm_time_entries')
+      .delete()
+      .eq('id', id)
+      .eq('company_id', companyId)
+      .select('id')
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) {
       return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Registro de tiempo no encontrado'));
     }
+
     return res.status(204).send();
   } catch (err) {
     return next(err);
@@ -176,29 +184,34 @@ async function deleteTime(req, res, next) {
 
 async function getProjectTimeSummary(req, res, next) {
   try {
-    const { id } = req.params;
-    const summaryQuery = `
-      SELECT
-        t.project_id,
-        COUNT(r.id)::int AS registros,
-        COALESCE(SUM(r.hours), 0)::numeric AS total_hours
-      FROM alm_time_entries r
-      JOIN alm_tasks t ON t.id = r.task_id
-      WHERE t.project_id = $1
-      GROUP BY t.project_id
-    `;
+    const companyId = getAuthCompanyId(req);
+    if (!companyId) {
+      return res.status(403).json(envelopeError('FORBIDDEN', 'companyId no disponible en token'));
+    }
 
-    const result = await pool.query(summaryQuery, [id]);
-    const row = result.rows[0];
-    if (!row) {
+    const { id } = req.params;
+    const { data: tasks, error: tasksError } = await supabase
+      .from('alm_tasks')
+      .select('id')
+      .eq('project_id', id)
+      .eq('company_id', companyId);
+    if (tasksError) throw tasksError;
+
+    const taskIds = (tasks || []).map((task) => task.id);
+    if (!taskIds.length) {
       return res.json(envelopeSuccess({ projectId: id, entries: 0, totalHours: 0 }));
     }
 
-    return res.json(envelopeSuccess({
-      projectId: row.project_id,
-      entries: row.registros,
-      totalHours: Number(row.total_hours)
-    }));
+    const { data: entries, error: entriesError } = await supabase
+      .from('alm_time_entries')
+      .select('hours')
+      .in('task_id', taskIds);
+    if (entriesError) throw entriesError;
+
+    const list = entries || [];
+    const totalHours = list.reduce((sum, row) => sum + Number(row.hours || 0), 0);
+
+    return res.json(envelopeSuccess({ projectId: id, entries: list.length, totalHours }));
   } catch (err) {
     return next(err);
   }
@@ -206,26 +219,24 @@ async function getProjectTimeSummary(req, res, next) {
 
 async function getUserTimes(req, res, next) {
   try {
+    const companyId = getAuthCompanyId(req);
+    if (!companyId) {
+      return res.status(403).json(envelopeError('FORBIDDEN', 'companyId no disponible en token'));
+    }
+
     const { id } = req.params;
     const { page, limit, offset } = getPaginationParams(req.query);
+    const { data, error, count } = await supabase
+      .from('alm_time_entries')
+      .select('*', { count: 'exact' })
+      .eq('user_id', id)
+      .eq('company_id', companyId)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
 
-    const countQuery = 'SELECT COUNT(*)::int AS total FROM alm_time_entries WHERE user_id = $1';
-    const countResult = await pool.query(countQuery, [id]);
-    const totalItems = countResult.rows[0]?.total || 0;
+    if (error) throw error;
 
-    const listQuery = `
-      SELECT *
-      FROM alm_time_entries
-      WHERE user_id = $1
-      ORDER BY created_at DESC
-      LIMIT $2 OFFSET $3
-    `;
-    const result = await pool.query(listQuery, [id, limit, offset]);
-
-    const data = result.rows.map(mapTime);
-    const meta = buildPaginationMeta(page, limit, totalItems);
-
-    return res.json(envelopeSuccess(data, meta));
+    return res.json(envelopeSuccess((data || []).map(mapTime), buildPaginationMeta(page, limit, count || 0)));
   } catch (err) {
     return next(err);
   }
@@ -233,26 +244,24 @@ async function getUserTimes(req, res, next) {
 
 async function getTaskTimes(req, res, next) {
   try {
+    const companyId = getAuthCompanyId(req);
+    if (!companyId) {
+      return res.status(403).json(envelopeError('FORBIDDEN', 'companyId no disponible en token'));
+    }
+
     const { id } = req.params;
     const { page, limit, offset } = getPaginationParams(req.query);
+    const { data, error, count } = await supabase
+      .from('alm_time_entries')
+      .select('*', { count: 'exact' })
+      .eq('task_id', id)
+      .eq('company_id', companyId)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
 
-    const countQuery = 'SELECT COUNT(*)::int AS total FROM alm_time_entries WHERE task_id = $1';
-    const countResult = await pool.query(countQuery, [id]);
-    const totalItems = countResult.rows[0]?.total || 0;
+    if (error) throw error;
 
-    const listQuery = `
-      SELECT *
-      FROM alm_time_entries
-      WHERE task_id = $1
-      ORDER BY created_at DESC
-      LIMIT $2 OFFSET $3
-    `;
-    const result = await pool.query(listQuery, [id, limit, offset]);
-
-    const data = result.rows.map(mapTime);
-    const meta = buildPaginationMeta(page, limit, totalItems);
-
-    return res.json(envelopeSuccess(data, meta));
+    return res.json(envelopeSuccess((data || []).map(mapTime), buildPaginationMeta(page, limit, count || 0)));
   } catch (err) {
     return next(err);
   }

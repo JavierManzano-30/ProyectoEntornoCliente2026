@@ -11,7 +11,12 @@ if (!JWT_SECRET) {
   throw new Error('Missing JWT_SECRET in environment');
 }
 
-const token = jwt.sign({ sub: 'smoke', role: 'admin' }, JWT_SECRET, { expiresIn: '10m' });
+const smokeCompanyId = process.env.ALM_TEST_COMPANY_ID || '11111111-1111-1111-1111-111111111111';
+const token = jwt.sign(
+  { userId: 'smoke-user', companyId: smokeCompanyId, roleId: 'admin' },
+  JWT_SECRET,
+  { expiresIn: '10m' }
+);
 
 const headers = {
   'Content-Type': 'application/json',
@@ -62,7 +67,7 @@ async function rollback() {
 }
 
 async function main() {
-  const companyId = process.env.ALM_TEST_COMPANY_ID || '11111111-1111-1111-1111-111111111111';
+  const companyId = smokeCompanyId;
   const responsibleId = process.env.ALM_TEST_USER_ID || 'user-1';
 
   // Projects
