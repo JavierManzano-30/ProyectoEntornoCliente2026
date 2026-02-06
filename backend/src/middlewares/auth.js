@@ -21,6 +21,7 @@ function requireAuth(req, res, next) {
     req.user = payload;
     return next();
   } catch (err) {
+    console.error('JWT verification error:', err);
     return res.status(401).json(envelopeError('UNAUTHORIZED', 'Token invalido'));
   }
 }
@@ -42,6 +43,7 @@ function authMiddleware(req, res, next) {
     };
     return next();
   } catch (err) {
+    console.error('Token verification error:', err);
     return res.status(401).json({ error: 'Invalid or expired token' });
   }
 }
