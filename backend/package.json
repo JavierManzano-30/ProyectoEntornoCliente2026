@@ -9,7 +9,11 @@
     "alm:smoke": "node src/modules/alm/tests/alm_smoke.mjs"
   },
   "dependencies": {
+<<<<<<< Updated upstream
     "@supabase/supabase-js": "^2.94.1",
+=======
+    "@supabase/supabase-js": "^2.49.1",
+>>>>>>> Stashed changes
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
