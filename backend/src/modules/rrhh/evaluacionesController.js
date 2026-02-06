@@ -3,6 +3,18 @@ const { envelopeSuccess, envelopeError } = require('../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../utils/pagination');
 const { validateRequiredFields, isNumber } = require('../../utils/validation');
 
+function resolveCompanyId(req) {
+  return req.user?.companyId || req.user?.empresaId || req.user?.company_id || null;
+}
+
+function ensureCompanyMatch(req, providedCompanyId) {
+  const tokenCompanyId = resolveCompanyId(req);
+  if (tokenCompanyId && providedCompanyId && providedCompanyId !== tokenCompanyId) {
+    return envelopeError('FORBIDDEN', 'Empresa no autorizada');
+  }
+  return null;
+}
+
 function mapEvaluacion(row) {
   return {
     id: row.id,
@@ -20,8 +32,12 @@ async function listEvaluaciones(req, res, next) {
     const { page, limit, offset } = getPaginationParams(req.query);
     const filters = [];
     const values = [];
+    const tokenCompanyId = resolveCompanyId(req);
 
-    if (req.query.empresaId) {
+    if (tokenCompanyId) {
+      values.push(tokenCompanyId);
+      filters.push(`company_id = $${values.length}`);
+    } else if (req.query.empresaId) {
       values.push(req.query.empresaId);
       filters.push(`company_id = $${values.length}`);
     }
@@ -58,7 +74,14 @@ async function listEvaluaciones(req, res, next) {
 async function getEvaluacion(req, res, next) {
   try {
     const { id } = req.params;
-    const result = await pool.query('SELECT * FROM hr_evaluations WHERE id = $1', [id]);
+    const tokenCompanyId = resolveCompanyId(req);
+    const values = [id];
+    let query = 'SELECT * FROM hr_evaluations WHERE id = $1';
+    if (tokenCompanyId) {
+      values.push(tokenCompanyId);
+      query += ` AND company_id = $2`;
+    }
+    const result = await pool.query(query, values);
     if (!result.rows.length) {
       return res
         .status(404)
@@ -79,6 +102,11 @@ async function createEvaluacion(req, res, next) {
       'fechaRevision'
     ]);
 
+    const companyError = ensureCompanyMatch(req, req.body.empresaId);
+    if (companyError) {
+      return res.status(403).json(companyError);
+    }
+
     // Validar rango de puntuacion 0-100 para alinearlo con la constraint de la BD
     if (req.body.puntuacion !== undefined) {
       if (!isNumber(req.body.puntuacion)) {
@@ -94,6 +122,13 @@ async function createEvaluacion(req, res, next) {
         .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
     }
 
+    const companyId = resolveCompanyId(req) || req.body.empresaId;
+    if (!companyId) {
+      return res
+        .status(400)
+        .json(envelopeError('VALIDATION_ERROR', 'empresaId es obligatorio'));
+    }
+
     const insertQuery = `
       INSERT INTO hr_evaluations (
         company_id, employee_id, score, review_date, notes
@@ -103,7 +138,7 @@ async function createEvaluacion(req, res, next) {
     `;
 
     const result = await pool.query(insertQuery, [
-      req.body.empresaId,
+      companyId,
       req.body.empleadoId,
       req.body.puntuacion,
       req.body.fechaRevision,

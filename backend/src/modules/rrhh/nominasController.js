@@ -3,6 +3,18 @@ const { envelopeSuccess, envelopeError } = require('../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../utils/pagination');
 const { validateRequiredFields } = require('../../utils/validation');
 
+function resolveCompanyId(req) {
+  return req.user?.companyId || req.user?.empresaId || req.user?.company_id || null;
+}
+
+function ensureCompanyMatch(req, providedCompanyId) {
+  const tokenCompanyId = resolveCompanyId(req);
+  if (tokenCompanyId && providedCompanyId && providedCompanyId !== tokenCompanyId) {
+    return envelopeError('FORBIDDEN', 'Empresa no autorizada');
+  }
+  return null;
+}
+
 function mapNomina(row) {
   return {
     id: row.id,
@@ -20,8 +32,12 @@ async function listNominas(req, res, next) {
     const { page, limit, offset } = getPaginationParams(req.query);
     const filters = [];
     const values = [];
+    const tokenCompanyId = resolveCompanyId(req);
 
-    if (req.query.empresaId) {
+    if (tokenCompanyId) {
+      values.push(tokenCompanyId);
+      filters.push(`company_id = $${values.length}`);
+    } else if (req.query.empresaId) {
       values.push(req.query.empresaId);
       filters.push(`company_id = $${values.length}`);
     }
@@ -62,7 +78,14 @@ async function listNominas(req, res, next) {
 async function getNomina(req, res, next) {
   try {
     const { id } = req.params;
-    const result = await pool.query('SELECT * FROM hr_payrolls WHERE id = $1', [id]);
+    const tokenCompanyId = resolveCompanyId(req);
+    const values = [id];
+    let query = 'SELECT * FROM hr_payrolls WHERE id = $1';
+    if (tokenCompanyId) {
+      values.push(tokenCompanyId);
+      query += ` AND company_id = $2`;
+    }
+    const result = await pool.query(query, values);
     if (!result.rows.length) {
       return res
         .status(404)
@@ -84,10 +107,22 @@ async function createNomina(req, res, next) {
       'importeNeto'
     ]);
 
+    const companyError = ensureCompanyMatch(req, req.body.empresaId);
+    if (companyError) {
+      return res.status(403).json(companyError);
+    }
+
     if (requiredErrors.length) {
       return res
         .status(400)
         .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
+    }
+
+    const companyId = resolveCompanyId(req) || req.body.empresaId;
+    if (!companyId) {
+      return res
+        .status(400)
+        .json(envelopeError('VALIDATION_ERROR', 'empresaId es obligatorio'));
     }
 
     const insertQuery = `
@@ -99,7 +134,7 @@ async function createNomina(req, res, next) {
     `;
 
     const result = await pool.query(insertQuery, [
-      req.body.empresaId,
+      companyId,
       req.body.empleadoId,
       req.body.periodo,
       req.body.importeBruto,

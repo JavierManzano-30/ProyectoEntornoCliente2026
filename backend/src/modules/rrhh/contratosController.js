@@ -3,6 +3,46 @@ const { envelopeSuccess, envelopeError } = require('../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../utils/pagination');
 const { validateRequiredFields } = require('../../utils/validation');
 
+function resolveCompanyId(req) {
+  return req.user?.companyId || req.user?.empresaId || req.user?.company_id || null;
+}
+
+function ensureCompanyMatch(req, providedCompanyId) {
+  const tokenCompanyId = resolveCompanyId(req);
+  if (tokenCompanyId && providedCompanyId && providedCompanyId !== tokenCompanyId) {
+    return envelopeError('FORBIDDEN', 'Empresa no autorizada');
+  }
+  return null;
+}
+
+function validateDateRange(startDate, endDate) {
+  if (!startDate) return null;
+  const start = new Date(startDate);
+  if (Number.isNaN(start.getTime())) return 'fechaInicio invalida';
+  if (!endDate) return null;
+  const end = new Date(endDate);
+  if (Number.isNaN(end.getTime())) return 'fechaFin invalida';
+  if (start > end) return 'fechaFin debe ser igual o posterior a fechaInicio';
+  return null;
+}
+
+async function hasOverlappingActiveContract({ employeeId, startDate, endDate, excludeId }) {
+  const result = await pool.query(
+    `
+      SELECT 1
+      FROM hr_contracts
+      WHERE employee_id = $1
+        AND active = true
+        AND id <> COALESCE($2, '00000000-0000-0000-0000-000000000000')
+        AND start_date <= COALESCE($4, 'infinity'::date)
+        AND COALESCE(end_date, 'infinity'::date) >= $3
+      LIMIT 1
+    `,
+    [employeeId, excludeId || null, startDate, endDate || null]
+  );
+  return result.rows.length > 0;
+}
+
 function mapContrato(row) {
   return {
     id: row.id,
@@ -22,8 +62,12 @@ async function listContratos(req, res, next) {
     const { page, limit, offset } = getPaginationParams(req.query);
     const filters = [];
     const values = [];
+    const tokenCompanyId = resolveCompanyId(req);
 
-    if (req.query.empresaId) {
+    if (tokenCompanyId) {
+      values.push(tokenCompanyId);
+      filters.push(`company_id = $${values.length}`);
+    } else if (req.query.empresaId) {
       values.push(req.query.empresaId);
       filters.push(`company_id = $${values.length}`);
     }
@@ -64,7 +108,14 @@ async function listContratos(req, res, next) {
 async function getContrato(req, res, next) {
   try {
     const { id } = req.params;
-    const result = await pool.query('SELECT * FROM hr_contracts WHERE id = $1', [id]);
+    const tokenCompanyId = resolveCompanyId(req);
+    const values = [id];
+    let query = 'SELECT * FROM hr_contracts WHERE id = $1';
+    if (tokenCompanyId) {
+      values.push(tokenCompanyId);
+      query += ` AND company_id = $2`;
+    }
+    const result = await pool.query(query, values);
     if (!result.rows.length) {
       return res
         .status(404)
@@ -86,10 +137,41 @@ async function createContrato(req, res, next) {
       'salario'
     ]);
 
+    const companyError = ensureCompanyMatch(req, req.body.empresaId);
+    if (companyError) {
+      return res.status(403).json(companyError);
+    }
+
+    const dateError = validateDateRange(req.body.fechaInicio, req.body.fechaFin);
+    if (dateError) {
+      requiredErrors.push({ field: 'fechaFin', message: dateError });
+    }
+
     if (requiredErrors.length) {
       return res
         .status(400)
         .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
+    }
+
+    const companyId = resolveCompanyId(req) || req.body.empresaId;
+    if (!companyId) {
+      return res
+        .status(400)
+        .json(envelopeError('VALIDATION_ERROR', 'empresaId es obligatorio'));
+    }
+
+    const active = req.body.activo !== undefined ? !!req.body.activo : true;
+    if (active) {
+      const hasOverlap = await hasOverlappingActiveContract({
+        employeeId: req.body.empleadoId,
+        startDate: req.body.fechaInicio,
+        endDate: req.body.fechaFin
+      });
+      if (hasOverlap) {
+        return res
+          .status(400)
+          .json(envelopeError('VALIDATION_ERROR', 'Contrato activo solapado'));
+      }
     }
 
     const insertQuery = `
@@ -101,13 +183,13 @@ async function createContrato(req, res, next) {
     `;
 
     const result = await pool.query(insertQuery, [
-      req.body.empresaId,
+      companyId,
       req.body.empleadoId,
       req.body.fechaInicio,
       req.body.fechaFin || null,
       req.body.tipoContrato,
       req.body.salario,
-      req.body.activo !== undefined ? !!req.body.activo : true
+      active
     ]);
 
     return res.status(201).json(envelopeSuccess(mapContrato(result.rows[0])));
@@ -127,10 +209,42 @@ async function updateContrato(req, res, next) {
       'salario'
     ]);
 
+    const companyError = ensureCompanyMatch(req, req.body.empresaId);
+    if (companyError) {
+      return res.status(403).json(companyError);
+    }
+
+    const dateError = validateDateRange(req.body.fechaInicio, req.body.fechaFin);
+    if (dateError) {
+      requiredErrors.push({ field: 'fechaFin', message: dateError });
+    }
+
     if (requiredErrors.length) {
       return res
         .status(400)
         .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
+    }
+
+    const companyId = resolveCompanyId(req) || req.body.empresaId;
+    if (!companyId) {
+      return res
+        .status(400)
+        .json(envelopeError('VALIDATION_ERROR', 'empresaId es obligatorio'));
+    }
+
+    const active = req.body.activo !== undefined ? !!req.body.activo : true;
+    if (active) {
+      const hasOverlap = await hasOverlappingActiveContract({
+        employeeId: req.body.empleadoId,
+        startDate: req.body.fechaInicio,
+        endDate: req.body.fechaFin,
+        excludeId: id
+      });
+      if (hasOverlap) {
+        return res
+          .status(400)
+          .json(envelopeError('VALIDATION_ERROR', 'Contrato activo solapado'));
+      }
     }
 
     const updateQuery = `
@@ -147,13 +261,13 @@ async function updateContrato(req, res, next) {
     `;
 
     const result = await pool.query(updateQuery, [
-      req.body.empresaId,
+      companyId,
       req.body.empleadoId,
       req.body.fechaInicio,
       req.body.fechaFin || null,
       req.body.tipoContrato,
       req.body.salario,
-      req.body.activo !== undefined ? !!req.body.activo : true,
+      active,
       id
     ]);
 
@@ -172,7 +286,26 @@ async function updateContrato(req, res, next) {
 async function deleteContrato(req, res, next) {
   try {
     const { id } = req.params;
-    const result = await pool.query('DELETE FROM hr_contracts WHERE id = $1', [id]);
+    const tokenCompanyId = resolveCompanyId(req);
+    const values = [id];
+    let query = `
+      UPDATE hr_contracts
+      SET active = false,
+          end_date = COALESCE(end_date, CURRENT_DATE)
+      WHERE id = $1
+      RETURNING *
+    `;
+    if (tokenCompanyId) {
+      query = `
+        UPDATE hr_contracts
+        SET active = false,
+            end_date = COALESCE(end_date, CURRENT_DATE)
+        WHERE id = $1 AND company_id = $2
+        RETURNING *
+      `;
+      values.push(tokenCompanyId);
+    }
+    const result = await pool.query(query, values);
     if (!result.rowCount) {
       return res
         .status(404)
