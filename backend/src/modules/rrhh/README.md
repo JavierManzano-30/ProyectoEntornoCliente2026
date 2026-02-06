@@ -5,6 +5,12 @@ Este documento resume qué endpoints existen en el backend de **Recursos Humanos
 Base URL: `/api/v1/rrhh`  
 Auth: `Authorization: Bearer <token>`
 
+Notas importantes:
+- Si el token incluye `companyId` o `empresaId`, el backend fuerza el aislamiento por empresa.
+- Si se envia `empresaId` distinto al del token, la API responde `403`.
+- Si el token incluye empresa, el filtro `empresaId` en listados se ignora.
+- Validaciones adicionales: fechas coherentes y sin solapamientos en contratos/ausencias.
+
 Este módulo sigue las convenciones de `backend/docs/api/convenciones-api.md`:
 - Envelope obligatorio (`success`, `data`, `meta/error`)
 - JSON en `camelCase`
@@ -104,7 +110,7 @@ Ejemplo POST `/departamentos`:
 - `POST /contratos`
 - `GET /contratos/{id}`
 - `PUT /contratos/{id}`
-- `DELETE /contratos/{id}`
+- `DELETE /contratos/{id}` _(baja logica: marca `active=false` y fija `end_date` si estaba vacio)_
 
 Filtros en listado:
 - `empresaId`
@@ -125,6 +131,10 @@ Ejemplo POST `/contratos`:
 }
 ```
 
+Reglas:
+- No se permiten contratos activos solapados para un mismo empleado.
+- `fechaFin` debe ser igual o posterior a `fechaInicio`.
+
 ---
 
 ## 🗓️ Ausencias
@@ -133,7 +143,7 @@ Ejemplo POST `/contratos`:
 - `POST /ausencias`
 - `GET /ausencias/{id}`
 - `PUT /ausencias/{id}`
-- `DELETE /ausencias/{id}`
+- `DELETE /ausencias/{id}` _(baja logica: marca `status='rejected'`)_
 - `PATCH /ausencias/{id}/aprobar`
 - `PATCH /ausencias/{id}/rechazar`
 
@@ -156,6 +166,10 @@ Ejemplo POST `/ausencias`:
   "notas": "Vacaciones de verano"
 }
 ```
+
+Reglas:
+- No se permiten ausencias solapadas en estado `pending` o `approved`.
+- `fechaFin` debe ser igual o posterior a `fechaInicio`.
 
 ---
 

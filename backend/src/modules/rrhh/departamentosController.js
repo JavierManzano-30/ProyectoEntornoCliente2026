@@ -3,6 +3,18 @@ const { envelopeSuccess, envelopeError } = require('../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../utils/pagination');
 const { validateRequiredFields } = require('../../utils/validation');
 
+function resolveCompanyId(req) {
+  return req.user?.companyId || req.user?.empresaId || req.user?.company_id || null;
+}
+
+function ensureCompanyMatch(req, providedCompanyId) {
+  const tokenCompanyId = resolveCompanyId(req);
+  if (tokenCompanyId && providedCompanyId && providedCompanyId !== tokenCompanyId) {
+    return envelopeError('FORBIDDEN', 'Empresa no autorizada');
+  }
+  return null;
+}
+
 function mapDepartamento(row) {
   return {
     id: row.id,
@@ -19,8 +31,12 @@ async function listDepartamentos(req, res, next) {
     const { page, limit, offset } = getPaginationParams(req.query);
     const filters = [];
     const values = [];
+    const tokenCompanyId = resolveCompanyId(req);
 
-    if (req.query.empresaId) {
+    if (tokenCompanyId) {
+      values.push(tokenCompanyId);
+      filters.push(`company_id = $${values.length}`);
+    } else if (req.query.empresaId) {
       values.push(req.query.empresaId);
       filters.push(`company_id = $${values.length}`);
     }
@@ -57,7 +73,14 @@ async function listDepartamentos(req, res, next) {
 async function getDepartamento(req, res, next) {
   try {
     const { id } = req.params;
-    const result = await pool.query('SELECT * FROM hr_departments WHERE id = $1', [id]);
+    const tokenCompanyId = resolveCompanyId(req);
+    const values = [id];
+    let query = 'SELECT * FROM hr_departments WHERE id = $1';
+    if (tokenCompanyId) {
+      values.push(tokenCompanyId);
+      query += ` AND company_id = $2`;
+    }
+    const result = await pool.query(query, values);
     if (!result.rows.length) {
       return res
         .status(404)
@@ -72,10 +95,21 @@ async function getDepartamento(req, res, next) {
 async function createDepartamento(req, res, next) {
   try {
     const requiredErrors = validateRequiredFields(req.body, ['empresaId', 'nombre']);
+    const companyError = ensureCompanyMatch(req, req.body.empresaId);
+    if (companyError) {
+      return res.status(403).json(companyError);
+    }
     if (requiredErrors.length) {
       return res
         .status(400)
         .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
+    }
+
+    const companyId = resolveCompanyId(req) || req.body.empresaId;
+    if (!companyId) {
+      return res
+        .status(400)
+        .json(envelopeError('VALIDATION_ERROR', 'empresaId es obligatorio'));
     }
 
     const insertQuery = `
@@ -85,7 +119,7 @@ async function createDepartamento(req, res, next) {
     `;
 
     const result = await pool.query(insertQuery, [
-      req.body.empresaId,
+      companyId,
       req.body.nombre,
       req.body.parentDepartmentId || null,
       req.body.activo !== undefined ? !!req.body.activo : true
@@ -101,10 +135,21 @@ async function updateDepartamento(req, res, next) {
   try {
     const { id } = req.params;
     const requiredErrors = validateRequiredFields(req.body, ['empresaId', 'nombre']);
+    const companyError = ensureCompanyMatch(req, req.body.empresaId);
+    if (companyError) {
+      return res.status(403).json(companyError);
+    }
     if (requiredErrors.length) {
       return res
         .status(400)
         .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
+    }
+
+    const companyId = resolveCompanyId(req) || req.body.empresaId;
+    if (!companyId) {
+      return res
+        .status(400)
+        .json(envelopeError('VALIDATION_ERROR', 'empresaId es obligatorio'));
     }
 
     const updateQuery = `
@@ -118,7 +163,7 @@ async function updateDepartamento(req, res, next) {
     `;
 
     const result = await pool.query(updateQuery, [
-      req.body.empresaId,
+      companyId,
       req.body.nombre,
       req.body.parentDepartmentId || null,
       req.body.activo !== undefined ? !!req.body.activo : true,
@@ -140,7 +185,14 @@ async function updateDepartamento(req, res, next) {
 async function deleteDepartamento(req, res, next) {
   try {
     const { id } = req.params;
-    const result = await pool.query('DELETE FROM hr_departments WHERE id = $1', [id]);
+    const tokenCompanyId = resolveCompanyId(req);
+    const values = [id];
+    let query = 'DELETE FROM hr_departments WHERE id = $1';
+    if (tokenCompanyId) {
+      values.push(tokenCompanyId);
+      query += ' AND company_id = $2';
+    }
+    const result = await pool.query(query, values);
     if (!result.rowCount) {
       return res
         .status(404)

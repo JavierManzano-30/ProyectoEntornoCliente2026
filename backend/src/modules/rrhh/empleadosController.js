@@ -3,6 +3,18 @@ const { envelopeSuccess, envelopeError } = require('../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../utils/pagination');
 const { validateRequiredFields } = require('../../utils/validation');
 
+function resolveCompanyId(req) {
+  return req.user?.companyId || req.user?.empresaId || req.user?.company_id || null;
+}
+
+function ensureCompanyMatch(req, providedCompanyId) {
+  const tokenCompanyId = resolveCompanyId(req);
+  if (tokenCompanyId && providedCompanyId && providedCompanyId !== tokenCompanyId) {
+    return envelopeError('FORBIDDEN', 'Empresa no autorizada');
+  }
+  return null;
+}
+
 function mapEmpleado(row) {
   return {
     id: row.id,
@@ -23,8 +35,12 @@ async function listEmpleados(req, res, next) {
     const { page, limit, offset } = getPaginationParams(req.query);
     const filters = [];
     const values = [];
+    const tokenCompanyId = resolveCompanyId(req);
 
-    if (req.query.empresaId) {
+    if (tokenCompanyId) {
+      values.push(tokenCompanyId);
+      filters.push(`company_id = $${values.length}`);
+    } else if (req.query.empresaId) {
       values.push(req.query.empresaId);
       filters.push(`company_id = $${values.length}`);
     }
@@ -71,7 +87,14 @@ async function listEmpleados(req, res, next) {
 async function getEmpleado(req, res, next) {
   try {
     const { id } = req.params;
-    const result = await pool.query('SELECT * FROM hr_employees WHERE id = $1', [id]);
+    const tokenCompanyId = resolveCompanyId(req);
+    const values = [id];
+    let query = 'SELECT * FROM hr_employees WHERE id = $1';
+    if (tokenCompanyId) {
+      values.push(tokenCompanyId);
+      query += ` AND company_id = $2`;
+    }
+    const result = await pool.query(query, values);
     if (!result.rows.length) {
       return res
         .status(404)
@@ -95,10 +118,22 @@ async function createEmpleado(req, res, next) {
       'departamentoId'
     ]);
 
+    const companyError = ensureCompanyMatch(req, req.body.empresaId);
+    if (companyError) {
+      return res.status(403).json(companyError);
+    }
+
     if (requiredErrors.length) {
       return res
         .status(400)
         .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
+    }
+
+    const companyId = resolveCompanyId(req) || req.body.empresaId;
+    if (!companyId) {
+      return res
+        .status(400)
+        .json(envelopeError('VALIDATION_ERROR', 'empresaId es obligatorio'));
     }
 
     const insertQuery = `
@@ -110,7 +145,7 @@ async function createEmpleado(req, res, next) {
     `;
 
     const result = await pool.query(insertQuery, [
-      req.body.empresaId,
+      companyId,
       req.body.nombre,
       req.body.apellidos,
       req.body.email,
@@ -138,10 +173,22 @@ async function updateEmpleado(req, res, next) {
       'departamentoId'
     ]);
 
+    const companyError = ensureCompanyMatch(req, req.body.empresaId);
+    if (companyError) {
+      return res.status(403).json(companyError);
+    }
+
     if (requiredErrors.length) {
       return res
         .status(400)
         .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
+    }
+
+    const companyId = resolveCompanyId(req) || req.body.empresaId;
+    if (!companyId) {
+      return res
+        .status(400)
+        .json(envelopeError('VALIDATION_ERROR', 'empresaId es obligatorio'));
     }
 
     const updateQuery = `
@@ -159,7 +206,7 @@ async function updateEmpleado(req, res, next) {
     `;
 
     const result = await pool.query(updateQuery, [
-      req.body.empresaId,
+      companyId,
       req.body.nombre,
       req.body.apellidos,
       req.body.email,
@@ -186,6 +233,7 @@ async function updateEmpleado(req, res, next) {
 async function deleteEmpleado(req, res, next) {
   try {
     const { id } = req.params;
+    const tokenCompanyId = resolveCompanyId(req);
     const updateQuery = `
       UPDATE hr_employees
       SET status = 'inactive'
@@ -193,7 +241,18 @@ async function deleteEmpleado(req, res, next) {
       RETURNING *
     `;
 
-    const result = await pool.query(updateQuery, [id]);
+    const values = [id];
+    let query = updateQuery;
+    if (tokenCompanyId) {
+      query = `
+        UPDATE hr_employees
+        SET status = 'inactive'
+        WHERE id = $1 AND company_id = $2
+        RETURNING *
+      `;
+      values.push(tokenCompanyId);
+    }
+    const result = await pool.query(query, values);
     if (!result.rows.length) {
       return res
         .status(404)
