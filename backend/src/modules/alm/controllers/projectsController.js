@@ -1,10 +1,14 @@
-const { pool } = require('../../../config/db');
+const supabase = require('../../../config/supabase');
 const { envelopeSuccess, envelopeError } = require('../../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../../utils/pagination');
 const { validateRequiredFields, validateEnum } = require('../../../utils/validation');
 const { generateId } = require('../../../utils/id');
 
 const PROJECT_STATES = ['planned', 'in_progress', 'paused', 'completed'];
+
+function getAuthCompanyId(req) {
+  return req.user?.companyId || req.user?.company_id || null;
+}
 
 function mapProject(row) {
   return {
@@ -24,9 +28,9 @@ function mapProject(row) {
 }
 
 function parseSort(sort) {
-  if (!sort) return 'created_at DESC';
-  const direction = sort.startsWith('-') ? 'DESC' : 'ASC';
-  const field = sort.replace('-', '');
+  const raw = sort || '-createdAt';
+  const ascending = !raw.startsWith('-');
+  const field = raw.replace('-', '');
   const map = {
     name: 'name',
     startDate: 'start_date',
@@ -34,63 +38,37 @@ function parseSort(sort) {
     status: 'status',
     createdAt: 'created_at'
   };
-  if (!map[field]) return 'created_at DESC';
-  return `${map[field]} ${direction}`;
+  return { column: map[field] || 'created_at', ascending };
 }
 
 async function listProjects(req, res, next) {
   try {
+    const companyId = getAuthCompanyId(req);
+    if (!companyId) {
+      return res.status(403).json(envelopeError('FORBIDDEN', 'companyId no disponible en token'));
+    }
+
     const { page, limit, offset } = getPaginationParams(req.query);
-    const filters = [];
-    const values = [];
+    const { column, ascending } = parseSort(req.query.sort);
 
-    if (req.query.companyId) {
-      values.push(req.query.companyId);
-      filters.push(`company_id = $${values.length}`);
-    }
-    if (req.query.status) {
-      values.push(req.query.status);
-      filters.push(`status = $${values.length}`);
-    }
-    if (req.query.clientId) {
-      values.push(req.query.clientId);
-      filters.push(`client_id = $${values.length}`);
-    }
-    if (req.query.responsibleId) {
-      values.push(req.query.responsibleId);
-      filters.push(`responsible_id = $${values.length}`);
-    }
-    if (req.query.startDate) {
-      values.push(req.query.startDate);
-      filters.push(`start_date >= $${values.length}`);
-    }
-    if (req.query.endDate) {
-      values.push(req.query.endDate);
-      filters.push(`end_date <= $${values.length}`);
-    }
+    let query = supabase
+      .from('alm_projects')
+      .select('*', { count: 'exact' })
+      .eq('company_id', companyId);
 
-    const whereClause = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
-    const orderBy = parseSort(req.query.sort);
+    if (req.query.status) query = query.eq('status', req.query.status);
+    if (req.query.clientId) query = query.eq('client_id', req.query.clientId);
+    if (req.query.responsibleId) query = query.eq('responsible_id', req.query.responsibleId);
+    if (req.query.startDate) query = query.gte('start_date', req.query.startDate);
+    if (req.query.endDate) query = query.lte('end_date', req.query.endDate);
 
-    const countQuery = `SELECT COUNT(*)::int AS total FROM alm_projects ${whereClause}`;
-    const countResult = await pool.query(countQuery, values);
-    const totalItems = countResult.rows[0]?.total || 0;
+    const { data, error, count } = await query
+      .order(column, { ascending })
+      .range(offset, offset + limit - 1);
 
-    values.push(limit);
-    values.push(offset);
-    const listQuery = `
-      SELECT *
-      FROM alm_projects
-      ${whereClause}
-      ORDER BY ${orderBy}
-      LIMIT $${values.length - 1} OFFSET $${values.length}
-    `;
+    if (error) throw error;
 
-    const result = await pool.query(listQuery, values);
-    const data = result.rows.map(mapProject);
-    const meta = buildPaginationMeta(page, limit, totalItems);
-
-    return res.json(envelopeSuccess(data, meta));
+    return res.json(envelopeSuccess((data || []).map(mapProject), buildPaginationMeta(page, limit, count || 0)));
   } catch (err) {
     return next(err);
   }
@@ -98,12 +76,25 @@ async function listProjects(req, res, next) {
 
 async function getProject(req, res, next) {
   try {
+    const companyId = getAuthCompanyId(req);
+    if (!companyId) {
+      return res.status(403).json(envelopeError('FORBIDDEN', 'companyId no disponible en token'));
+    }
+
     const { id } = req.params;
-    const result = await pool.query('SELECT * FROM alm_projects WHERE id = $1', [id]);
-    if (!result.rows.length) {
+    const { data, error } = await supabase
+      .from('alm_projects')
+      .select('*')
+      .eq('id', id)
+      .eq('company_id', companyId)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) {
       return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Proyecto no encontrado'));
     }
-    return res.json(envelopeSuccess(mapProject(result.rows[0])));
+
+    return res.json(envelopeSuccess(mapProject(data)));
   } catch (err) {
     return next(err);
   }
@@ -111,8 +102,12 @@ async function getProject(req, res, next) {
 
 async function createProject(req, res, next) {
   try {
+    const companyId = getAuthCompanyId(req);
+    if (!companyId) {
+      return res.status(403).json(envelopeError('FORBIDDEN', 'companyId no disponible en token'));
+    }
+
     const requiredErrors = validateRequiredFields(req.body, [
-      'companyId',
       'name',
       'startDate',
       'responsibleId',
@@ -122,49 +117,29 @@ async function createProject(req, res, next) {
     if (enumError) requiredErrors.push({ field: 'status', message: enumError });
 
     if (requiredErrors.length) {
-      return res
-        .status(400)
-        .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
     }
 
+    const now = new Date().toISOString();
     const payload = {
-      companyId: req.body.companyId,
+      id: generateId('proj'),
+      company_id: companyId,
       name: req.body.name,
       description: req.body.description || null,
-      startDate: req.body.startDate,
-      endDate: req.body.endDate || null,
-      responsibleId: req.body.responsibleId,
+      start_date: req.body.startDate,
+      end_date: req.body.endDate || null,
+      responsible_id: req.body.responsibleId,
       status: req.body.status,
       budget: req.body.budget ?? null,
-      clientId: req.body.clientId || null
+      client_id: req.body.clientId || null,
+      created_at: now,
+      updated_at: now
     };
 
-    const insertQuery = `
-      INSERT INTO alm_projects
-        (id, company_id, name, description, start_date, end_date, responsible_id, status, budget, client_id, created_at, updated_at)
-      VALUES
-        ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
-      RETURNING *
-    `;
+    const { data, error } = await supabase.from('alm_projects').insert([payload]).select('*').single();
+    if (error) throw error;
 
-    const id = generateId('proj');
-    const now = new Date().toISOString();
-    const result = await pool.query(insertQuery, [
-      id,
-      payload.companyId,
-      payload.name,
-      payload.description,
-      payload.startDate,
-      payload.endDate,
-      payload.responsibleId,
-      payload.status,
-      payload.budget,
-      payload.clientId,
-      now,
-      now
-    ]);
-
-    return res.status(201).json(envelopeSuccess(mapProject(result.rows[0])));
+    return res.status(201).json(envelopeSuccess(mapProject(data)));
   } catch (err) {
     return next(err);
   }
@@ -172,9 +147,13 @@ async function createProject(req, res, next) {
 
 async function updateProject(req, res, next) {
   try {
+    const companyId = getAuthCompanyId(req);
+    if (!companyId) {
+      return res.status(403).json(envelopeError('FORBIDDEN', 'companyId no disponible en token'));
+    }
+
     const { id } = req.params;
     const requiredErrors = validateRequiredFields(req.body, [
-      'companyId',
       'name',
       'startDate',
       'responsibleId',
@@ -184,47 +163,34 @@ async function updateProject(req, res, next) {
     if (enumError) requiredErrors.push({ field: 'status', message: enumError });
 
     if (requiredErrors.length) {
-      return res
-        .status(400)
-        .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
     }
 
-    const updateQuery = `
-      UPDATE alm_projects
-      SET company_id = $1,
-          name = $2,
-          description = $3,
-          start_date = $4,
-          end_date = $5,
-          responsible_id = $6,
-          status = $7,
-          budget = $8,
-          client_id = $9,
-          updated_at = $10
-      WHERE id = $11
-      RETURNING *
-    `;
+    const { data, error } = await supabase
+      .from('alm_projects')
+      .update({
+        company_id: companyId,
+        name: req.body.name,
+        description: req.body.description || null,
+        start_date: req.body.startDate,
+        end_date: req.body.endDate || null,
+        responsible_id: req.body.responsibleId,
+        status: req.body.status,
+        budget: req.body.budget ?? null,
+        client_id: req.body.clientId || null,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .eq('company_id', companyId)
+      .select('*')
+      .maybeSingle();
 
-    const now = new Date().toISOString();
-    const result = await pool.query(updateQuery, [
-      req.body.companyId,
-      req.body.name,
-      req.body.description || null,
-      req.body.startDate,
-      req.body.endDate || null,
-      req.body.responsibleId,
-      req.body.status,
-      req.body.budget ?? null,
-      req.body.clientId || null,
-      now,
-      id
-    ]);
-
-    if (!result.rows.length) {
+    if (error) throw error;
+    if (!data) {
       return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Proyecto no encontrado'));
     }
 
-    return res.json(envelopeSuccess(mapProject(result.rows[0])));
+    return res.json(envelopeSuccess(mapProject(data)));
   } catch (err) {
     return next(err);
   }
@@ -232,11 +198,25 @@ async function updateProject(req, res, next) {
 
 async function deleteProject(req, res, next) {
   try {
+    const companyId = getAuthCompanyId(req);
+    if (!companyId) {
+      return res.status(403).json(envelopeError('FORBIDDEN', 'companyId no disponible en token'));
+    }
+
     const { id } = req.params;
-    const result = await pool.query('DELETE FROM alm_projects WHERE id = $1', [id]);
-    if (!result.rowCount) {
+    const { data, error } = await supabase
+      .from('alm_projects')
+      .delete()
+      .eq('id', id)
+      .eq('company_id', companyId)
+      .select('id')
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) {
       return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Proyecto no encontrado'));
     }
+
     return res.status(204).send();
   } catch (err) {
     return next(err);
@@ -245,25 +225,24 @@ async function deleteProject(req, res, next) {
 
 async function listProjectTasks(req, res, next) {
   try {
+    const companyId = getAuthCompanyId(req);
+    if (!companyId) {
+      return res.status(403).json(envelopeError('FORBIDDEN', 'companyId no disponible en token'));
+    }
+
     const { id } = req.params;
     const { page, limit, offset } = getPaginationParams(req.query);
-    const values = [id];
+    const { data, error, count } = await supabase
+      .from('alm_tasks')
+      .select('*', { count: 'exact' })
+      .eq('project_id', id)
+      .eq('company_id', companyId)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
 
-    const countQuery = 'SELECT COUNT(*)::int AS total FROM alm_tasks WHERE project_id = $1';
-    const countResult = await pool.query(countQuery, values);
-    const totalItems = countResult.rows[0]?.total || 0;
+    if (error) throw error;
 
-    values.push(limit, offset);
-    const listQuery = `
-      SELECT *
-      FROM alm_tasks
-      WHERE project_id = $1
-      ORDER BY created_at DESC
-      LIMIT $2 OFFSET $3
-    `;
-    const result = await pool.query(listQuery, values);
-
-    const data = result.rows.map((row) => ({
+    const mapped = (data || []).map((row) => ({
       id: row.id,
       companyId: row.company_id,
       projectId: row.project_id,
@@ -278,8 +257,7 @@ async function listProjectTasks(req, res, next) {
       updatedAt: row.updated_at
     }));
 
-    const meta = buildPaginationMeta(page, limit, totalItems);
-    return res.json(envelopeSuccess(data, meta));
+    return res.json(envelopeSuccess(mapped, buildPaginationMeta(page, limit, count || 0)));
   } catch (err) {
     return next(err);
   }
@@ -287,48 +265,59 @@ async function listProjectTasks(req, res, next) {
 
 async function getProjectStats(req, res, next) {
   try {
-    const { id } = req.params;
+    const companyId = getAuthCompanyId(req);
+    if (!companyId) {
+      return res.status(403).json(envelopeError('FORBIDDEN', 'companyId no disponible en token'));
+    }
 
-    const projectResult = await pool.query('SELECT id FROM alm_projects WHERE id = $1', [id]);
-    if (!projectResult.rows.length) {
+    const { id } = req.params;
+    const { data: project, error: projectError } = await supabase
+      .from('alm_projects')
+      .select('id')
+      .eq('id', id)
+      .eq('company_id', companyId)
+      .maybeSingle();
+
+    if (projectError) throw projectError;
+    if (!project) {
       return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Proyecto no encontrado'));
     }
 
-    const countsQuery = `
-      SELECT
-        COUNT(*)::int AS total,
-        COUNT(*) FILTER (WHERE status = 'pending')::int AS pending,
-        COUNT(*) FILTER (WHERE status = 'in_progress')::int AS in_progress,
-        COUNT(*) FILTER (WHERE status = 'completed')::int AS completed,
-        COALESCE(SUM(estimated_time), 0)::int AS estimated_hours
-      FROM alm_tasks
-      WHERE project_id = $1
-    `;
+    const { data: tasks, error: tasksError } = await supabase
+      .from('alm_tasks')
+      .select('id, status, estimated_time')
+      .eq('project_id', id)
+      .eq('company_id', companyId);
+    if (tasksError) throw tasksError;
 
-    const timesQuery = `
-      SELECT COALESCE(SUM(r.hours), 0)::numeric AS real_hours
-      FROM alm_time_entries r
-      JOIN alm_tasks t ON t.id = r.task_id
-      WHERE t.project_id = $1
-    `;
+    const taskRows = tasks || [];
+    const taskIds = taskRows.map((task) => task.id);
+    let totalRealHours = 0;
+    if (taskIds.length) {
+      const { data: timeRows, error: timeError } = await supabase
+        .from('alm_time_entries')
+        .select('hours')
+        .in('task_id', taskIds);
+      if (timeError) throw timeError;
+      totalRealHours = (timeRows || []).reduce((sum, row) => sum + Number(row.hours || 0), 0);
+    }
 
-    const counts = await pool.query(countsQuery, [id]);
-    const times = await pool.query(timesQuery, [id]);
-    const statsRow = counts.rows[0];
-    const realHours = Number(times.rows[0]?.real_hours || 0);
-    const completion = statsRow.total ? Math.round((statsRow.completed / statsRow.total) * 100) : 0;
+    const total = taskRows.length;
+    const pending = taskRows.filter((row) => row.status === 'pending').length;
+    const inProgress = taskRows.filter((row) => row.status === 'in_progress').length;
+    const completed = taskRows.filter((row) => row.status === 'completed').length;
+    const estimatedHours = taskRows.reduce((sum, row) => sum + Number(row.estimated_time || 0), 0);
+    const completionPercent = total ? Math.round((completed / total) * 100) : 0;
 
-    const data = {
-      totalTasks: statsRow.total,
-      pending: statsRow.pending,
-      inProgress: statsRow.in_progress,
-      completed: statsRow.completed,
-      completionPercent: completion,
-      estimatedHours: statsRow.estimated_hours,
-      realHours
-    };
-
-    return res.json(envelopeSuccess(data));
+    return res.json(envelopeSuccess({
+      totalTasks: total,
+      pending,
+      inProgress,
+      completed,
+      completionPercent,
+      estimatedHours,
+      realHours: totalRealHours
+    }));
   } catch (err) {
     return next(err);
   }

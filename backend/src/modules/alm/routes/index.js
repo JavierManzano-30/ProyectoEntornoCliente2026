@@ -1,5 +1,5 @@
 const express = require('express');
-const { requireAuth } = require('../../../middlewares/auth');
+const { authMiddleware } = require('../../../middlewares/auth');
 const projects = require('../controllers/projectsController');
 const tasks = require('../controllers/tasksController');
 const times = require('../controllers/timesController');
@@ -11,7 +11,7 @@ const router = express.Router();
 router.get('/supabase/health', supabase.supabaseHealth);
 
 // Apply auth to all remaining ALM routes
-router.use(requireAuth);
+router.use(authMiddleware);
 // Proyectos
 router.get('/proyectos', projects.listProjects);
 router.post('/proyectos', projects.createProject);
