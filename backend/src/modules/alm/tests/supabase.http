@@ -1,0 +1,23 @@
+# @no-cookie-jar
+@supabase_url = https://qctgocielkphraivucua.supabase.co
+@supabase_key = {{SUPABASE_ANON_KEY}}
+
+### Supabase - list projects
+GET {{supabase_url}}/rest/v1/alm_projects?select=*
+apikey: {{supabase_key}}
+Authorization: Bearer {{supabase_key}}
+
+### Supabase - list tasks
+GET {{supabase_url}}/rest/v1/alm_tasks?select=*
+apikey: {{supabase_key}}
+Authorization: Bearer {{supabase_key}}
+
+### Supabase - list time entries
+GET {{supabase_url}}/rest/v1/alm_time_entries?select=*
+apikey: {{supabase_key}}
+Authorization: Bearer {{supabase_key}}
+
+### Supabase - projects by company
+GET {{supabase_url}}/rest/v1/alm_projects?company_id=eq.11111111-1111-1111-1111-111111111111
+apikey: {{supabase_key}}
+Authorization: Bearer {{supabase_key}}

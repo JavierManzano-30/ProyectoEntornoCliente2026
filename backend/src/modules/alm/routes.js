@@ -3,12 +3,15 @@ const { requireAuth } = require('../../middleware/auth');
 const projects = require('./projectsController');
 const tasks = require('./tasksController');
 const times = require('./timesController');
+const supabase = require('./supabaseController');
 
 const router = express.Router();
 
-// Apply auth to all ALM routes
-router.use(requireAuth);
+// Public health check (no auth) for Supabase connectivity
+router.get('/supabase/health', supabase.supabaseHealth);
 
+// Apply auth to all remaining ALM routes
+router.use(requireAuth);
 // Proyectos
 router.get('/proyectos', projects.listProjects);
 router.post('/proyectos', projects.createProject);
@@ -35,5 +38,6 @@ router.delete('/tiempos/:id', times.deleteTime);
 router.get('/tiempos/proyecto/:id/resumen', times.getProjectTimeSummary);
 router.get('/tiempos/usuario/:id', times.getUserTimes);
 router.get('/tiempos/tarea/:id', times.getTaskTimes);
+
 
 module.exports = router;
