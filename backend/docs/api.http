@@ -111,27 +111,158 @@ Content-Type: application/json
 }
 
 ### CRM - List Clients (requires JWT)
-GET {{baseUrl}}/api/v1/crm/clientes?page=1&limit=10&companyId={{companyId}}
+GET {{baseUrl}}/api/v1/crm/clientes?page=1&limit=10
 Authorization: Bearer {{token}}
 
-### CRM - Create Client (requires JWT)
+### CRM - Create Client (LEAD) (requires JWT)
 # @name crmCreateClient
 POST {{baseUrl}}/api/v1/crm/clientes
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "companyId": "{{companyId}}",
-  "name": "Cliente Demo",
-  "taxId": "B123",
+  "name": "Cliente Demo CRM",
+  "taxId": "B12345678",
   "email": "cliente@demo.com",
   "phone": "+34 600 111 222",
   "type": "lead"
 }
 
-### CRM - List Opportunities (requires JWT)
-GET {{baseUrl}}/api/v1/crm/oportunidades?page=1&limit=10&companyId={{companyId}}
+### CRM - Get Client Details (requires JWT)
+GET {{baseUrl}}/api/v1/crm/clientes/{{crmCreateClient.response.body.data.id}}
 Authorization: Bearer {{token}}
+
+### CRM - Create Pipeline (requires JWT)
+# @name crmCreatePipeline
+POST {{baseUrl}}/api/v1/crm/config/pipelines
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Pipeline Demo",
+  "description": "Pipeline de prueba",
+  "isActive": true
+}
+
+### CRM - List Pipelines (requires JWT)
+GET {{baseUrl}}/api/v1/crm/config/pipelines
+Authorization: Bearer {{token}}
+
+### CRM - Create Stage (requires JWT)
+# @name crmCreateStage
+POST {{baseUrl}}/api/v1/crm/config/stages
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "pipelineId": "{{crmCreatePipeline.response.body.data.id}}",
+  "name": "Prospección",
+  "sortOrder": 1,
+  "defaultProbability": 20
+}
+
+### CRM - Create Contact (requires JWT)
+# @name crmCreateContact
+POST {{baseUrl}}/api/v1/crm/contactos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "clientId": "{{crmCreateClient.response.body.data.id}}",
+  "name": "Juan",
+  "lastName": "Pérez",
+  "jobTitle": "CTO",
+  "email": "juan.perez@demo.com",
+  "phone": "+34 600 222 333",
+  "isDecisionMaker": true
+}
+
+### CRM - List Contacts (requires JWT)
+GET {{baseUrl}}/api/v1/crm/contactos?clientId={{crmCreateClient.response.body.data.id}}
+Authorization: Bearer {{token}}
+
+### CRM - Create Opportunity (requires JWT)
+# @name crmCreateOpportunity
+POST {{baseUrl}}/api/v1/crm/oportunidades
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "clientId": "{{crmCreateClient.response.body.data.id}}",
+  "pipelineId": "{{crmCreatePipeline.response.body.data.id}}",
+  "stageId": "{{crmCreateStage.response.body.data.id}}",
+  "title": "Venta Software ERP",
+  "description": "Implementación completa",
+  "estimatedValue": 50000,
+  "currency": "EUR",
+  "probability": 60,
+  "expectedCloseDate": "2026-03-31"
+}
+
+### CRM - List Opportunities (requires JWT)
+GET {{baseUrl}}/api/v1/crm/oportunidades?page=1&limit=10
+Authorization: Bearer {{token}}
+
+### CRM - Get Opportunity Details (requires JWT)
+GET {{baseUrl}}/api/v1/crm/oportunidades/{{crmCreateOpportunity.response.body.data.id}}
+Authorization: Bearer {{token}}
+
+### CRM - Update Opportunity Stage (requires JWT)
+PATCH {{baseUrl}}/api/v1/crm/oportunidades/{{crmCreateOpportunity.response.body.data.id}}/stage
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "stageId": "{{crmCreateStage.response.body.data.id}}",
+  "sortOrder": 1
+}
+
+### CRM - Create Activity (requires JWT)
+# @name crmCreateActivity
+POST {{baseUrl}}/api/v1/crm/actividades
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "userId": "test-user-1",
+  "clientId": "{{crmCreateClient.response.body.data.id}}",
+  "opportunityId": "{{crmCreateOpportunity.response.body.data.id}}",
+  "type": "call",
+  "subject": "Primera llamada",
+  "description": "Conversación inicial",
+  "activityAt": "2026-02-07T10:00:00.000Z",
+  "completed": false
+}
+
+### CRM - List Activities (requires JWT)
+GET {{baseUrl}}/api/v1/crm/actividades?page=1&limit=10
+Authorization: Bearer {{token}}
+
+### CRM - Get Activity Details (requires JWT)
+GET {{baseUrl}}/api/v1/crm/actividades/{{crmCreateActivity.response.body.data.id}}
+Authorization: Bearer {{token}}
+
+### CRM - Mark Activity as Completed (requires JWT)
+PATCH {{baseUrl}}/api/v1/crm/actividades/{{crmCreateActivity.response.body.data.id}}/completar
+Authorization: Bearer {{token}}
+
+### CRM - Convert Lead to Customer (requires JWT)
+POST {{baseUrl}}/api/v1/crm/clientes/{{crmCreateClient.response.body.data.id}}/convertir
+Authorization: Bearer {{token}}
+
+### CRM - Update Client (requires JWT)
+PUT {{baseUrl}}/api/v1/crm/clientes/{{crmCreateClient.response.body.data.id}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Cliente Demo CRM Actualizado",
+  "email": "cliente.updated@demo.com"
+}
+
+### ⚠️ CRM - Delete Client (CUIDADO: Eliminará en cascada contactos, oportunidades y actividades)
+# DELETE {{baseUrl}}/api/v1/crm/clientes/{{crmCreateClient.response.body.data.id}}
+# Authorization: Bearer {{token}}
 
 ### RRHH - Health (public)
 GET {{baseUrl}}/api/v1/rrhh/health

@@ -2,7 +2,6 @@ const supabase = require('../../../config/supabase');
 const { envelopeSuccess, envelopeError } = require('../../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../../utils/pagination');
 const { validateRequiredFields } = require('../../../utils/validation');
-const { generateId } = require('../../../utils/id');
 
 function mapContacto(row) {
   return {
@@ -81,14 +80,12 @@ async function createContacto(req, res, next) {
         .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
     }
 
-    const id = generateId('cont');
     const now = new Date().toISOString();
 
     const { data, error } = await supabase
       .from('crm_contacts')
       .insert([{
-        id,
-        company_id: req.body.companyId || null,
+        company_id: req.user.companyId,
         client_id: req.body.clientId,
         name: req.body.name,
         last_name: req.body.lastName || null,

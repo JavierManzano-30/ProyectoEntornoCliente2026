@@ -2,7 +2,6 @@ const supabase = require('../../../config/supabase');
 const { envelopeSuccess, envelopeError } = require('../../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../../utils/pagination');
 const { validateRequiredFields, validateEnum } = require('../../../utils/validation');
-const { generateId } = require('../../../utils/id');
 
 const CLIENTE_TIPOS = ['lead', 'customer'];
 
@@ -157,14 +156,12 @@ async function createCliente(req, res, next) {
         .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
     }
 
-    const id = generateId('cli');
     const now = new Date().toISOString();
 
     const { data, error } = await supabase
       .from('crm_clients')
       .insert([{
-        id,
-        company_id: req.body.companyId || null,
+        company_id: req.user.companyId,
         name: req.body.name,
         tax_id: req.body.taxId || null,
         email: req.body.email || null,

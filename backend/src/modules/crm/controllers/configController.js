@@ -1,7 +1,6 @@
 const supabase = require('../../../config/supabase');
 const { envelopeSuccess, envelopeError } = require('../../../utils/envelope');
 const { validateRequiredFields } = require('../../../utils/validation');
-const { generateId } = require('../../../utils/id');
 
 function mapPipeline(row) {
   return {
@@ -116,14 +115,12 @@ async function createPipeline(req, res, next) {
         .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
     }
 
-    const id = generateId('pipe');
     const now = new Date().toISOString();
 
     const { data, error } = await supabase
       .from('crm_pipelines')
       .insert([{
-        id,
-        company_id: req.body.companyId || null,
+        company_id: req.user.companyId,
         name: req.body.name,
         description: req.body.description || null,
         is_active: req.body.isActive !== undefined ? req.body.isActive : true,
@@ -212,14 +209,12 @@ async function createStage(req, res, next) {
         .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
     }
 
-    const id = generateId('stage');
     const now = new Date().toISOString();
 
     const { data, error } = await supabase
       .from('crm_stages')
       .insert([{
-        id,
-        company_id: req.body.companyId || null,
+        company_id: req.user.companyId,
         pipeline_id: req.body.pipelineId,
         name: req.body.name,
         sort_order: req.body.sortOrder,

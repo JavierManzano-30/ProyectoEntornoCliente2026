@@ -32,7 +32,7 @@ router.post('/oportunidades', oportunidades.createOportunidad);
 router.get('/oportunidades/:id', oportunidades.getOportunidad);
 router.put('/oportunidades/:id', oportunidades.updateOportunidad);
 router.delete('/oportunidades/:id', oportunidades.deleteOportunidad);
-router.patch('/oportunidades/:id/fase', oportunidades.updateFase);
+router.patch('/oportunidades/:id/stage', oportunidades.updateStage);
 
 // Actividades
 router.get('/actividades', actividades.listActividades);

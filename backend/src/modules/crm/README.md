@@ -2,9 +2,10 @@
 
 ## 📋 Información General
 
-**Base URL**: `/api/v1/crm`  
-**Autenticación**: `Authorization: Bearer <token>`  
-**Base de Datos**: Supabase (PostgreSQL)
+**Base URL**: `http://localhost:3001/api/v1/crm`  
+**Autenticación**: `Authorization: Bearer <token>` (requerido en todos los endpoints)  
+**Base de Datos**: Supabase (PostgreSQL con UUIDs auto-generados)  
+**Puerto**: 3001 (development)
 
 ### Convenciones de la API
 
@@ -65,9 +66,46 @@ Este módulo sigue las convenciones definidas en `backend/docs/api/convenciones-
 ### Ejemplos
 
 **POST /clientes** - Crear cliente:
+
+```bash
+# PowerShell
+$token = "YOUR_JWT_TOKEN"
+$headers = @{'Authorization' = "Bearer $token"; 'Content-Type' = 'application/json'}
+$body = @{
+  name = "Acme Corporation"
+  taxId = "B12345678"
+  email = "contact@acme.com"
+  phone = "+34912345678"
+  address = "Calle Mayor 1"
+  city = "Madrid"
+  responsibleId = "usr_10"
+  type = "lead"
+  notes = "Interesado en solución ERP"
+} | ConvertTo-Json
+Invoke-RestMethod -Uri 'http://localhost:3001/api/v1/crm/clientes' -Method POST -Headers $headers -Body $body
+```
+
+```bash
+# curl
+curl -X POST http://localhost:3001/api/v1/crm/clientes \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Acme Corporation",
+    "taxId": "B12345678",
+    "email": "contact@acme.com",
+    "phone": "+34912345678",
+    "address": "Calle Mayor 1",
+    "city": "Madrid",
+    "responsibleId": "usr_10",
+    "type": "lead",
+    "notes": "Interesado en solución ERP"
+  }'
+```
+
+**Request Body**:
 ```json
 {
-  "companyId": "11111111-1111-1111-1111-111111111111",
   "name": "Acme Corporation",
   "taxId": "B12345678",
   "email": "contact@acme.com",
@@ -80,12 +118,14 @@ Este módulo sigue las convenciones definidas en `backend/docs/api/convenciones-
 }
 ```
 
+> ⚠️ **Nota**: `companyId` se obtiene automáticamente del token JWT, no debe enviarse en el body.
+
 **Response 201**:
 ```json
 {
   "success": true,
   "data": {
-    "id": "cli_1234567890",
+    "id": "e6fad568-990e-495a-955a-51b64533b51e",
     "companyId": "11111111-1111-1111-1111-111111111111",
     "name": "Acme Corporation",
     "taxId": "B12345678",
@@ -96,19 +136,34 @@ Este módulo sigue las convenciones definidas en `backend/docs/api/convenciones-
     "responsibleId": "usr_10",
     "type": "lead",
     "notes": "Interesado en solución ERP",
-    "createdAt": "2026-02-04T12:00:00.000Z",
-    "updatedAt": "2026-02-04T12:00:00.000Z"
+    "createdAt": "2026-02-06T19:26:33.489Z",
+    "updatedAt": "2026-02-06T19:26:33.489Z"
   }
 }
 ```
 
 **GET /clientes?type=lead&limit=5** - Listar leads:
+
+```bash
+# PowerShell
+$token = "YOUR_JWT_TOKEN"
+$headers = @{'Authorization' = "Bearer $token"}
+Invoke-RestMethod -Uri 'http://localhost:3001/api/v1/crm/clientes?type=lead&limit=5' -Method GET -Headers $headers
+```
+
+```bash
+# curl
+curl -X GET "http://localhost:3001/api/v1/crm/clientes?type=lead&limit=5" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+**Response 200**:
 ```json
 {
   "success": true,
   "data": [
     {
-      "id": "cli_1234567890",
+      "id": "e6fad568-990e-495a-955a-51b64533b51e",
       "companyId": "11111111-1111-1111-1111-111111111111",
       "name": "Acme Corporation",
       "taxId": "B12345678",
@@ -119,8 +174,8 @@ Este módulo sigue las convenciones definidas en `backend/docs/api/convenciones-
       "responsibleId": "usr_10",
       "type": "lead",
       "notes": "Interesado en solución ERP",
-      "createdAt": "2026-02-04T12:00:00.000Z",
-      "updatedAt": "2026-02-04T12:00:00.000Z"
+      "createdAt": "2026-02-06T19:26:33.489Z",
+      "updatedAt": "2026-02-06T19:26:33.489Z"
     }
   ],
   "meta": {
@@ -133,17 +188,27 @@ Este módulo sigue las convenciones definidas en `backend/docs/api/convenciones-
 ```
 
 **GET /clientes/:id** - Detalle completo con relaciones:
+
+```bash
+# PowerShell
+$token = "YOUR_JWT_TOKEN"
+$headers = @{'Authorization' = "Bearer $token"}
+$clientId = "e6fad568-990e-495a-955a-51b64533b51e"
+Invoke-RestMethod -Uri "http://localhost:3001/api/v1/crm/clientes/$clientId" -Method GET -Headers $headers
+```
+
+**Response 200**:
 ```json
 {
   "success": true,
   "data": {
-    "id": "cli_1234567890",
+    "id": "e6fad568-990e-495a-955a-51b64533b51e",
     "companyId": "11111111-1111-1111-1111-111111111111",
     "name": "Acme Corporation",
     "type": "customer",
     "contacts": [
       {
-        "id": "cont_9876543210",
+        "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
         "name": "Juan",
         "lastName": "Pérez García",
         "jobTitle": "CTO",
@@ -159,14 +224,23 @@ Este módulo sigue las convenciones definidas en `backend/docs/api/convenciones-
 ```
 
 **POST /clientes/:id/convertir** - Convertir lead a customer:
+
+```bash
+# PowerShell
+$token = "YOUR_JWT_TOKEN"
+$headers = @{'Authorization' = "Bearer $token"; 'Content-Type' = 'application/json'}
+$clientId = "e6fad568-990e-495a-955a-51b64533b51e"
+Invoke-RestMethod -Uri "http://localhost:3001/api/v1/crm/clientes/$clientId/convertir" -Method POST -Headers $headers
+```
+
+**Response 200**:
 ```json
 {
   "success": true,
   "data": {
-    "id": "cli_1234567890",
+    "id": "e6fad568-990e-495a-955a-51b64533b51e",
     "type": "customer",
-    "syncedWithErp": true,
-    "updatedAt": "2026-02-04T12:30:00.000Z"
+    "updatedAt": "2026-02-06T19:30:00.489Z"
   }
 }
 ```
@@ -195,10 +269,27 @@ Este módulo sigue las convenciones definidas en `backend/docs/api/convenciones-
 ### Ejemplos
 
 **POST /contactos** - Crear contacto:
+
+```bash
+# PowerShell
+$token = "YOUR_JWT_TOKEN"
+$headers = @{'Authorization' = "Bearer $token"; 'Content-Type' = 'application/json'}
+$body = @{
+  clientId = "e6fad568-990e-495a-955a-51b64533b51e"
+  name = "Juan"
+  lastName = "Pérez García"
+  jobTitle = "CTO"
+  email = "juan.perez@acme.com"
+  phone = "+34600111222"
+  isDecisionMaker = $true
+} | ConvertTo-Json
+Invoke-RestMethod -Uri 'http://localhost:3001/api/v1/crm/contactos' -Method POST -Headers $headers -Body $body
+```
+
+**Request Body** (companyId viene del token):
 ```json
 {
-  "companyId": "11111111-1111-1111-1111-111111111111",
-  "clientId": "cli_1234567890",
+  "clientId": "e6fad568-990e-495a-955a-51b64533b51e",
   "name": "Juan",
   "lastName": "Pérez García",
   "jobTitle": "CTO",
@@ -213,17 +304,17 @@ Este módulo sigue las convenciones definidas en `backend/docs/api/convenciones-
 {
   "success": true,
   "data": {
-    "id": "cont_9876543210",
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     "companyId": "11111111-1111-1111-1111-111111111111",
-    "clientId": "cli_1234567890",
+    "clientId": "e6fad568-990e-495a-955a-51b64533b51e",
     "name": "Juan",
     "lastName": "Pérez García",
     "jobTitle": "CTO",
     "email": "juan.perez@acme.com",
     "phone": "+34600111222",
     "isDecisionMaker": true,
-    "createdAt": "2026-02-04T12:00:00.000Z",
-    "updatedAt": "2026-02-04T12:00:00.000Z"
+    "createdAt": "2026-02-06T19:26:33.489Z",
+    "updatedAt": "2026-02-06T19:26:33.489Z"
   }
 }
 ```
@@ -241,7 +332,7 @@ Este módulo sigue las convenciones definidas en `backend/docs/api/convenciones-
 | GET | `/oportunidades/:id` | Obtener oportunidad por ID |
 | PUT | `/oportunidades/:id` | Actualizar oportunidad |
 | DELETE | `/oportunidades/:id` | Eliminar oportunidad |
-| PATCH | `/oportunidades/:id/fase` | Cambiar fase (Kanban) |
+| PATCH | `/oportunidades/:id/stage` | Cambiar stage/fase (Kanban) |
 
 ### Query Parameters (GET /oportunidades)
 
@@ -257,12 +348,33 @@ Este módulo sigue las convenciones definidas en `backend/docs/api/convenciones-
 ### Ejemplos
 
 **POST /oportunidades** - Crear oportunidad:
+
+```bash
+# PowerShell
+$token = "YOUR_JWT_TOKEN"
+$headers = @{'Authorization' = "Bearer $token"; 'Content-Type' = 'application/json'}
+$body = @{
+  clientId = "e6fad568-990e-495a-955a-51b64533b51e"
+  pipelineId = "adb3ae84-7e80-4112-ac2c-a7b874fa1d19"
+  stageId = "aae15ef8-3960-4a59-8932-aa0edba533cc"
+  title = "Venta Software ERP"
+  description = "Implementación completa del módulo ERP"
+  estimatedValue = 50000
+  currency = "EUR"
+  probability = 60
+  expectedCloseDate = "2026-03-31"
+  responsibleId = "usr_10"
+  sortOrder = 0
+} | ConvertTo-Json
+Invoke-RestMethod -Uri 'http://localhost:3001/api/v1/crm/oportunidades' -Method POST -Headers $headers -Body $body
+```
+
+**Request Body** (companyId viene del token):
 ```json
 {
-  "companyId": "11111111-1111-1111-1111-111111111111",
-  "clientId": "cli_1234567890",
-  "pipelineId": "pipe_1111111111",
-  "stageId": "stage_2222222222",
+  "clientId": "e6fad568-990e-495a-955a-51b64533b51e",
+  "pipelineId": "adb3ae84-7e80-4112-ac2c-a7b874fa1d19",
+  "stageId": "aae15ef8-3960-4a59-8932-aa0edba533cc",
   "title": "Venta Software ERP",
   "description": "Implementación completa del módulo ERP",
   "estimatedValue": 50000,
@@ -274,10 +386,24 @@ Este módulo sigue las convenciones definidas en `backend/docs/api/convenciones-
 }
 ```
 
-**PATCH /oportunidades/:id/fase** - Mover en Kanban:
+**PATCH /oportunidades/:id/stage** - Mover en Kanban:
+
+```bash
+# PowerShell
+$token = "YOUR_JWT_TOKEN"
+$headers = @{'Authorization' = "Bearer $token"; 'Content-Type' = 'application/json'}
+$opportunityId = "f1e2d3c4-b5a6-7890-cdef-123456789abc"
+$body = @{
+  stageId = "aae15ef8-3960-4a59-8932-aa0edba533cc"
+  sortOrder = 2
+} | ConvertTo-Json
+Invoke-RestMethod -Uri "http://localhost:3001/api/v1/crm/oportunidades/$opportunityId/stage" -Method PATCH -Headers $headers -Body $body
+```
+
+**Request Body**:
 ```json
 {
-  "stageId": "stage_3333333333",
+  "stageId": "aae15ef8-3960-4a59-8932-aa0edba533cc",
   "sortOrder": 2
 }
 ```
@@ -312,12 +438,31 @@ Este módulo sigue las convenciones definidas en `backend/docs/api/convenciones-
 ### Ejemplos
 
 **POST /actividades** - Crear actividad:
+
+```bash
+# PowerShell
+$token = "YOUR_JWT_TOKEN"
+$headers = @{'Authorization' = "Bearer $token"; 'Content-Type' = 'application/json'}
+$body = @{
+  userId = "usr_10"
+  clientId = "e6fad568-990e-495a-955a-51b64533b51e"
+  opportunityId = "f1e2d3c4-b5a6-7890-cdef-123456789abc"
+  type = "call"
+  subject = "Primera toma de contacto"
+  description = "Conversación inicial sobre necesidades del cliente"
+  activityAt = "2026-02-05T10:00:00.000Z"
+  dueDate = "2026-02-05T15:00:00.000Z"
+  completed = $false
+} | ConvertTo-Json
+Invoke-RestMethod -Uri 'http://localhost:3001/api/v1/crm/actividades' -Method POST -Headers $headers -Body $body
+```
+
+**Request Body** (companyId viene del token):
 ```json
 {
-  "companyId": "11111111-1111-1111-1111-111111111111",
   "userId": "usr_10",
-  "clientId": "cli_1234567890",
-  "opportunityId": "opor_5555555555",
+  "clientId": "e6fad568-990e-495a-955a-51b64533b51e",
+  "opportunityId": "f1e2d3c4-b5a6-7890-cdef-123456789abc",
   "type": "call",
   "subject": "Primera toma de contacto",
   "description": "Conversación inicial sobre necesidades del cliente",
@@ -328,13 +473,23 @@ Este módulo sigue las convenciones definidas en `backend/docs/api/convenciones-
 ```
 
 **PATCH /actividades/:id/completar** - Marcar como completada:
+
+```bash
+# PowerShell
+$token = "YOUR_JWT_TOKEN"
+$headers = @{'Authorization' = "Bearer $token"; 'Content-Type' = 'application/json'}
+$activityId = "b1c2d3e4-f5a6-7890-bcde-f123456789ab"
+Invoke-RestMethod -Uri "http://localhost:3001/api/v1/crm/actividades/$activityId/completar" -Method PATCH -Headers $headers
+```
+
+**Response 200**:
 ```json
 {
   "success": true,
   "data": {
-    "id": "act_7777777777",
+    "id": "b1c2d3e4-f5a6-7890-bcde-f123456789ab",
     "completed": true,
-    "updatedAt": "2026-02-04T14:30:00.000Z"
+    "updatedAt": "2026-02-06T19:30:00.489Z"
   }
 }
 ```
@@ -364,9 +519,22 @@ Este módulo sigue las convenciones definidas en `backend/docs/api/convenciones-
 ### Ejemplos
 
 **POST /config/pipelines** - Crear pipeline:
+
+```bash
+# PowerShell
+$token = "YOUR_JWT_TOKEN"
+$headers = @{'Authorization' = "Bearer $token"; 'Content-Type' = 'application/json'}
+$body = @{
+  name = "Venta de Licencias"
+  description = "Pipeline para venta de software"
+  isActive = $true
+} | ConvertTo-Json
+Invoke-RestMethod -Uri 'http://localhost:3001/api/v1/crm/config/pipelines' -Method POST -Headers $headers -Body $body
+```
+
+**Request Body** (companyId viene del token):
 ```json
 {
-  "companyId": "11111111-1111-1111-1111-111111111111",
   "name": "Venta de Licencias",
   "description": "Pipeline para venta de software",
   "isActive": true
@@ -374,48 +542,73 @@ Este módulo sigue las convenciones definidas en `backend/docs/api/convenciones-
 ```
 
 **GET /config/pipelines** - Listar con stages anidados:
+
+```bash
+# PowerShell
+$token = "YOUR_JWT_TOKEN"
+$headers = @{'Authorization' = "Bearer $token"}
+Invoke-RestMethod -Uri 'http://localhost:3001/api/v1/crm/config/pipelines' -Method GET -Headers $headers
+```
+
+**Response 200**:
 ```json
 {
   "success": true,
   "data": [
     {
-      "id": "pipe_1111111111",
+      "id": "adb3ae84-7e80-4112-ac2c-a7b874fa1d19",
       "companyId": "11111111-1111-1111-1111-111111111111",
       "name": "Venta de Licencias",
       "description": "Pipeline para venta de software",
       "isActive": true,
       "stages": [
         {
-          "id": "stage_2222222222",
-          "pipelineId": "pipe_1111111111",
+          "id": "aae15ef8-3960-4a59-8932-aa0edba533cc",
+          "companyId": "11111111-1111-1111-1111-111111111111",
+          "pipelineId": "adb3ae84-7e80-4112-ac2c-a7b874fa1d19",
           "name": "Cualificación",
           "sortOrder": 1,
           "defaultProbability": 20,
-          "createdAt": "2026-02-04T10:00:00.000Z",
-          "updatedAt": "2026-02-04T10:00:00.000Z"
+          "createdAt": "2026-02-06T19:25:00.123Z",
+          "updatedAt": "2026-02-06T19:25:00.123Z"
         },
         {
-          "id": "stage_3333333333",
-          "pipelineId": "pipe_1111111111",
+          "id": "bcd4ef89-4abc-5678-9def-0123456789ab",
+          "companyId": "11111111-1111-1111-1111-111111111111",
+          "pipelineId": "adb3ae84-7e80-4112-ac2c-a7b874fa1d19",
           "name": "Propuesta",
           "sortOrder": 2,
           "defaultProbability": 40,
-          "createdAt": "2026-02-04T10:00:00.000Z",
-          "updatedAt": "2026-02-04T10:00:00.000Z"
+          "createdAt": "2026-02-06T19:25:05.456Z",
+          "updatedAt": "2026-02-06T19:25:05.456Z"
         }
       ],
-      "createdAt": "2026-02-04T10:00:00.000Z",
-      "updatedAt": "2026-02-04T10:00:00.000Z"
+      "createdAt": "2026-02-06T19:24:30.789Z",
+      "updatedAt": "2026-02-06T19:24:30.789Z"
     }
   ]
 }
 ```
 
 **POST /config/stages** - Crear stage:
+
+```bash
+# PowerShell
+$token = "YOUR_JWT_TOKEN"
+$headers = @{'Authorization' = "Bearer $token"; 'Content-Type' = 'application/json'}
+$body = @{
+  pipelineId = "adb3ae84-7e80-4112-ac2c-a7b874fa1d19"
+  name = "Negociación"
+  sortOrder = 3
+  defaultProbability = 70
+} | ConvertTo-Json
+Invoke-RestMethod -Uri 'http://localhost:3001/api/v1/crm/config/stages' -Method POST -Headers $headers -Body $body
+```
+
+**Request Body** (companyId viene del token):
 ```json
 {
-  "companyId": "11111111-1111-1111-1111-111111111111",
-  "pipelineId": "pipe_1111111111",
+  "pipelineId": "adb3ae84-7e80-4112-ac2c-a7b874fa1d19",
   "name": "Negociación",
   "sortOrder": 3,
   "defaultProbability": 70
@@ -593,17 +786,28 @@ interface Stage {
    - Al recibir: Parsear con `new Date(dateString)`
 
 5. **IDs**: 
-   - Generados por el backend con prefijos:
-     - `cli_` - Clientes
-     - `cont_` - Contactos
-     - `opor_` - Oportunidades
-     - `act_` - Actividades
-     - `pipe_` - Pipelines
-     - `stage_` - Stages
+   - Generados automáticamente por Supabase como UUIDs v4
+   - Formato: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`
+   - Ejemplo: `e6fad568-990e-495a-955a-51b64533b51e`
+   - No envíes IDs en el body al crear recursos (POST)
 
-6. **Validación**:
+6. **companyId**:
+   - Se obtiene automáticamente del token JWT
+   - **No debe enviarse** en el body de las peticiones POST/PUT
+   - El middleware `requireAuth` lo inyecta en `req.user.companyId`
+
+7. **Validación**:
    - El backend retorna detalles específicos en `error.details[]`
    - Mostrar mensajes de campo específicos al usuario
+
+8. **Generación de Token JWT**:
+   ```bash
+   # En el directorio backend
+   node scripts/setup_crm_test_data.js
+   ```
+   - Genera un token válido usando una company existente
+   - Token válido por 24 horas
+   - No inserta datos en la base de datos
 
 ---
 

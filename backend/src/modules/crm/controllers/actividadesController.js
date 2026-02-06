@@ -2,7 +2,6 @@ const supabase = require('../../../config/supabase');
 const { envelopeSuccess, envelopeError } = require('../../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../../utils/pagination');
 const { validateRequiredFields, validateEnum } = require('../../../utils/validation');
-const { generateId } = require('../../../utils/id');
 
 const ACTIVIDAD_TIPOS = ['call', 'email', 'meeting', 'note'];
 
@@ -126,14 +125,12 @@ async function createActividad(req, res, next) {
         .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
     }
 
-    const id = generateId('act');
     const now = new Date().toISOString();
 
     const { data, error } = await supabase
       .from('crm_activities')
       .insert([{
-        id,
-        company_id: req.body.companyId || null,
+        company_id: req.user.companyId,
         user_id: req.body.userId,
         client_id: req.body.clientId || null,
         opportunity_id: req.body.opportunityId || null,

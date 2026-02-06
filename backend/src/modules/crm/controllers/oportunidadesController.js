@@ -2,7 +2,6 @@ const supabase = require('../../../config/supabase');
 const { envelopeSuccess, envelopeError } = require('../../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../../utils/pagination');
 const { validateRequiredFields } = require('../../../utils/validation');
-const { generateId } = require('../../../utils/id');
 
 function mapOportunidad(row) {
   return {
@@ -117,14 +116,12 @@ async function createOportunidad(req, res, next) {
         .json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
     }
 
-    const id = generateId('opor');
     const now = new Date().toISOString();
 
     const { data, error } = await supabase
       .from('crm_opportunities')
       .insert([{
-        id,
-        company_id: req.body.companyId || null,
+        company_id: req.user.companyId,
         client_id: req.body.clientId,
         pipeline_id: req.body.pipelineId,
         stage_id: req.body.stageId,
@@ -221,7 +218,7 @@ async function deleteOportunidad(req, res, next) {
   }
 }
 
-async function updateFase(req, res, next) {
+async function updateStage(req, res, next) {
   try {
     const { id } = req.params;
     const requiredErrors = validateRequiredFields(req.body, ['stageId']);
@@ -261,5 +258,5 @@ module.exports = {
   createOportunidad,
   updateOportunidad,
   deleteOportunidad,
-  updateFase
+  updateStage
 };
