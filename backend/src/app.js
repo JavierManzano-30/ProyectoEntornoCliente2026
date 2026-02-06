@@ -5,7 +5,7 @@ const morgan = require('morgan');
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 
 const alm = require('./modules/alm');
-const core = require('./modules/core');
+const core = require('./modules/core/index.js');
 const rrhh = require('./modules/rrhh');
 const crm = require('./modules/crm');
 const bpm = require('./modules/bpm');
