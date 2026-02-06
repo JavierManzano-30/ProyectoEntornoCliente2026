@@ -1,9 +1,7 @@
 @baseUrl = http://localhost:3001
-@token = {{login.response.body.token}}
-@companyId = {{login.response.body.companyId}}
-@userId = {{login.response.body.userId}}
-@almCompanyId = 11111111-1111-1111-1111-111111111111
-@almUserId = user-1
+@token = PEGAR_TOKEN_LOGIN
+@companyId = PEGAR_COMPANY_ID_LOGIN
+@userId = PEGAR_USER_ID_LOGIN
 
 ### Health - Global
 GET {{baseUrl}}/health
@@ -39,7 +37,7 @@ POST {{baseUrl}}/api/v1/core/auth/login
 Content-Type: application/json
 
 {
-  "email": "pepe@acme.com",
+  "email": "ana.lopez@demo.com",
   "password": "secret123"
 }
 
@@ -61,7 +59,7 @@ Content-Type: application/json
 GET {{baseUrl}}/api/v1/alm/supabase/health
 
 ### ALM - List Projects (requires JWT)
-GET {{baseUrl}}/api/v1/alm/proyectos?page=1&limit=10&companyId={{almCompanyId}}
+GET {{baseUrl}}/api/v1/alm/proyectos?page=1&limit=10&companyId={{companyId}}
 Authorization: Bearer {{token}}
 
 ### ALM - Create Project (requires JWT)
@@ -71,11 +69,11 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "companyId": "{{almCompanyId}}",
+  "companyId": "{{companyId}}",
   "name": "Proyecto ALM",
   "description": "Demo de proyecto",
   "startDate": "2026-01-10",
-  "responsibleId": "{{almUserId}}",
+  "responsibleId": "{{userId}}",
   "status": "planned"
 }
 
@@ -86,7 +84,7 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "companyId": "{{almCompanyId}}",
+  "companyId": "{{companyId}}",
   "projectId": "{{almCreateProject.response.body.data.id}}",
   "title": "Tarea ALM",
   "status": "pending",
@@ -94,7 +92,7 @@ Content-Type: application/json
 }
 
 ### ALM - List Tasks (requires JWT)
-GET {{baseUrl}}/api/v1/alm/tareas?companyId={{almCompanyId}}
+GET {{baseUrl}}/api/v1/alm/tareas?companyId={{companyId}}
 Authorization: Bearer {{token}}
 
 ### ALM - Create Time Entry (requires JWT)
@@ -103,9 +101,9 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "companyId": "{{almCompanyId}}",
+  "companyId": "{{companyId}}",
   "taskId": "{{almCreateTask.response.body.data.id}}",
-  "userId": "{{almUserId}}",
+  "userId": "{{userId}}",
   "entryDate": "2026-01-11",
   "hours": 1.5
 }
