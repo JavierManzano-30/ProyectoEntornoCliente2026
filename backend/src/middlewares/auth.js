@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { envelopeError } = require('../utils/envelope');
 const { verifyToken } = require('../modules/core/services/authService');
-const logger = require('../utils/logger');
 
 function requireAuth(req, res, next) {
   const header = req.headers.authorization || '';
