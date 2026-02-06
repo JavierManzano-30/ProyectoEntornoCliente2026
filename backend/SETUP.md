@@ -9,11 +9,7 @@ npm install
 
 ## 2) Configure env
 
-```bash
-cp .env.example .env
-```
-
-Update DB and JWT values in `.env`.
+Edit `.env` with DB and JWT values for your environment.
 
 ## 3) Create schema
 

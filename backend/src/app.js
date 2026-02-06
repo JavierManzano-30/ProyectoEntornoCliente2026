@@ -2,7 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
+const { loadEnv } = require('./config/env');
+const { notFoundHandler, errorHandler } = require('./middlewares/errorHandler');
+
+loadEnv();
 
 const alm = require('./modules/alm');
 const core = require('./modules/core/index.js');
@@ -46,5 +49,14 @@ app.use('/api/v1/bi', bi.routes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
+
+const port = process.env.PORT || 3001;
+
+if (require.main === module) {
+  app.listen(port, () => {
+    // eslint-disable-next-line no-console
+    console.log(`API listening on port ${port}`);
+  });
+}
 
 module.exports = app;

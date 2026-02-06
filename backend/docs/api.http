@@ -1,0 +1,168 @@
+@baseUrl = http://localhost:3001
+@token = {{login.response.body.token}}
+@companyId = {{login.response.body.companyId}}
+@userId = {{login.response.body.userId}}
+@almCompanyId = 11111111-1111-1111-1111-111111111111
+@almUserId = user-1
+
+### Health - Global
+GET {{baseUrl}}/health
+
+### Health - Core
+GET {{baseUrl}}/api/v1/core/health
+
+### Health - Core DB
+GET {{baseUrl}}/api/v1/core/health/db
+
+### Core Auth - Register
+# @name register
+POST {{baseUrl}}/api/v1/core/auth/register
+Content-Type: application/json
+
+{
+  "company": {
+    "name": "Acme Corp",
+    "tax_id": "A123",
+    "domain": "acme",
+    "settings": { "plan": "pro" },
+    "is_active": true
+  },
+  "user": {
+    "email": "ana.lopez@demo.com",
+    "password": "secret123"
+  }
+}
+
+### Core Auth - Login
+# @name login
+POST {{baseUrl}}/api/v1/core/auth/login
+Content-Type: application/json
+
+{
+  "email": "pepe@acme.com",
+  "password": "secret123"
+}
+
+### Core Companies - Get (requires JWT)
+GET {{baseUrl}}/api/v1/core/companies/{{companyId}}
+Authorization: Bearer {{token}}
+
+### Core Companies - Update (requires JWT)
+PUT {{baseUrl}}/api/v1/core/companies/{{companyId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "domain": "acme-updated",
+  "settings": { "plan": "enterprise" }
+}
+
+### ALM - Supabase Health (public)
+GET {{baseUrl}}/api/v1/alm/supabase/health
+
+### ALM - List Projects (requires JWT)
+GET {{baseUrl}}/api/v1/alm/proyectos?page=1&limit=10&companyId={{almCompanyId}}
+Authorization: Bearer {{token}}
+
+### ALM - Create Project (requires JWT)
+# @name almCreateProject
+POST {{baseUrl}}/api/v1/alm/proyectos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "companyId": "{{almCompanyId}}",
+  "name": "Proyecto ALM",
+  "description": "Demo de proyecto",
+  "startDate": "2026-01-10",
+  "responsibleId": "{{almUserId}}",
+  "status": "planned"
+}
+
+### ALM - Create Task (requires JWT)
+# @name almCreateTask
+POST {{baseUrl}}/api/v1/alm/tareas
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "companyId": "{{almCompanyId}}",
+  "projectId": "{{almCreateProject.response.body.data.id}}",
+  "title": "Tarea ALM",
+  "status": "pending",
+  "priority": "medium"
+}
+
+### ALM - List Tasks (requires JWT)
+GET {{baseUrl}}/api/v1/alm/tareas?companyId={{almCompanyId}}
+Authorization: Bearer {{token}}
+
+### ALM - Create Time Entry (requires JWT)
+POST {{baseUrl}}/api/v1/alm/tiempos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "companyId": "{{almCompanyId}}",
+  "taskId": "{{almCreateTask.response.body.data.id}}",
+  "userId": "{{almUserId}}",
+  "entryDate": "2026-01-11",
+  "hours": 1.5
+}
+
+### CRM - List Clients (requires JWT)
+GET {{baseUrl}}/api/v1/crm/clientes?page=1&limit=10&companyId={{companyId}}
+Authorization: Bearer {{token}}
+
+### CRM - Create Client (requires JWT)
+# @name crmCreateClient
+POST {{baseUrl}}/api/v1/crm/clientes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "companyId": "{{companyId}}",
+  "name": "Cliente Demo",
+  "taxId": "B123",
+  "email": "cliente@demo.com",
+  "phone": "+34 600 111 222",
+  "type": "lead"
+}
+
+### CRM - List Opportunities (requires JWT)
+GET {{baseUrl}}/api/v1/crm/oportunidades?page=1&limit=10&companyId={{companyId}}
+Authorization: Bearer {{token}}
+
+### RRHH - Health (public)
+GET {{baseUrl}}/api/v1/rrhh/health
+
+### RRHH - List Employees (requires JWT)
+GET {{baseUrl}}/api/v1/rrhh/empleados?page=1&limit=10&empresaId={{companyId}}
+Authorization: Bearer {{token}}
+
+### RRHH - Create Employee (requires JWT)
+POST {{baseUrl}}/api/v1/rrhh/empleados
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "empresaId": "{{companyId}}",
+  "nombre": "Ana",
+  "apellidos": "Lopez",
+  "email": "ana.lopez@demo.com",
+  "estado": "active",
+  "fechaAlta": "2026-01-15",
+  "departamentoId": "dep-1"
+}
+
+### BPM - Health
+GET {{baseUrl}}/api/v1/bpm/health
+
+### ERP - Health
+GET {{baseUrl}}/api/v1/erp/health
+
+### SOPORTE - Health
+GET {{baseUrl}}/api/v1/soporte/health
+
+### BI - Health
+GET {{baseUrl}}/api/v1/bi/health

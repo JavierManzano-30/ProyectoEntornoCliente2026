@@ -7,19 +7,18 @@ Este `src/` está organizado por módulos para que cada persona pueda trabajar e
 ```
 src/
   app.js
-  server.js
   config/
     env.js
     db.js
-  middleware/
+    supabase.js
+  middlewares/
     auth.js
     errorHandler.js
   modules/
     alm/
-      routes.js
-      projectsController.js
-      tasksController.js
-      timesController.js
+      controllers/
+      routes/
+      services/
     core/
     rrhh/
     crm/
@@ -50,11 +49,7 @@ cd backend
 npm install
 ```
 
-2) Configurar `.env`
-
-```bash
-cp .env.example .env
-```
+2) Configurar `.env` (editar valores según tu entorno)
 
 3) Crear la base de datos y tablas
 
@@ -94,8 +89,8 @@ curl -X POST "http://localhost:3001/api/v1/alm/proyectos" \
 
 ## 📌 Dónde añadir nuevos endpoints
 
-1) Crear un `routes.js` en el módulo si no existe.
-2) Crear el controlador en el mismo módulo.
+1) Crear un `routes/index.js` en el módulo si no existe.
+2) Crear el controlador dentro de `controllers/`.
 3) Montar el módulo en `src/app.js` si no está.
 
 ## ✅ Salud del módulo
