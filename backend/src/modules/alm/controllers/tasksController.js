@@ -121,9 +121,9 @@ async function createTask(req, res, next) {
     }
 
     const requiredErrors = validateRequiredFields(req.body, ['projectId', 'title', 'status', 'priority']);
-    const estadoError = validateEnum(req.body.status, TASK_STATES);
+    const statusError = validateEnum(req.body.status, TASK_STATES);
     const prioridadError = validateEnum(req.body.priority, TASK_PRIORITIES);
-    if (estadoError) requiredErrors.push({ field: 'status', message: estadoError });
+    if (statusError) requiredErrors.push({ field: 'status', message: statusError });
     if (prioridadError) requiredErrors.push({ field: 'priority', message: prioridadError });
 
     if (requiredErrors.length) {
@@ -173,9 +173,9 @@ async function updateTask(req, res, next) {
 
     const { id } = req.params;
     const requiredErrors = validateRequiredFields(req.body, ['projectId', 'title', 'status', 'priority']);
-    const estadoError = validateEnum(req.body.status, TASK_STATES);
+    const statusError = validateEnum(req.body.status, TASK_STATES);
     const prioridadError = validateEnum(req.body.priority, TASK_PRIORITIES);
-    if (estadoError) requiredErrors.push({ field: 'status', message: estadoError });
+    if (statusError) requiredErrors.push({ field: 'status', message: statusError });
     if (prioridadError) requiredErrors.push({ field: 'priority', message: prioridadError });
 
     if (requiredErrors.length) {
@@ -254,10 +254,10 @@ async function updateTaskStatus(req, res, next) {
     }
 
     const { id } = req.params;
-    const estadoError = validateEnum(req.body.status, TASK_STATES);
-    if (estadoError) {
+    const statusError = validateEnum(req.body.status, TASK_STATES);
+    if (statusError) {
       return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', [
-        { field: 'status', message: estadoError }
+        { field: 'status', message: statusError }
       ]));
     }
 

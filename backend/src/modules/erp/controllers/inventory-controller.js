@@ -12,7 +12,7 @@ function mapWarehouse(row) {
     id: row.id,
     companyId: row.company_id,
     name: row.name,
-    ubicacion: row.ubicacion,
+    location: row.location,
     totalCapacity: row.total_capacity,
     responsibleId: row.responsible_id,
     type: row.type,
@@ -26,7 +26,7 @@ function mapInventory(row) {
   return {
     id: row.id,
     companyId: row.company_id,
-    productoId: row.producto_id,
+    productId: row.product_id,
     warehouseId: row.warehouse_id,
     quantityAvailable: row.quantity_available,
     quantityReserved: row.quantity_reserved,
@@ -42,7 +42,7 @@ function mapMovement(row) {
   return {
     id: row.id,
     companyId: row.company_id,
-    productoId: row.producto_id,
+    productId: row.product_id,
     warehouseId: row.warehouse_id,
     movementType: row.movement_type,
     quantity: row.quantity,
@@ -121,7 +121,7 @@ async function listInventory(req, res, next) {
     const companyId = resolveCompanyId(req);
     const filters = {
       warehouseId: req.query.warehouseId,
-      productoId: req.query.productoId
+      productId: req.query.productId
     };
     const { rows, totalItems } = await inventoryService.listInventory(companyId, { filters, limit, offset });
     const meta = buildPaginationMeta(page, limit, totalItems);
@@ -172,7 +172,7 @@ async function listMovements(req, res, next) {
     const { page, limit, offset } = getPaginationParams(req.query);
     const companyId = resolveCompanyId(req);
     const filters = {
-      productoId: req.query.productoId,
+      productId: req.query.productId,
       warehouseId: req.query.warehouseId,
       movementType: req.query.movementType
     };
@@ -186,7 +186,7 @@ async function listMovements(req, res, next) {
 
 async function createMovement(req, res, next) {
   try {
-    const errors = validateRequiredFields(req.body, ['productoId', 'warehouseId', 'movementType', 'quantity', 'userId']);
+    const errors = validateRequiredFields(req.body, ['productId', 'warehouseId', 'movementType', 'quantity', 'userId']);
     if (errors.length) {
       return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', errors));
     }

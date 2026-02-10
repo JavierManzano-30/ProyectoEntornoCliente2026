@@ -110,10 +110,10 @@ async function addSalesItem(companyId, data) {
   const id = generateId('erp_si');
   const result = await pool.query(
     `INSERT INTO erp_sales_items
-      (id, company_id, sales_order_id, producto_id, quantity, unit_price, descuento_porcentaje, subtotal, created_at, updated_at)
+      (id, company_id, sales_order_id, product_id, quantity, unit_price, discount_percentage, subtotal, created_at, updated_at)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
-    [id, companyId, data.salesOrderId, data.productoId,
-     data.quantity, data.unitPrice, data.descuentoPorcentaje || 0,
+    [id, companyId, data.salesOrderId, data.productId,
+     data.quantity, data.unitPrice, data.discountPercentage || 0,
      data.subtotal, now, now]
   );
   return result.rows[0];
@@ -122,12 +122,12 @@ async function addSalesItem(companyId, data) {
 async function updateSalesItem(companyId, id, data) {
   const now = new Date().toISOString();
   const values = [
-    data.productoId, data.quantity, data.unitPrice,
-    data.descuentoPorcentaje || 0, data.subtotal, now, id
+    data.productId, data.quantity, data.unitPrice,
+    data.discountPercentage || 0, data.subtotal, now, id
   ];
   let query = `UPDATE erp_sales_items SET
-    producto_id=$1, quantity=$2, unit_price=$3,
-    descuento_porcentaje=$4, subtotal=$5, updated_at=$6
+    product_id=$1, quantity=$2, unit_price=$3,
+    discount_percentage=$4, subtotal=$5, updated_at=$6
     WHERE id=$7`;
   if (companyId) {
     values.push(companyId);

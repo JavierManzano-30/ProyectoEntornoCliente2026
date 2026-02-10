@@ -33,10 +33,10 @@ function mapSalesItem(row) {
     id: row.id,
     companyId: row.company_id,
     salesOrderId: row.sales_order_id,
-    productoId: row.producto_id,
+    productId: row.product_id,
     quantity: row.quantity,
     unitPrice: row.unit_price,
-    descuentoPorcentaje: row.descuento_porcentaje,
+    discountPercentage: row.discount_percentage,
     subtotal: row.subtotal,
     createdAt: row.created_at,
     updatedAt: row.updated_at

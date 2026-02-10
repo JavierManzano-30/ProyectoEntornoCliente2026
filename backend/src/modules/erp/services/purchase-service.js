@@ -184,9 +184,9 @@ async function addPurchaseItem(companyId, data) {
   const id = generateId('erp_pi');
   const result = await pool.query(
     `INSERT INTO erp_purchase_items
-      (id, company_id, purchase_order_id, producto_id, quantity_ordered, quantity_received, unit_price, subtotal, created_at, updated_at)
+      (id, company_id, purchase_order_id, product_id, quantity_ordered, quantity_received, unit_price, subtotal, created_at, updated_at)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
-    [id, companyId, data.purchaseOrderId, data.productoId,
+    [id, companyId, data.purchaseOrderId, data.productId,
      data.quantityOrdered, data.quantityReceived || 0,
      data.unitPrice, data.subtotal, now, now]
   );
@@ -196,11 +196,11 @@ async function addPurchaseItem(companyId, data) {
 async function updatePurchaseItem(companyId, id, data) {
   const now = new Date().toISOString();
   const values = [
-    data.productoId, data.quantityOrdered, data.quantityReceived || 0,
+    data.productId, data.quantityOrdered, data.quantityReceived || 0,
     data.unitPrice, data.subtotal, now, id
   ];
   let query = `UPDATE erp_purchase_items SET
-    producto_id=$1, quantity_ordered=$2, quantity_received=$3,
+    product_id=$1, quantity_ordered=$2, quantity_received=$3,
     unit_price=$4, subtotal=$5, updated_at=$6
     WHERE id=$7`;
   if (companyId) {

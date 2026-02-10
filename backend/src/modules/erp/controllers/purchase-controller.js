@@ -45,7 +45,7 @@ function mapPurchaseItem(row) {
     id: row.id,
     companyId: row.company_id,
     purchaseOrderId: row.purchase_order_id,
-    productoId: row.producto_id,
+    productId: row.product_id,
     quantityOrdered: row.quantity_ordered,
     quantityReceived: row.quantity_received,
     unitPrice: row.unit_price,
