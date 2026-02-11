@@ -61,3 +61,25 @@
 .card-padding-large .card-body {
   padding: 2rem;
 }
+
+body.dark-mode .card {
+  background-color: #1f2937;
+  border-color: #374151;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.35), 0 1px 2px 0 rgba(0, 0, 0, 0.25);
+}
+
+body.dark-mode .card:hover {
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .card-header {
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .card-title {
+  color: #f3f4f6;
+}
+
+body.dark-mode .card-subtitle {
+  color: #9ca3af;
+}

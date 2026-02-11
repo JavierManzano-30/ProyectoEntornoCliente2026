@@ -482,3 +482,63 @@
     max-height: 95vh;
   }
 }
+
+body.dark-mode .header-content h1,
+body.dark-mode .stat-value,
+body.dark-mode .sla-title h3,
+body.dark-mode .metric-value,
+body.dark-mode .modal-header h2 {
+  color: #f3f4f6;
+}
+
+body.dark-mode .header-content p,
+body.dark-mode .stat-label,
+body.dark-mode .sla-description,
+body.dark-mode .metric-label,
+body.dark-mode .empty-state,
+body.dark-mode .loading-state,
+body.dark-mode .form-group label {
+  color: #9ca3af;
+}
+
+body.dark-mode .stat-card,
+body.dark-mode .sla-list,
+body.dark-mode .modal-content,
+body.dark-mode .metric,
+body.dark-mode .scope-tag {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+body.dark-mode .sla-card {
+  background: #111827;
+  border-color: #374151;
+}
+
+body.dark-mode .sla-card.inactive {
+  background: #1f2937;
+}
+
+body.dark-mode .modal-header,
+body.dark-mode .modal-actions {
+  border-bottom-color: #374151;
+  border-top-color: #374151;
+}
+
+body.dark-mode .form-group input,
+body.dark-mode .form-group select,
+body.dark-mode .form-group textarea {
+  background: #111827;
+  border-color: #374151;
+  color: #e5e7eb;
+}
+
+body.dark-mode .btn-secondary {
+  background: #374151;
+  color: #e5e7eb;
+}
+
+body.dark-mode .btn-secondary:hover,
+body.dark-mode .btn-icon:hover {
+  background: #4b5563;
+}

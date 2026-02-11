@@ -60,6 +60,30 @@
   flex-shrink: 0;
 }
 
+body.dark-mode .breadcrumb-link {
+  color: #60a5fa;
+}
+
+body.dark-mode .breadcrumb-link:hover {
+  color: #93c5fd;
+}
+
+body.dark-mode .breadcrumb-separator {
+  color: #6b7280;
+}
+
+body.dark-mode .breadcrumb-current {
+  color: #9ca3af;
+}
+
+body.dark-mode .page-title {
+  color: #f3f4f6;
+}
+
+body.dark-mode .page-subtitle {
+  color: #9ca3af;
+}
+
 @media (max-width: 768px) {
   .page-header-content {
     flex-direction: column;

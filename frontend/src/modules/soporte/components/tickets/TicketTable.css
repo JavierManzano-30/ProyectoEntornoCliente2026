@@ -96,3 +96,40 @@
     min-width: 900px;
   }
 }
+
+body.dark-mode .ticket-table-container,
+body.dark-mode .ticket-table-empty {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+body.dark-mode .ticket-table thead {
+  background-color: #111827;
+}
+
+body.dark-mode .ticket-table th {
+  color: #cbd5e1;
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .ticket-table th.sortable:hover {
+  background-color: #273449;
+}
+
+body.dark-mode .ticket-table td {
+  border-bottom-color: #374151;
+  color: #d1d5db;
+}
+
+body.dark-mode .ticket-table tbody tr:hover {
+  background-color: #1f2937;
+}
+
+body.dark-mode .ticket-title {
+  color: #f3f4f6;
+}
+
+body.dark-mode .ticket-age,
+body.dark-mode .ticket-table-empty {
+  color: #9ca3af;
+}

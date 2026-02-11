@@ -5,7 +5,8 @@ import {
   Ticket,
   AlertCircle,
   BarChart3,
-  Settings,
+  Sun,
+  Moon,
   Users,
   Calendar,
   DollarSign,
@@ -30,6 +31,16 @@ const MainLayout = ({ module = "soporte" }) => {
     // Aquí podrías limpiar el estado de sesión si lo hubiera
     navigate('/');
   };
+
+  // Tema: iluminado/oscuro
+  const [darkMode, setDarkMode] = React.useState(() => document.body.classList.contains('dark-mode'));
+  const handleToggleTheme = () => {
+    setDarkMode((prev) => {
+      const next = !prev;
+      document.body.classList.toggle('dark-mode', next);
+      return next;
+    });
+  };
   const navigationConfig = {
     soporte: {
       title: "Módulo de Soporte",
@@ -43,7 +54,7 @@ const MainLayout = ({ module = "soporte" }) => {
         { name: "Tickets", href: "/soporte/tickets", icon: Ticket },
         { name: "SLA", href: "/soporte/sla", icon: AlertCircle },
         { name: "Reportes", href: "/soporte/reportes", icon: BarChart3 },
-        { name: "Configuración", href: "/soporte/config", icon: Settings },
+        // { name: "Configuración", href: "/soporte/config", icon: Settings },
       ],
     },
     bi: {
@@ -62,7 +73,7 @@ const MainLayout = ({ module = "soporte" }) => {
         { name: "Ausencias", href: "/rrhh/ausencias", icon: Calendar },
         { name: "Nóminas", href: "/rrhh/nominas", icon: DollarSign },
         { name: "Departamentos", href: "/rrhh/departamentos", icon: Building2 },
-        { name: "Configuración", href: "/rrhh/config", icon: Settings },
+        // { name: "Configuración", href: "/rrhh/config", icon: Settings },
       ],
     },
     core: {
@@ -125,10 +136,10 @@ const MainLayout = ({ module = "soporte" }) => {
   const navigation = currentNav.items;
 
   return (
-    <div className="main-layout">
+    <div className={`main-layout${darkMode ? ' dark-mode' : ''}`}>
       <aside className="main-sidebar">
         <div className="sidebar-header">
-          <h1 className="sidebar-logo">ERP</h1>
+          <h1 className="sidebar-logo company-name">EMPRESA DEMO</h1>
           <p className="sidebar-subtitle">Sistema de Gestión</p>
         </div>
 
@@ -155,7 +166,7 @@ const MainLayout = ({ module = "soporte" }) => {
       <div className="main-content">
         <header className="main-header">
           <div className="header-content">
-            <h2 className="header-title">{currentNav.title}</h2>
+            <h2 className="header-title header-title-blue">{currentNav.title}</h2>
             <div className="header-actions">
               <NavLink to="/core" className="header-module-link">
                 Core
@@ -181,8 +192,8 @@ const MainLayout = ({ module = "soporte" }) => {
               <NavLink to="/erp" className="header-module-link">
                 ERP
               </NavLink>
-              <button className="header-button">
-                <Settings size={20} />
+              <button className="header-button" onClick={handleToggleTheme} title="Cambiar modo de iluminación">
+                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
               </button>
               <button className="header-button logout-btn" onClick={handleLogout} title="Cerrar sesión">
                 Cerrar sesión

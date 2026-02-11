@@ -1,3 +1,60 @@
+body.dark-mode {
+  background: #181a1b !important;
+  color: #e5e7eb !important;
+}
+
+.main-layout.dark-mode,
+body.dark-mode .main-layout {
+  background: #181a1b;
+}
+
+.main-sidebar.dark-mode,
+body.dark-mode .main-sidebar {
+  background: #23272f;
+  border-right: 1px solid #222;
+}
+
+.sidebar-header.dark-mode,
+body.dark-mode .sidebar-header {
+  color: #e5e7eb;
+}
+
+.sidebar-logo.dark-mode,
+body.dark-mode .sidebar-logo {
+  color: #a5b4fc;
+  background: none;
+}
+
+.sidebar-subtitle.dark-mode,
+body.dark-mode .sidebar-subtitle {
+  color: #a5b4fc;
+}
+
+.sidebar-company.dark-mode,
+body.dark-mode .sidebar-company {
+  color: #a5b4fc;
+}
+
+.company-name.dark-mode,
+body.dark-mode .company-name {
+  color: #60a5fa;
+}
+
+.main-content.dark-mode,
+body.dark-mode .main-content {
+  background: #181a1b;
+}
+
+.main-header.dark-mode,
+body.dark-mode .main-header {
+  background: #23272f;
+  color: #e5e7eb;
+}
+
+.header-title-blue.dark-mode,
+body.dark-mode .header-title-blue {
+  color: #60a5fa;
+}
 .main-layout {
   display: flex;
   min-height: 100vh;
@@ -20,6 +77,26 @@
 .sidebar-header {
   padding: 2rem 1.5rem;
   border-bottom: 1px solid #e5e7eb;
+}
+ .sidebar-header {
+   padding: 2rem 1.5rem 1rem 1.5rem;
+   border-bottom: 1px solid #e5e7eb;
+ }
+
+ .sidebar-company {
+   margin-top: 0.5rem;
+   font-size: 1rem;
+   color: #4f8cff;
+   font-weight: 500;
+ }
+
+ .company-name {
+  font-weight: 700;
+  color: #2563eb;
+ }
+
+body.dark-mode .company-name {
+  color: #60a5fa !important;
 }
 
 .sidebar-logo {
@@ -101,6 +178,10 @@
   color: #111827;
 }
 
+.header-title-blue {
+  color: #2563eb;
+}
+
 .header-actions {
   display: flex;
   align-items: center;
@@ -150,6 +231,54 @@
 .main-body {
   flex: 1;
   background-color: #f9fafb;
+}
+
+body.dark-mode .main-body {
+  background-color: #111827;
+}
+
+body.dark-mode .nav-link {
+  color: #9ca3af;
+}
+
+body.dark-mode .nav-link:hover {
+  background-color: #374151;
+  color: #f3f4f6;
+}
+
+body.dark-mode .nav-link.active {
+  background-color: #1e3a8a;
+  color: #bfdbfe;
+}
+
+body.dark-mode .header-module-link {
+  background: #374151;
+  color: #e5e7eb;
+}
+
+body.dark-mode .header-module-link:hover {
+  background: #4b5563;
+  color: #f9fafb;
+}
+
+body.dark-mode .header-module-link.active {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+}
+
+body.dark-mode .header-button {
+  color: #d1d5db;
+}
+
+body.dark-mode .header-button:hover {
+  background-color: #374151;
+  color: #f9fafb;
+}
+
+body.dark-mode .sidebar-logo.company-name {
+  background: none;
+  -webkit-text-fill-color: #7dd3fc;
+  color: #7dd3fc;
 }
 
 @media (max-width: 1024px) {

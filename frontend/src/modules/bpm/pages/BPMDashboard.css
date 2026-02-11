@@ -190,3 +190,26 @@
   padding: 1rem;
   text-align: center;
 }
+
+body.dark-mode .dashboard-header h1,
+body.dark-mode .stat-value,
+body.dark-mode .widget-title {
+  color: #f3f4f6;
+}
+
+body.dark-mode .dashboard-subtitle,
+body.dark-mode .stat-title,
+body.dark-mode .stat-subtext,
+body.dark-mode .quick-item-value {
+  color: #9ca3af;
+}
+
+body.dark-mode .quick-item-name {
+  color: #d1d5db;
+}
+
+body.dark-mode .dashboard-widget,
+body.dark-mode .quick-item {
+  background-color: #1f2937;
+  border-color: #374151;
+}

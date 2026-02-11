@@ -263,3 +263,69 @@
     max-width: none;
   }
 }
+
+body.dark-mode .metric-label,
+body.dark-mode .metric-trend,
+body.dark-mode .contact-item,
+body.dark-mode .pagination-info,
+body.dark-mode .empty-state {
+  color: #9ca3af;
+}
+
+body.dark-mode .metric-value,
+body.dark-mode .user-name {
+  color: #f3f4f6;
+}
+
+body.dark-mode .search-input {
+  background: #111827;
+  border-color: #374151;
+  color: #e5e7eb;
+}
+
+body.dark-mode .search-input-wrapper svg {
+  color: #6b7280;
+}
+
+body.dark-mode .filters-panel {
+  border-top-color: #374151;
+}
+
+body.dark-mode .filter-group label {
+  color: #d1d5db;
+}
+
+body.dark-mode .filter-group select {
+  background: #111827;
+  border-color: #374151;
+  color: #e5e7eb;
+}
+
+body.dark-mode .users-table thead {
+  background: #1f2937;
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .users-table th {
+  color: #cbd5e1;
+}
+
+body.dark-mode .users-table th.sortable:hover {
+  background: #273449;
+}
+
+body.dark-mode .users-table tbody tr {
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .users-table tbody tr:hover {
+  background: #1f2937;
+}
+
+body.dark-mode .users-table td {
+  color: #d1d5db;
+}
+
+body.dark-mode .pagination {
+  border-top-color: #374151;
+}

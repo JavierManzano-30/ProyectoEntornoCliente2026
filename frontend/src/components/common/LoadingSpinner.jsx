@@ -8,17 +8,17 @@ const LoadingSpinner = ({
 }) => {
   if (fullScreen) {
     return (
-      <div className="spinner-fullscreen">
-        <div className={`spinner spinner-${size}`}></div>
-        {text && <p className="spinner-text">{text}</p>}
+      <div className="loading-spinner-fullscreen">
+        <div className={`loading-spinner loading-spinner-${size}`}></div>
+        {text && <p className="loading-spinner-text">{text}</p>}
       </div>
     );
   }
 
   return (
-    <div className="spinner-container">
-      <div className={`spinner spinner-${size}`}></div>
-      {text && <p className="spinner-text">{text}</p>}
+    <div className="loading-spinner-container">
+      <div className={`loading-spinner loading-spinner-${size}`}></div>
+      {text && <p className="loading-spinner-text">{text}</p>}
     </div>
   );
 };

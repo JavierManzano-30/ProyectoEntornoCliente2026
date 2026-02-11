@@ -147,3 +147,38 @@
     grid-template-columns: 1fr;
   }
 }
+
+body.dark-mode .metric-label,
+body.dark-mode .empty-state {
+  color: #9ca3af;
+}
+
+body.dark-mode .metric-value {
+  color: #f3f4f6;
+}
+
+body.dark-mode .search-input {
+  background: #111827;
+  border-color: #374151;
+  color: #e5e7eb;
+}
+
+body.dark-mode .search-input-wrapper svg {
+  color: #6b7280;
+}
+
+body.dark-mode .view-toggle button {
+  border-color: #4b5563;
+  background: #374151;
+  color: #d1d5db;
+}
+
+body.dark-mode .view-toggle button:hover {
+  background: #4b5563;
+}
+
+body.dark-mode .view-toggle button.active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}

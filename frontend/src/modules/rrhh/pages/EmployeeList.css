@@ -279,3 +279,81 @@
     overflow-x: scroll;
   }
 }
+
+body.dark-mode .metric-icon-blue { background: #1e3a8a; color: #93c5fd; }
+body.dark-mode .metric-icon-green { background: #064e3b; color: #6ee7b7; }
+body.dark-mode .metric-icon-purple { background: #4c1d95; color: #c4b5fd; }
+body.dark-mode .metric-icon-orange { background: #7c2d12; color: #fdba74; }
+body.dark-mode .metric-icon-yellow { background: #713f12; color: #fde68a; }
+body.dark-mode .metric-icon-red { background: #7f1d1d; color: #fca5a5; }
+
+body.dark-mode .metric-label,
+body.dark-mode .metric-trend,
+body.dark-mode .employee-email,
+body.dark-mode .pagination-info,
+body.dark-mode .empty-state {
+  color: #9ca3af;
+}
+
+body.dark-mode .metric-value,
+body.dark-mode .employee-name {
+  color: #f3f4f6;
+}
+
+body.dark-mode .search-box {
+  background: #111827;
+  border-color: #374151;
+}
+
+body.dark-mode .search-box svg,
+body.dark-mode .search-input::placeholder {
+  color: #6b7280;
+}
+
+body.dark-mode .search-input {
+  color: #e5e7eb;
+}
+
+body.dark-mode .filters-grid {
+  border-top-color: #374151;
+}
+
+body.dark-mode .filter-item label {
+  color: #d1d5db;
+}
+
+body.dark-mode .filter-item select,
+body.dark-mode .filter-item input {
+  background: #111827;
+  border-color: #374151;
+  color: #e5e7eb;
+}
+
+body.dark-mode .employee-table thead {
+  background: #1f2937;
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .employee-table th {
+  color: #cbd5e1;
+}
+
+body.dark-mode .employee-table th.sortable:hover {
+  background: #273449;
+}
+
+body.dark-mode .employee-table tbody tr {
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .employee-row:hover {
+  background: #1f2937;
+}
+
+body.dark-mode .employee-table td {
+  color: #d1d5db;
+}
+
+body.dark-mode .table-pagination {
+  border-top-color: #374151;
+}

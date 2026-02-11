@@ -124,3 +124,39 @@
   border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
 }
+
+body.dark-mode .process-table-wrapper,
+body.dark-mode .process-table-loading,
+body.dark-mode .process-table-empty {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+body.dark-mode .process-table thead {
+  background-color: #111827;
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .process-table th {
+  color: #cbd5e1;
+}
+
+body.dark-mode .process-table tbody tr {
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .process-table tbody tr:hover {
+  background-color: #1f2937;
+}
+
+body.dark-mode .process-name {
+  color: #f3f4f6;
+}
+
+body.dark-mode .process-code {
+  color: #9ca3af;
+}
+
+body.dark-mode .process-table td {
+  color: #d1d5db;
+}

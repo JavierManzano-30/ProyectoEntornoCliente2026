@@ -22,7 +22,7 @@ const Login = () => {
     };
 
     return (
-        <div className="login-bg">
+        <div className={`login-bg${document.body.classList.contains('dark-mode') ? ' dark-mode' : ''}`}> 
             <div className="login-logo-bar login-logo-left">
                 <img src="/images/synera-logo.png" alt="SYNERA Logo" className="login-logo" />
                 <span className="login-brand">SYNERA</span>

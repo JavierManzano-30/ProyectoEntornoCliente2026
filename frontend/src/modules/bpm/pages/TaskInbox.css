@@ -235,3 +235,45 @@
   opacity: 0.5;
   margin-bottom: 1rem;
 }
+
+body.dark-mode .inbox-header h1,
+body.dark-mode .stat-value,
+body.dark-mode .task-title {
+  color: #f3f4f6;
+}
+
+body.dark-mode .subtitle,
+body.dark-mode .stat-label,
+body.dark-mode .task-process,
+body.dark-mode .task-description,
+body.dark-mode .task-status,
+body.dark-mode .loading,
+body.dark-mode .empty-state {
+  color: #9ca3af;
+}
+
+body.dark-mode .stat-item,
+body.dark-mode .task-item {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+body.dark-mode .task-item:hover {
+  border-color: #4b5563;
+}
+
+body.dark-mode .inbox-tabs {
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .tab-btn {
+  color: #9ca3af;
+}
+
+body.dark-mode .tab-btn:hover {
+  color: #d1d5db;
+}
+
+body.dark-mode .task-footer {
+  border-top-color: #374151;
+}

@@ -374,3 +374,85 @@
     grid-template-columns: 1fr;
   }
 }
+
+body.dark-mode .dashboard-subtitle,
+body.dark-mode .tablon-description,
+body.dark-mode .sla-stat-label,
+body.dark-mode .recent-ticket-status,
+body.dark-mode .team-member-role {
+  color: #9ca3af;
+}
+
+body.dark-mode .dashboard-subtitle .separator {
+  color: #6b7280;
+}
+
+body.dark-mode .tablon-selector {
+  background: #111827;
+  border-color: #374151;
+  color: #d1d5db;
+}
+
+body.dark-mode .tablon-select {
+  color: #e5e7eb;
+}
+
+body.dark-mode .tablon-info-banner {
+  background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+  border-left-color: #60a5fa;
+}
+
+body.dark-mode .tablon-details strong,
+body.dark-mode .metric-value,
+body.dark-mode .recent-ticket-title,
+body.dark-mode .team-member-name,
+body.dark-mode .sla-stat-value {
+  color: #f3f4f6;
+}
+
+body.dark-mode .metric-label {
+  color: #9ca3af;
+}
+
+body.dark-mode .metric-icon-blue {
+  background-color: #1e3a8a;
+  color: #93c5fd;
+}
+
+body.dark-mode .metric-icon-green {
+  background-color: #064e3b;
+  color: #6ee7b7;
+}
+
+body.dark-mode .metric-icon-yellow {
+  background-color: #713f12;
+  color: #fde68a;
+}
+
+body.dark-mode .metric-icon-red {
+  background-color: #7f1d1d;
+  color: #fca5a5;
+}
+
+body.dark-mode .recent-ticket-item,
+body.dark-mode .team-member-activity {
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .recent-ticket-item:hover {
+  background-color: #1f2937;
+}
+
+body.dark-mode .recent-ticket-id,
+body.dark-mode .team-member-tickets {
+  color: #60a5fa;
+}
+
+body.dark-mode .sla-progress-bar {
+  background-color: #374151;
+}
+
+body.dark-mode .sla-breakdown-item {
+  background-color: #1f2937;
+  color: #d1d5db;
+}

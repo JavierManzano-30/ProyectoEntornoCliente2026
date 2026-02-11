@@ -40,3 +40,15 @@
     gap: 0.5rem;
   }
 }
+
+body.dark-mode .opportunity-board::-webkit-scrollbar-track {
+  background: #111827;
+}
+
+body.dark-mode .opportunity-board::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+body.dark-mode .opportunity-board::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}

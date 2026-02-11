@@ -92,3 +92,29 @@
   white-space: nowrap;
   max-width: 60%;
 }
+
+body.dark-mode .company-card {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+body.dark-mode .company-card:hover {
+  border-color: #60a5fa;
+}
+
+body.dark-mode .company-card-header {
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .company-card-name {
+  color: #f3f4f6;
+}
+
+body.dark-mode .company-card-cif,
+body.dark-mode .company-card-detail .detail-label {
+  color: #9ca3af;
+}
+
+body.dark-mode .company-card-detail .detail-value {
+  color: #d1d5db;
+}

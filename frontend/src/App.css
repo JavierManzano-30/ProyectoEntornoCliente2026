@@ -7,3 +7,119 @@
   width: 100%;
   min-height: 100vh;
 }
+
+/* Capa global dark mode para pantallas modulares */
+body.dark-mode [class$="-page"] {
+  color: #e5e7eb;
+}
+
+body.dark-mode [class*="filters-card"],
+body.dark-mode [class*="table-card"],
+body.dark-mode [class*="list-card"],
+body.dark-mode [class*="search-section"] {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+body.dark-mode [class*="search-input"],
+body.dark-mode [class*="filter-item"] select,
+body.dark-mode [class*="filter-item"] input,
+body.dark-mode [class*="filter-group"] select {
+  background-color: #111827;
+  border-color: #374151;
+  color: #e5e7eb;
+}
+
+body.dark-mode [class*="search-input"]::placeholder {
+  color: #6b7280;
+}
+
+body.dark-mode [class*="-table"] thead {
+  background: #1f2937;
+  border-bottom-color: #374151;
+}
+
+body.dark-mode [class*="-table"] th {
+  color: #cbd5e1;
+}
+
+body.dark-mode [class*="-table"] td {
+  color: #d1d5db;
+}
+
+body.dark-mode [class*="-table"] tbody tr {
+  border-bottom-color: #374151;
+}
+
+body.dark-mode [class*="-table"] tbody tr:hover {
+  background: #1f2937;
+}
+
+body.dark-mode [class*="pagination"] {
+  border-top-color: #374151;
+}
+
+body.dark-mode [class*="empty-state"] {
+  color: #9ca3af;
+}
+
+body.dark-mode .stat-card,
+body.dark-mode .kpi-card,
+body.dark-mode .summary-card,
+body.dark-mode .report-card,
+body.dark-mode .dataset-card,
+body.dark-mode .alert-card,
+body.dark-mode .project-card,
+body.dark-mode .task-card,
+body.dark-mode .process-card,
+body.dark-mode .instance-card,
+body.dark-mode .payroll-card,
+body.dark-mode .employee-card,
+body.dark-mode .absence-card,
+body.dark-mode .department-card,
+body.dark-mode .monitor-card,
+body.dark-mode .role-card,
+body.dark-mode .detail-card,
+body.dark-mode .chart-card,
+body.dark-mode .sla-card,
+body.dark-mode .tablon-card,
+body.dark-mode .estado-card,
+body.dark-mode .plantilla-card,
+body.dark-mode .entry-card,
+body.dark-mode .opportunity-card {
+  background: #1f2937;
+  border-color: #374151;
+  color: #d1d5db;
+}
+
+body.dark-mode .stat-card:hover,
+body.dark-mode .kpi-card:hover,
+body.dark-mode .summary-card:hover,
+body.dark-mode .report-card:hover,
+body.dark-mode .dataset-card:hover,
+body.dark-mode .alert-card:hover,
+body.dark-mode .project-card:hover,
+body.dark-mode .task-card:hover,
+body.dark-mode .process-card:hover,
+body.dark-mode .instance-card:hover,
+body.dark-mode .payroll-card:hover,
+body.dark-mode .employee-card:hover,
+body.dark-mode .absence-card:hover,
+body.dark-mode .department-card:hover,
+body.dark-mode .monitor-card:hover,
+body.dark-mode .role-card:hover,
+body.dark-mode .detail-card:hover,
+body.dark-mode .chart-card:hover,
+body.dark-mode .sla-card:hover,
+body.dark-mode .tablon-card:hover,
+body.dark-mode .estado-card:hover,
+body.dark-mode .plantilla-card:hover,
+body.dark-mode .entry-card:hover,
+body.dark-mode .opportunity-card:hover {
+  border-color: #60a5fa;
+}
+
+body.dark-mode select option {
+  background: #111827;
+  color: #e5e7eb;
+}
