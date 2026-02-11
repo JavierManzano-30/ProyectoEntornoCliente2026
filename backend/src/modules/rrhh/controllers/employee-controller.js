@@ -67,6 +67,20 @@ async function createEmployee(req, res, next) {
       return res.status(400).json(envelopeError('VALIDATION_ERROR', 'company_id es obligatorio'));
     }
 
+    const hasDepartment = await employeeService.departmentExists({
+      id: req.body.department_id,
+      companyId: company_id
+    });
+    if (!hasDepartment) {
+      return res
+        .status(400)
+        .json(
+          envelopeError('VALIDATION_ERROR', 'department_id no existe para la company_id indicada', [
+            { field: 'department_id', message: 'Departamento no encontrado' }
+          ])
+        );
+    }
+
     const row = await employeeService.createEmployee({
       company_id,
       first_name: req.body.first_name,
@@ -80,6 +94,15 @@ async function createEmployee(req, res, next) {
 
     return res.status(201).json(envelopeSuccess(row));
   } catch (err) {
+    if (err?.code === '23503') {
+      return res
+        .status(400)
+        .json(
+          envelopeError('VALIDATION_ERROR', 'Referencia invalida (clave foranea)', [
+            { code: err.code, message: err.message, details: err.details }
+          ])
+        );
+    }
     return next(err);
   }
 }
@@ -106,6 +129,20 @@ async function updateEmployee(req, res, next) {
       return res.status(400).json(envelopeError('VALIDATION_ERROR', 'company_id es obligatorio'));
     }
 
+    const hasDepartment = await employeeService.departmentExists({
+      id: req.body.department_id,
+      companyId: company_id
+    });
+    if (!hasDepartment) {
+      return res
+        .status(400)
+        .json(
+          envelopeError('VALIDATION_ERROR', 'department_id no existe para la company_id indicada', [
+            { field: 'department_id', message: 'Departamento no encontrado' }
+          ])
+        );
+    }
+
     const row = await employeeService.updateEmployee({
       id: req.params.id,
       company_id,
@@ -124,6 +161,15 @@ async function updateEmployee(req, res, next) {
 
     return res.json(envelopeSuccess(row));
   } catch (err) {
+    if (err?.code === '23503') {
+      return res
+        .status(400)
+        .json(
+          envelopeError('VALIDATION_ERROR', 'Referencia invalida (clave foranea)', [
+            { code: err.code, message: err.message, details: err.details }
+          ])
+        );
+    }
     return next(err);
   }
 }

@@ -1,14 +1,14 @@
 @baseUrl = http://localhost:3001/api/v1
 @email = pepe@acme.com
 @password = secret123
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4M2VhOGNlOS0xOTlkLTRmYjItODVmYy1lOGU4MTkyN2VjY2IiLCJjb21wYW55SWQiOiI4ZGVkYjVmMS05YjEzLTRmNTItYmJkZS1kOTVmNGNkMjRiNjQiLCJyb2xlSWQiOiIxYjQ5NDc2MS1iNjY2LTQxYjYtYjcxNi1hMThlMTc5ZDJhNzQiLCJpYXQiOjE3NzA3OTQzMzAsImV4cCI6MTc3MDgyMzEzMH0.eDgJE6GqzZT0u-pPuOSNj_e2Tal3SF7jm-0mQ0tuXTk
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4M2VhOGNlOS0xOTlkLTRmYjItODVmYy1lOGU4MTkyN2VjY2IiLCJjb21wYW55SWQiOiI4ZGVkYjVmMS05YjEzLTRmNTItYmJkZS1kOTVmNGNkMjRiNjQiLCJyb2xlSWQiOiIxYjQ5NDc2MS1iNjY2LTQxYjYtYjcxNi1hMThlMTc5ZDJhNzQiLCJpYXQiOjE3NzA3OTkxNzYsImV4cCI6MTc3MDgyNzk3Nn0.Jakhl1upyH6WYAQqIAZjuguosHpugmifc-YqW4r68sQ
 @company_id = 8dedb5f1-9b13-4f52-bbde-d95f4cd24b64
-@employee_id = e402de3d-4f7f-47cf-92ab-e68ae0b4bb08
-@department_id = 13214298-480b-4bb8-b63d-03bc67e3bec2
-@contract_id = cc8f3754-05a3-4341-a0bb-7b4216d78104
-@absence_id = ac9d3d90-050e-4f34-9302-76fcc1505bec
-@payroll_id = e1a72d2b-094e-4a1b-9c3c-6bc63e6372f3
-@evaluation_id = c3a0be98-b957-4f50-804c-0dd3a9d749d0
+@employee_id = c2ca25ea-93b2-4587-bec5-9a5812b8fd32
+@department_id = 23f11798-3502-4133-99ae-fa5d80949842
+@contract_id = b24ae678-c335-4ce8-adcf-27235fdd0be2
+@absence_id = 07e5ebdf-f4ff-4d94-a088-9e80944304f4
+@payroll_id = 793af435-6e6d-4fce-b174-7be49768036a
+@evaluation_id = bd2ee9ae-61ff-4c32-9536-c659ca84dd9c
 
 ### Health RRHH
 GET {{baseUrl}}/rrhh/health

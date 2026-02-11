@@ -25,6 +25,14 @@ async function getEmployeeById({ id, companyId }) {
   return data || null;
 }
 
+async function departmentExists({ id, companyId }) {
+  let query = supabase.from('hr_departments').select('id').eq('id', id);
+  query = applyEquals(query, 'company_id', companyId);
+  const { data, error } = await query.maybeSingle();
+  if (error) throw error;
+  return !!data;
+}
+
 async function createEmployee({
   company_id,
   first_name,
@@ -123,6 +131,7 @@ async function getEmployeeSummary({ id, companyId }) {
 module.exports = {
   listEmployees,
   getEmployeeById,
+  departmentExists,
   createEmployee,
   updateEmployee,
   deactivateEmployee,
