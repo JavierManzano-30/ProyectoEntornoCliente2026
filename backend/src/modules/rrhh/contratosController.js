@@ -1,14 +1,7 @@
-<<<<<<< Updated upstream:backend/src/modules/rrhh/contratosController.js
 const { pool } = require('../../config/db');
 const { envelopeSuccess, envelopeError } = require('../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../utils/pagination');
 const { validateRequiredFields } = require('../../utils/validation');
-=======
-const supabase = require('../../../config/supabase');
-const { envelopeSuccess, envelopeError } = require('../../../utils/envelope');
-const { getPaginationParams, buildPaginationMeta } = require('../../../utils/pagination');
-const { validateRequiredFields } = require('../../../utils/validation');
->>>>>>> Stashed changes:backend/src/modules/rrhh/controllers/contratosController.js
 
 function resolveCompanyId(req) {
   return req.user?.companyId || req.user?.empresaId || req.user?.company_id || null;
