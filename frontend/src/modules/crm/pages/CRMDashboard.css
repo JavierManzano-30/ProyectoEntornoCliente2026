@@ -242,3 +242,34 @@
     grid-template-columns: 100px 1fr 80px;
   }
 }
+
+body.dark-mode .crm-dashboard__header h1,
+body.dark-mode .crm-dashboard__card h3,
+body.dark-mode .kpi-card__value,
+body.dark-mode .pipeline-item__valor {
+  color: #f3f4f6;
+}
+
+body.dark-mode .crm-dashboard__header p,
+body.dark-mode .kpi-card__label,
+body.dark-mode .pipeline-item__cantidad,
+body.dark-mode .activity-item__meta {
+  color: #9ca3af;
+}
+
+body.dark-mode .pipeline-item__fase {
+  color: #d1d5db;
+}
+
+body.dark-mode .pipeline-item__bar {
+  background-color: #374151;
+}
+
+body.dark-mode .opportunity-item,
+body.dark-mode .activity-item {
+  background-color: #111827;
+}
+
+body.dark-mode .opportunity-item__details {
+  color: #9ca3af;
+}

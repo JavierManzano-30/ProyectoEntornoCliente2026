@@ -127,3 +127,34 @@
   background-color: #fee2e2;
   color: #ef4444;
 }
+
+body.dark-mode .ticket-card {
+  background: #1f2937;
+  border-color: #374151;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+body.dark-mode .ticket-card:hover {
+  border-color: #60a5fa;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .ticket-card-id,
+body.dark-mode .ticket-card-description,
+body.dark-mode .ticket-card-meta-item {
+  color: #9ca3af;
+}
+
+body.dark-mode .ticket-card-title {
+  color: #f3f4f6;
+}
+
+body.dark-mode .ticket-card-sla.warning {
+  background-color: #713f12;
+  color: #fde68a;
+}
+
+body.dark-mode .ticket-card-sla.breached {
+  background-color: #7f1d1d;
+  color: #fca5a5;
+}

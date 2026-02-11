@@ -85,3 +85,36 @@
     grid-template-columns: 1fr;
   }
 }
+
+body.dark-mode .stat-label {
+  color: #9ca3af;
+}
+
+body.dark-mode .stat-value {
+  color: #f3f4f6;
+}
+
+body.dark-mode .stat-icon-blue {
+  background-color: #1e3a8a;
+  color: #93c5fd;
+}
+
+body.dark-mode .stat-icon-green {
+  background-color: #064e3b;
+  color: #6ee7b7;
+}
+
+body.dark-mode .stat-icon-yellow {
+  background-color: #713f12;
+  color: #fde68a;
+}
+
+body.dark-mode .stat-icon-red {
+  background-color: #7f1d1d;
+  color: #fca5a5;
+}
+
+body.dark-mode .stat-icon-gray {
+  background-color: #374151;
+  color: #d1d5db;
+}

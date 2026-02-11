@@ -83,3 +83,28 @@
     grid-template-columns: 1fr;
   }
 }
+
+body.dark-mode .payroll-table thead {
+  background: #1f2937;
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .payroll-table th {
+  color: #cbd5e1;
+}
+
+body.dark-mode .payroll-table tbody tr {
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .payroll-row:hover {
+  background: #1f2937;
+}
+
+body.dark-mode .payroll-table td {
+  color: #d1d5db;
+}
+
+body.dark-mode .employee-number {
+  color: #9ca3af;
+}

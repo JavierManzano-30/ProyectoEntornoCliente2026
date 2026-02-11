@@ -216,3 +216,52 @@
   font-weight: 700;
   font-size: 0.75rem;
 }
+
+body.dark-mode .task-card {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+body.dark-mode .task-card:hover {
+  border-color: #4b5563;
+}
+
+body.dark-mode .task-card-title {
+  color: #f3f4f6;
+}
+
+body.dark-mode .task-card-process,
+body.dark-mode .task-card-description,
+body.dark-mode .task-deadline,
+body.dark-mode .task-assignee {
+  color: #9ca3af;
+}
+
+body.dark-mode .menu-btn {
+  background-color: #374151;
+  color: #d1d5db;
+}
+
+body.dark-mode .menu-btn:hover {
+  background-color: #4b5563;
+  color: #f3f4f6;
+}
+
+body.dark-mode .dropdown-menu {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+body.dark-mode .dropdown-menu button {
+  color: #d1d5db;
+}
+
+body.dark-mode .dropdown-menu button:hover {
+  background-color: #374151;
+  color: #f3f4f6;
+}
+
+body.dark-mode .task-card-footer,
+body.dark-mode .task-assignee {
+  border-top-color: #374151;
+}

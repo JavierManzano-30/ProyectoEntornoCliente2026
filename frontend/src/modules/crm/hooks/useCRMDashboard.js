@@ -5,6 +5,7 @@ export const useCRMDashboard = (params = {}) => {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const paramsKey = JSON.stringify(params);
 
   const fetchDashboard = useCallback(async () => {
     try {
@@ -18,7 +19,7 @@ export const useCRMDashboard = (params = {}) => {
     } finally {
       setLoading(false);
     }
-  }, [params]);
+  }, [paramsKey]);
 
   useEffect(() => {
     fetchDashboard();

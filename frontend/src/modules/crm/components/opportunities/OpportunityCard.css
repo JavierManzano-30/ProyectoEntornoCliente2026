@@ -80,3 +80,22 @@
   font-size: 0.8rem;
   color: #6b7280;
 }
+
+body.dark-mode .opportunity-card__title {
+  color: #f3f4f6;
+}
+
+body.dark-mode .opportunity-card__description,
+body.dark-mode .opportunity-card__icon,
+body.dark-mode .opportunity-card__probability,
+body.dark-mode .opportunity-card__owner {
+  color: #9ca3af;
+}
+
+body.dark-mode .opportunity-card__detail {
+  color: #d1d5db;
+}
+
+body.dark-mode .opportunity-card__footer {
+  border-top-color: #374151;
+}

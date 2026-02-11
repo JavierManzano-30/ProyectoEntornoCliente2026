@@ -101,3 +101,30 @@
   color: #9ca3af;
   font-size: 1rem;
 }
+
+body.dark-mode .process-list-header h1 {
+  color: #f3f4f6;
+}
+
+body.dark-mode .subtitle,
+body.dark-mode .result-count,
+body.dark-mode .loading {
+  color: #9ca3af;
+}
+
+body.dark-mode .view-toggle {
+  background-color: #1f2937;
+}
+
+body.dark-mode .toggle-btn {
+  color: #9ca3af;
+}
+
+body.dark-mode .toggle-btn:hover {
+  color: #d1d5db;
+}
+
+body.dark-mode .toggle-btn.active {
+  background-color: #374151;
+  color: #60a5fa;
+}

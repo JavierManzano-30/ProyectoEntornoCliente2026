@@ -4,7 +4,7 @@ import './Landing.css';
 
 const Landing = () => {
   return (
-    <div className="landing-bg">
+    <div className={`landing-bg${document.body.classList.contains('dark-mode') ? ' dark-mode' : ''}`}> 
       <div className="landing-logo-bar">
         <img src="/images/synera-logo.png" alt="SYNERA Logo" className="landing-logo" />
         <span className="landing-brand">SYNERA</span>

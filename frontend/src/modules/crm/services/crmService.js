@@ -10,7 +10,7 @@ class CRMService {
   
   async getCustomers(params = {}) {
     if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 300));
       return mockCustomers.filter(c => c.tipo === 'cliente');
     }
     const response = await axiosInstance.get(API_ENDPOINTS.crm.customers, { params });
@@ -30,7 +30,7 @@ class CRMService {
 
   async createCustomer(customerData) {
     if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 300));
       return { ...customerData, id: mockCustomers.length + 1 };
     }
     const response = await axiosInstance.post(API_ENDPOINTS.crm.customers, customerData);
@@ -60,7 +60,7 @@ class CRMService {
   
   async getLeads(params = {}) {
     if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 300));
       return mockLeads;
     }
     const response = await axiosInstance.get(API_ENDPOINTS.crm.leads, { params });
@@ -80,7 +80,7 @@ class CRMService {
 
   async createLead(leadData) {
     if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 300));
       return { ...leadData, id: mockLeads.length + 1 };
     }
     const response = await axiosInstance.post(API_ENDPOINTS.crm.leads, leadData);
@@ -108,7 +108,7 @@ class CRMService {
 
   async convertLead(id, conversionData) {
     if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 300));
       return { 
         success: true, 
         customerId: Math.floor(Math.random() * 1000),
@@ -123,7 +123,7 @@ class CRMService {
   
   async getOpportunities(params = {}) {
     if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 300));
       return mockOpportunities;
     }
     const response = await axiosInstance.get(API_ENDPOINTS.crm.opportunities, { params });
@@ -143,7 +143,7 @@ class CRMService {
 
   async createOpportunity(opportunityData) {
     if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 300));
       return { ...opportunityData, id: mockOpportunities.length + 1 };
     }
     const response = await axiosInstance.post(API_ENDPOINTS.crm.opportunities, opportunityData);
@@ -183,7 +183,7 @@ class CRMService {
   
   async getActivities(params = {}) {
     if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 300));
       return mockActivities;
     }
     const response = await axiosInstance.get(API_ENDPOINTS.crm.activities, { params });
@@ -203,7 +203,7 @@ class CRMService {
 
   async createActivity(activityData) {
     if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 300));
       return { ...activityData, id: mockActivities.length + 1 };
     }
     const response = await axiosInstance.post(API_ENDPOINTS.crm.activities, activityData);
@@ -243,7 +243,7 @@ class CRMService {
   
   async getDashboardData(params = {}) {
     if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 300));
       return mockDashboardData;
     }
     const response = await axiosInstance.get(API_ENDPOINTS.crm.dashboard, { params });
@@ -266,3 +266,4 @@ class CRMService {
 }
 
 export default new CRMService();
+

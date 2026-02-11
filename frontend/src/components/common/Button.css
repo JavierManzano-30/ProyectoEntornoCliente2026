@@ -137,6 +137,25 @@
   animation: spin 0.6s linear infinite;
 }
 
+body.dark-mode .btn-secondary {
+  color: #e5e7eb;
+  background-color: #374151;
+  border-color: #4b5563;
+}
+
+body.dark-mode .btn-secondary:hover:not(.btn-disabled) {
+  background-color: #4b5563;
+  border-color: #6b7280;
+}
+
+body.dark-mode .btn-ghost {
+  color: #d1d5db;
+}
+
+body.dark-mode .btn-ghost:hover:not(.btn-disabled) {
+  background-color: #374151;
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);

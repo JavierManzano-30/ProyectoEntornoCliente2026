@@ -80,3 +80,24 @@
     flex-direction: column;
   }
 }
+
+body.dark-mode .absence-table thead {
+  background: #1f2937;
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .absence-table th {
+  color: #cbd5e1;
+}
+
+body.dark-mode .absence-table tbody tr {
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .absence-row:hover {
+  background: #1f2937;
+}
+
+body.dark-mode .absence-table td {
+  color: #d1d5db;
+}
