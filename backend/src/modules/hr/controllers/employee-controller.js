@@ -36,7 +36,7 @@ async function getEmployee(req, res, next) {
     });
 
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Empleado no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Employee not found'));
     }
 
     return res.json(envelopeSuccess(row));
@@ -59,12 +59,12 @@ async function createEmployee(req, res, next) {
     if (companyError) return res.status(403).json(companyError);
 
     if (requiredErrors.length) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', requiredErrors));
     }
 
     const company_id = ensureCompanyId(req, req.body.company_id);
     if (!company_id) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'company_id es obligatorio'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'company_id is required'));
     }
 
     const hasDepartment = await employeeService.departmentExists({
@@ -75,8 +75,8 @@ async function createEmployee(req, res, next) {
       return res
         .status(400)
         .json(
-          envelopeError('VALIDATION_ERROR', 'department_id no existe para la company_id indicada', [
-            { field: 'department_id', message: 'Departamento no encontrado' }
+          envelopeError('VALIDATION_ERROR', 'department_id does not exist for the specified company_id', [
+            { field: 'department_id', message: 'Department not found' }
           ])
         );
     }
@@ -98,7 +98,7 @@ async function createEmployee(req, res, next) {
       return res
         .status(400)
         .json(
-          envelopeError('VALIDATION_ERROR', 'Referencia invalida (clave foranea)', [
+          envelopeError('VALIDATION_ERROR', 'Invalid reference (foreign key)', [
             { code: err.code, message: err.message, details: err.details }
           ])
         );
@@ -121,12 +121,12 @@ async function updateEmployee(req, res, next) {
     if (companyError) return res.status(403).json(companyError);
 
     if (requiredErrors.length) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', requiredErrors));
     }
 
     const company_id = ensureCompanyId(req, req.body.company_id);
     if (!company_id) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'company_id es obligatorio'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'company_id is required'));
     }
 
     const hasDepartment = await employeeService.departmentExists({
@@ -137,8 +137,8 @@ async function updateEmployee(req, res, next) {
       return res
         .status(400)
         .json(
-          envelopeError('VALIDATION_ERROR', 'department_id no existe para la company_id indicada', [
-            { field: 'department_id', message: 'Departamento no encontrado' }
+          envelopeError('VALIDATION_ERROR', 'department_id does not exist for the specified company_id', [
+            { field: 'department_id', message: 'Department not found' }
           ])
         );
     }
@@ -156,7 +156,7 @@ async function updateEmployee(req, res, next) {
     });
 
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Empleado no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Employee not found'));
     }
 
     return res.json(envelopeSuccess(row));
@@ -165,7 +165,7 @@ async function updateEmployee(req, res, next) {
       return res
         .status(400)
         .json(
-          envelopeError('VALIDATION_ERROR', 'Referencia invalida (clave foranea)', [
+          envelopeError('VALIDATION_ERROR', 'Invalid reference (foreign key)', [
             { code: err.code, message: err.message, details: err.details }
           ])
         );
@@ -182,7 +182,7 @@ async function deleteEmployee(req, res, next) {
     });
 
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Empleado no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Employee not found'));
     }
 
     return res.status(204).send();
@@ -199,7 +199,7 @@ async function getEmployeeSummary(req, res, next) {
     });
 
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Empleado no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Employee not found'));
     }
 
     return res.json(envelopeSuccess(row));

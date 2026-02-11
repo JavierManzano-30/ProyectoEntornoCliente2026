@@ -6,14 +6,14 @@ function requireAuth(req, res, next) {
   const header = req.headers.authorization || '';
   const [scheme, token] = header.split(' ');
   if (scheme !== 'Bearer' || !token) {
-    return res.status(401).json(envelopeError('UNAUTHORIZED', 'Token requerido'));
+    return res.status(401).json(envelopeError('UNAUTHORIZED', 'Token required'));
   }
 
   const secret = process.env.JWT_SECRET;
   if (!secret) {
     return res
       .status(500)
-      .json(envelopeError('CONFIG_ERROR', 'JWT_SECRET no configurado'));
+      .json(envelopeError('CONFIG_ERROR', 'JWT_SECRET is not configured'));
   }
 
   try {
@@ -22,7 +22,7 @@ function requireAuth(req, res, next) {
     return next();
   } catch (err) {
     console.error('JWT verification error:', err);
-    return res.status(401).json(envelopeError('UNAUTHORIZED', 'Token invalido'));
+    return res.status(401).json(envelopeError('UNAUTHORIZED', 'Invalid token'));
   }
 }
 

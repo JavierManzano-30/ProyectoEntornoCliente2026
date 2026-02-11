@@ -4,7 +4,7 @@ const { validateRequiredFields, validateEnum } = require('../../../utils/validat
 const purchaseService = require('../services/purchase-service');
 
 function resolveCompanyId(req) {
-  return req.user?.companyId || req.user?.empresaId || req.user?.company_id || null;
+  return req.user?.companyId || req.user?.companyId || req.user?.company_id || null;
 }
 
 function mapSupplier(row) {
@@ -94,7 +94,7 @@ async function getSupplier(req, res, next) {
     const companyId = resolveCompanyId(req);
     const row = await purchaseService.getSupplierById(companyId, req.params.id);
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Proveedor no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Supplier not found'));
     }
     return res.json(envelopeSuccess(mapSupplier(row)));
   } catch (err) {
@@ -106,7 +106,7 @@ async function createSupplier(req, res, next) {
   try {
     const errors = validateRequiredFields(req.body, ['legalName']);
     if (errors.length) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', errors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', errors));
     }
     const companyId = resolveCompanyId(req);
     const row = await purchaseService.createSupplier(companyId, req.body);
@@ -121,7 +121,7 @@ async function updateSupplier(req, res, next) {
     const companyId = resolveCompanyId(req);
     const row = await purchaseService.updateSupplier(companyId, req.params.id, req.body);
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Proveedor no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Supplier not found'));
     }
     return res.json(envelopeSuccess(mapSupplier(row)));
   } catch (err) {
@@ -134,7 +134,7 @@ async function deleteSupplier(req, res, next) {
     const companyId = resolveCompanyId(req);
     const row = await purchaseService.deleteSupplier(companyId, req.params.id);
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Proveedor no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Supplier not found'));
     }
     return res.status(204).send();
   } catch (err) {
@@ -178,7 +178,7 @@ async function createPurchaseOrder(req, res, next) {
   try {
     const errors = validateRequiredFields(req.body, ['supplierId', 'orderNumber', 'orderDate', 'total']);
     if (errors.length) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', errors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', errors));
     }
     const statusErr = validateEnum(req.body.status, ['draft', 'confirmed', 'partially_received', 'received', 'canceled']);
     if (statusErr) {
@@ -238,7 +238,7 @@ async function updatePurchaseItem(req, res, next) {
     const companyId = resolveCompanyId(req);
     const row = await purchaseService.updatePurchaseItem(companyId, req.params.id, req.body);
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Item de compra no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Purchase item not found'));
     }
     return res.json(envelopeSuccess(mapPurchaseItem(row)));
   } catch (err) {
@@ -251,7 +251,7 @@ async function deletePurchaseItem(req, res, next) {
     const companyId = resolveCompanyId(req);
     const row = await purchaseService.deletePurchaseItem(companyId, req.params.id);
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Item de compra no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Purchase item not found'));
     }
     return res.status(204).send();
   } catch (err) {

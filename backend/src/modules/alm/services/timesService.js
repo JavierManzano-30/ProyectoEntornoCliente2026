@@ -19,7 +19,7 @@ function mapTime(row) {
 
 function ensureCompanyId(companyId) {
   if (!companyId) {
-    throw createServiceError(403, 'FORBIDDEN', 'companyId no disponible en token');
+    throw createServiceError(403, 'FORBIDDEN', 'companyId not available in token');
   }
 }
 
@@ -59,13 +59,13 @@ async function listTimes(companyId, query, paging) {
 async function validateTimePayload(body, companyId) {
   const requiredErrors = validateRequiredFields(body, ['taskId', 'userId', 'entryDate', 'hours']);
   if (requiredErrors.length) {
-    throw createServiceError(400, 'VALIDATION_ERROR', 'Datos invalidos', requiredErrors);
+    throw createServiceError(400, 'VALIDATION_ERROR', 'Invalid data', requiredErrors);
   }
 
   const taskExists = await ensureTaskInCompany(body.taskId, companyId);
   if (!taskExists) {
-    throw createServiceError(400, 'VALIDATION_ERROR', 'Datos invalidos', [
-      { field: 'taskId', message: 'Tarea no encontrada para la empresa del token' }
+    throw createServiceError(400, 'VALIDATION_ERROR', 'Invalid data', [
+      { field: 'taskId', message: 'Task not found for the token company' }
     ]);
   }
 }
@@ -117,7 +117,7 @@ async function updateTime(companyId, id, body) {
 
   if (error) throw error;
   if (!data) {
-    throw createServiceError(404, 'RESOURCE_NOT_FOUND', 'Registro de tiempo no encontrado');
+    throw createServiceError(404, 'RESOURCE_NOT_FOUND', 'Time entry not found');
   }
 
   return mapTime(data);
@@ -136,7 +136,7 @@ async function deleteTime(companyId, id) {
 
   if (error) throw error;
   if (!data) {
-    throw createServiceError(404, 'RESOURCE_NOT_FOUND', 'Registro de tiempo no encontrado');
+    throw createServiceError(404, 'RESOURCE_NOT_FOUND', 'Time entry not found');
   }
 }
 

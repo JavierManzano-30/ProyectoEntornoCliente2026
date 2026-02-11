@@ -72,8 +72,8 @@ Content-Type: application/json
 
 {
   "companyId": "{{almCompanyId}}",
-  "name": "Proyecto ALM",
-  "description": "Demo de proyecto",
+  "name": "ALM Project",
+  "description": "Project demo",
   "startDate": "2026-01-10",
   "responsibleId": "{{almUserId}}",
   "status": "planned"
@@ -88,7 +88,7 @@ Content-Type: application/json
 {
   "companyId": "{{almCompanyId}}",
   "projectId": "{{almCreateProject.data.id}}",
-  "title": "Tarea ALM",
+  "title": "ALM Task",
   "status": "pending",
   "priority": "medium"
 }
@@ -111,25 +111,25 @@ Content-Type: application/json
 }
 
 ### CRM - List Clients (requires JWT)
-GET {{baseUrl}}/api/v1/crm/clientes?page=1&limit=10
+GET {{baseUrl}}/api/v1/crm/customers?page=1&limit=10
 Authorization: Bearer {{token}}
 
 ### CRM - Create Client (LEAD) (requires JWT)
 # @name crmCreateClient
-POST {{baseUrl}}/api/v1/crm/clientes
+POST {{baseUrl}}/api/v1/crm/customers
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "name": "Cliente Demo CRM",
+  "name": "CRM Demo Customer",
   "taxId": "B12345678",
-  "email": "cliente@demo.com",
+  "email": "customer@demo.com",
   "phone": "+34 600 111 222",
   "type": "lead"
 }
 
 ### CRM - Get Client Details (requires JWT)
-GET {{baseUrl}}/api/v1/crm/clientes/{{crmCreateClient.data.id}}
+GET {{baseUrl}}/api/v1/crm/customers/{{crmCreateClient.data.id}}
 Authorization: Bearer {{token}}
 
 ### CRM - Create Pipeline (requires JWT)
@@ -156,21 +156,21 @@ Content-Type: application/json
 
 {
   "pipelineId": "{{crmCreatePipeline.data.id}}",
-  "name": "Prospección",
+  "name": "Prospecting",
   "sortOrder": 1,
   "defaultProbability": 20
 }
 
 ### CRM - Create Contact (requires JWT)
 # @name crmCreateContact
-POST {{baseUrl}}/api/v1/crm/contactos
+POST {{baseUrl}}/api/v1/crm/contacts
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
   "clientId": "{{crmCreateClient.data.id}}",
-  "name": "Juan",
-  "lastName": "Pérez",
+  "name": "John",
+  "lastName": "Perez",
   "jobTitle": "CTO",
   "email": "juan.perez@demo.com",
   "phone": "+34 600 222 333",
@@ -178,12 +178,12 @@ Content-Type: application/json
 }
 
 ### CRM - List Contacts (requires JWT)
-GET {{baseUrl}}/api/v1/crm/contactos?clientId={{crmCreateClient.data.id}}
+GET {{baseUrl}}/api/v1/crm/contacts?clientId={{crmCreateClient.data.id}}
 Authorization: Bearer {{token}}
 
 ### CRM - Create Opportunity (requires JWT)
 # @name crmCreateOpportunity
-POST {{baseUrl}}/api/v1/crm/oportunidades
+POST {{baseUrl}}/api/v1/crm/opportunities
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -191,8 +191,8 @@ Content-Type: application/json
   "clientId": "{{crmCreateClient.data.id}}",
   "pipelineId": "{{crmCreatePipeline.data.id}}",
   "stageId": "{{crmCreateStage.data.id}}",
-  "title": "Venta Software ERP",
-  "description": "Implementación completa",
+  "title": "ERP Software Sale",
+  "description": "Full implementation",
   "estimatedValue": 50000,
   "currency": "EUR",
   "probability": 60,
@@ -200,15 +200,15 @@ Content-Type: application/json
 }
 
 ### CRM - List Opportunities (requires JWT)
-GET {{baseUrl}}/api/v1/crm/oportunidades?page=1&limit=10
+GET {{baseUrl}}/api/v1/crm/opportunities?page=1&limit=10
 Authorization: Bearer {{token}}
 
 ### CRM - Get Opportunity Details (requires JWT)
-GET {{baseUrl}}/api/v1/crm/oportunidades/{{crmCreateOpportunity.data.id}}
+GET {{baseUrl}}/api/v1/crm/opportunities/{{crmCreateOpportunity.data.id}}
 Authorization: Bearer {{token}}
 
 ### CRM - Update Opportunity Stage (requires JWT)
-PATCH {{baseUrl}}/api/v1/crm/oportunidades/{{crmCreateOpportunity.data.id}}/stage
+PATCH {{baseUrl}}/api/v1/crm/opportunities/{{crmCreateOpportunity.data.id}}/stage
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -219,7 +219,7 @@ Content-Type: application/json
 
 ### CRM - Create Activity (requires JWT)
 # @name crmCreateActivity
-POST {{baseUrl}}/api/v1/crm/actividades
+POST {{baseUrl}}/api/v1/crm/activities
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -228,62 +228,62 @@ Content-Type: application/json
   "clientId": "{{crmCreateClient.data.id}}",
   "opportunityId": "{{crmCreateOpportunity.data.id}}",
   "type": "call",
-  "subject": "Primera llamada",
-  "description": "Conversación inicial",
+  "subject": "First call",
+  "description": "Initial conversation",
   "activityAt": "2026-02-07T10:00:00.000Z",
   "completed": false
 }
 
 ### CRM - List Activities (requires JWT)
-GET {{baseUrl}}/api/v1/crm/actividades?page=1&limit=10
+GET {{baseUrl}}/api/v1/crm/activities?page=1&limit=10
 Authorization: Bearer {{token}}
 
 ### CRM - Get Activity Details (requires JWT)
-GET {{baseUrl}}/api/v1/crm/actividades/{{crmCreateActivity.data.id}}
+GET {{baseUrl}}/api/v1/crm/activities/{{crmCreateActivity.data.id}}
 Authorization: Bearer {{token}}
 
 ### CRM - Mark Activity as Completed (requires JWT)
-PATCH {{baseUrl}}/api/v1/crm/actividades/{{crmCreateActivity.data.id}}/completar
+PATCH {{baseUrl}}/api/v1/crm/activities/{{crmCreateActivity.data.id}}/complete
 Authorization: Bearer {{token}}
 
 ### CRM - Convert Lead to Customer (requires JWT)
-POST {{baseUrl}}/api/v1/crm/clientes/{{crmCreateClient.data.id}}/convertir
+POST {{baseUrl}}/api/v1/crm/customers/{{crmCreateClient.data.id}}/convert
 Authorization: Bearer {{token}}
 
 ### CRM - Update Client (requires JWT)
-PUT {{baseUrl}}/api/v1/crm/clientes/{{crmCreateClient.data.id}}
+PUT {{baseUrl}}/api/v1/crm/customers/{{crmCreateClient.data.id}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "name": "Cliente Demo CRM Actualizado",
-  "email": "cliente.updated@demo.com"
+  "name": "Updated CRM Demo Customer",
+  "email": "customer.updated@demo.com"
 }
 
-### ⚠️ CRM - Delete Client (CUIDADO: Eliminará en cascada contactos, oportunidades y actividades)
-# DELETE {{baseUrl}}/api/v1/crm/clientes/{{crmCreateClient.data.id}}
+### CRM - Delete Client (warning: deletes related contacts, opportunities and activities)
+# DELETE {{baseUrl}}/api/v1/crm/customers/{{crmCreateClient.data.id}}
 # Authorization: Bearer {{token}}
 
-### RRHH - Health (public)
-GET {{baseUrl}}/api/v1/rrhh/health
+### HR - Health (public)
+GET {{baseUrl}}/api/v1/hr/health
 
-### RRHH - List Employees (requires JWT)
-GET {{baseUrl}}/api/v1/rrhh/empleados?page=1&limit=10&empresaId={{companyId}}
+### HR - List Employees (requires JWT)
+GET {{baseUrl}}/api/v1/hr/employees?page=1&limit=10&company_id={{companyId}}
 Authorization: Bearer {{token}}
 
-### RRHH - Create Employee (requires JWT)
-POST {{baseUrl}}/api/v1/rrhh/empleados
+### HR - Create Employee (requires JWT)
+POST {{baseUrl}}/api/v1/hr/employees
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "empresaId": "{{companyId}}",
-  "nombre": "Ana",
-  "apellidos": "Lopez",
+  "company_id": "{{companyId}}",
+  "first_name": "Ana",
+  "last_name": "Taylor",
   "email": "ana.lopez@demo.com",
-  "estado": "active",
-  "fechaAlta": "2026-01-15",
-  "departamentoId": "dep-1"
+  "status": "active",
+  "hire_date": "2026-01-15",
+  "department_id": "dep-1"
 }
 
 ### BPM - Health
@@ -292,8 +292,59 @@ GET {{baseUrl}}/api/v1/bpm/health
 ### ERP - Health
 GET {{baseUrl}}/api/v1/erp/health
 
-### SOPORTE - Health
-GET {{baseUrl}}/api/v1/soporte/health
+### SUPPORT - Health
+GET {{baseUrl}}/api/v1/support/health
+
+### SUPPORT - List Tickets (requires JWT)
+GET {{baseUrl}}/api/v1/support/tickets
+Authorization: Bearer {{token}}
+
+### SUPPORT - Create Ticket (requires JWT)
+# @name supportCreateTicket
+POST {{baseUrl}}/api/v1/support/tickets
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Access issue",
+  "description": "User cannot access CRM dashboard",
+  "category": "technical",
+  "priority": "high"
+}
+
+### SUPPORT - Add Message (requires JWT)
+POST {{baseUrl}}/api/v1/support/tickets/{{supportCreateTicket.data.id}}/messages
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "content": "Issue acknowledged by support team"
+}
 
 ### BI - Health
 GET {{baseUrl}}/api/v1/bi/health
+
+### BI - KPI Summary (requires JWT)
+GET {{baseUrl}}/api/v1/bi/kpis
+Authorization: Bearer {{token}}
+
+### BI - List Reports (requires JWT)
+GET {{baseUrl}}/api/v1/bi/reports
+Authorization: Bearer {{token}}
+
+### BI - Create Report (requires JWT)
+# @name biCreateReport
+POST {{baseUrl}}/api/v1/bi/reports
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Open tickets by priority",
+  "description": "Operational support report",
+  "module": "support",
+  "queryDefinition": "SELECT priority, COUNT(*) AS total FROM support_tickets GROUP BY priority"
+}
+
+### BI - Run Report (requires JWT)
+POST {{baseUrl}}/api/v1/bi/reports/{{biCreateReport.data.id}}/run
+Authorization: Bearer {{token}}

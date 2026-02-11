@@ -1,48 +1,52 @@
 const express = require('express');
 const { requireAuth } = require('../../../middlewares/auth');
-const clientes = require('../controllers/clientesController');
-const contactos = require('../controllers/contactosController');
-const oportunidades = require('../controllers/oportunidadesController');
-const actividades = require('../controllers/actividadesController');
+const customers = require('../controllers/customersController');
+const contacts = require('../controllers/contactsController');
+const opportunities = require('../controllers/opportunitiesController');
+const activities = require('../controllers/activitiesController');
 const config = require('../controllers/configController');
 
 const router = express.Router();
 
+router.get('/health', (req, res) => {
+  res.json({ success: true, data: { module: 'crm', status: 'ok' } });
+});
+
 // Apply auth to all CRM routes
 router.use(requireAuth);
 
-// Clientes
-router.get('/clientes', clientes.listClientes);
-router.post('/clientes', clientes.createCliente);
-router.get('/clientes/:id', clientes.getCliente);
-router.put('/clientes/:id', clientes.updateCliente);
-router.delete('/clientes/:id', clientes.deleteCliente);
-router.post('/clientes/:id/convertir', clientes.convertirCliente);
+// Customers
+router.get('/customers', customers.listCustomers);
+router.post('/customers', customers.createCustomer);
+router.get('/customers/:id', customers.getCustomer);
+router.put('/customers/:id', customers.updateCustomer);
+router.delete('/customers/:id', customers.deleteCustomer);
+router.post('/customers/:id/convert', customers.convertCustomer);
 
-// Contactos
-router.get('/contactos', contactos.listContactos);
-router.post('/contactos', contactos.createContacto);
-router.get('/contactos/:id', contactos.getContacto);
-router.put('/contactos/:id', contactos.updateContacto);
-router.delete('/contactos/:id', contactos.deleteContacto);
+// Contacts
+router.get('/contacts', contacts.listContacts);
+router.post('/contacts', contacts.createContact);
+router.get('/contacts/:id', contacts.getContact);
+router.put('/contacts/:id', contacts.updateContact);
+router.delete('/contacts/:id', contacts.deleteContact);
 
-// Oportunidades
-router.get('/oportunidades', oportunidades.listOportunidades);
-router.post('/oportunidades', oportunidades.createOportunidad);
-router.get('/oportunidades/:id', oportunidades.getOportunidad);
-router.put('/oportunidades/:id', oportunidades.updateOportunidad);
-router.delete('/oportunidades/:id', oportunidades.deleteOportunidad);
-router.patch('/oportunidades/:id/stage', oportunidades.updateStage);
+// Opportunities
+router.get('/opportunities', opportunities.listOpportunities);
+router.post('/opportunities', opportunities.createOpportunity);
+router.get('/opportunities/:id', opportunities.getOpportunity);
+router.put('/opportunities/:id', opportunities.updateOpportunity);
+router.delete('/opportunities/:id', opportunities.deleteOpportunity);
+router.patch('/opportunities/:id/stage', opportunities.updateStage);
 
-// Actividades
-router.get('/actividades', actividades.listActividades);
-router.post('/actividades', actividades.createActividad);
-router.get('/actividades/:id', actividades.getActividad);
-router.put('/actividades/:id', actividades.updateActividad);
-router.delete('/actividades/:id', actividades.deleteActividad);
-router.patch('/actividades/:id/completar', actividades.marcarCompletada);
+// Activities
+router.get('/activities', activities.listActivities);
+router.post('/activities', activities.createActivity);
+router.get('/activities/:id', activities.getActivity);
+router.put('/activities/:id', activities.updateActivity);
+router.delete('/activities/:id', activities.deleteActivity);
+router.patch('/activities/:id/complete', activities.markCompleted);
 
-// Configuración
+// Configuration
 router.get('/config/pipelines', config.listPipelines);
 router.post('/config/pipelines', config.createPipeline);
 router.get('/config/pipelines/:id', config.getPipeline);

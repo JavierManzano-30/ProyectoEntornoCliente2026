@@ -9,11 +9,11 @@ loadEnv();
 
 const alm = require('./modules/alm');
 const core = require('./modules/core/index.js');
-const rrhh = require('./modules/rrhh');
+const hr = require('./modules/hr');
 const crm = require('./modules/crm');
 const bpm = require('./modules/bpm');
 const erp = require('./modules/erp');
-const soporte = require('./modules/soporte');
+const support = require('./modules/support');
 const bi = require('./modules/bi');
 
 const app = express();
@@ -27,24 +27,24 @@ app.get('/health', (req, res) => {
   res.json({ success: true, data: { status: 'ok' } });
 });
 
-console.log('Módulos cargados:', {
+console.log('Modules loaded:', {
   alm: !!alm.routes,
   core: !!core.routes,
-  rrhh: !!rrhh.routes,
+  hr: !!hr.routes,
   crm: !!crm.routes,
   bpm: !!bpm.routes,
   erp: !!erp.routes,
-  soporte: !!soporte.routes,
+  support: !!support.routes,
   bi: !!bi.routes
 });
 
 app.use('/api/v1/alm', alm.routes);
 app.use('/api/v1/core', core.routes);
-app.use('/api/v1/rrhh', rrhh.routes);
+app.use('/api/v1/hr', hr.routes);
 app.use('/api/v1/crm', crm.routes);
 app.use('/api/v1/bpm', bpm.routes);
 app.use('/api/v1/erp', erp.routes);
-app.use('/api/v1/soporte', soporte.routes);
+app.use('/api/v1/support', support.routes);
 app.use('/api/v1/bi', bi.routes);
 
 app.use(notFoundHandler);

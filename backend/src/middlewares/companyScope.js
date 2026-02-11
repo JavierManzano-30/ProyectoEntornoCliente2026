@@ -1,11 +1,12 @@
-export const companyScope = (req, res, next) => {
+function companyScope(req, res, next) {
+  const companyId = req.user?.companyId || req.user?.company_id || null;
 
-  const empresaId = req.user?.empresa_id;
-
-  if (!empresaId) {
-    return res.status(403).json({ error: "Empresa no definida" });
+  if (!companyId) {
+    return res.status(403).json({ error: 'Company not defined in auth context' });
   }
 
-  req.empresaId = empresaId;
-  next();
-};
+  req.companyId = companyId;
+  return next();
+}
+
+module.exports = { companyScope };

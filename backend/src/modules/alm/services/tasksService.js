@@ -39,7 +39,7 @@ function parseSort(sort) {
 
 function ensureCompanyId(companyId) {
   if (!companyId) {
-    throw createServiceError(403, 'FORBIDDEN', 'companyId no disponible en token');
+    throw createServiceError(403, 'FORBIDDEN', 'companyId not available in token');
   }
 }
 
@@ -91,7 +91,7 @@ async function getTask(companyId, id) {
 
   if (error) throw error;
   if (!data) {
-    throw createServiceError(404, 'RESOURCE_NOT_FOUND', 'Tarea no encontrada');
+    throw createServiceError(404, 'RESOURCE_NOT_FOUND', 'Task not found');
   }
 
   return mapTask(data);
@@ -105,13 +105,13 @@ async function ensureValidTaskBody(body, companyId) {
   if (priorityError) requiredErrors.push({ field: 'priority', message: priorityError });
 
   if (requiredErrors.length) {
-    throw createServiceError(400, 'VALIDATION_ERROR', 'Datos invalidos', requiredErrors);
+    throw createServiceError(400, 'VALIDATION_ERROR', 'Invalid data', requiredErrors);
   }
 
   const projectExists = await ensureProjectInCompany(body.projectId, companyId);
   if (!projectExists) {
-    throw createServiceError(400, 'VALIDATION_ERROR', 'Datos invalidos', [
-      { field: 'projectId', message: 'Proyecto no encontrado para la empresa del token' }
+    throw createServiceError(400, 'VALIDATION_ERROR', 'Invalid data', [
+      { field: 'projectId', message: 'Project not found for the token company' }
     ]);
   }
 }
@@ -169,7 +169,7 @@ async function updateTask(companyId, id, body) {
 
   if (error) throw error;
   if (!data) {
-    throw createServiceError(404, 'RESOURCE_NOT_FOUND', 'Tarea no encontrada');
+    throw createServiceError(404, 'RESOURCE_NOT_FOUND', 'Task not found');
   }
 
   return mapTask(data);
@@ -188,7 +188,7 @@ async function deleteTask(companyId, id) {
 
   if (error) throw error;
   if (!data) {
-    throw createServiceError(404, 'RESOURCE_NOT_FOUND', 'Tarea no encontrada');
+    throw createServiceError(404, 'RESOURCE_NOT_FOUND', 'Task not found');
   }
 }
 
@@ -196,7 +196,7 @@ async function updateTaskStatus(companyId, id, body) {
   ensureCompanyId(companyId);
   const statusError = validateEnum(body.status, TASK_STATES);
   if (statusError) {
-    throw createServiceError(400, 'VALIDATION_ERROR', 'Datos invalidos', [
+    throw createServiceError(400, 'VALIDATION_ERROR', 'Invalid data', [
       { field: 'status', message: statusError }
     ]);
   }
@@ -214,7 +214,7 @@ async function updateTaskStatus(companyId, id, body) {
 
   if (error) throw error;
   if (!data) {
-    throw createServiceError(404, 'RESOURCE_NOT_FOUND', 'Tarea no encontrada');
+    throw createServiceError(404, 'RESOURCE_NOT_FOUND', 'Task not found');
   }
 
   return mapTask(data);
@@ -223,7 +223,7 @@ async function updateTaskStatus(companyId, id, body) {
 async function assignTask(companyId, id, body) {
   ensureCompanyId(companyId);
   if (!body.assignedTo) {
-    throw createServiceError(400, 'VALIDATION_ERROR', 'Datos invalidos', [
+    throw createServiceError(400, 'VALIDATION_ERROR', 'Invalid data', [
       { field: 'assignedTo', message: 'Requerido' }
     ]);
   }
@@ -241,7 +241,7 @@ async function assignTask(companyId, id, body) {
 
   if (error) throw error;
   if (!data) {
-    throw createServiceError(404, 'RESOURCE_NOT_FOUND', 'Tarea no encontrada');
+    throw createServiceError(404, 'RESOURCE_NOT_FOUND', 'Task not found');
   }
 
   return mapTask(data);

@@ -11,7 +11,7 @@
 @evaluation_id = bd2ee9ae-61ff-4c32-9536-c659ca84dd9c
 
 ### Health RRHH
-GET {{baseUrl}}/rrhh/health
+GET {{baseUrl}}/hr/health
 
 ### Login CORE (copiar token de la respuesta a @token)
 POST {{baseUrl}}/core/auth/login
@@ -22,12 +22,12 @@ Content-Type: application/json
   "password": "secret123"
 }
 
-### Listar departamentos
-GET {{baseUrl}}/rrhh/departamentos?page=1&limit=10
+### List departments
+GET {{baseUrl}}/hr/departments?page=1&limit=10
 Authorization: Bearer {{token}}
 
 ### Crear departamento
-POST {{baseUrl}}/rrhh/departamentos
+POST {{baseUrl}}/hr/departments
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -39,11 +39,11 @@ Content-Type: application/json
 }
 
 ### Obtener departamento
-GET {{baseUrl}}/rrhh/departamentos/{{department_id}}
+GET {{baseUrl}}/hr/departments/{{department_id}}
 Authorization: Bearer {{token}}
 
 ### Actualizar departamento
-PUT {{baseUrl}}/rrhh/departamentos/{{department_id}}
+PUT {{baseUrl}}/hr/departments/{{department_id}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -55,15 +55,15 @@ Content-Type: application/json
 }
 
 ### Borrar departamento (DELETE fisico)
-DELETE {{baseUrl}}/rrhh/departamentos/{{department_id}}
+DELETE {{baseUrl}}/hr/departments/{{department_id}}
 Authorization: Bearer {{token}}
 
-### Listar empleados
-GET {{baseUrl}}/rrhh/empleados?page=1&limit=10
+### List employees
+GET {{baseUrl}}/hr/employees?page=1&limit=10
 Authorization: Bearer {{token}}
 
 ### Crear empleado
-POST {{baseUrl}}/rrhh/empleados
+POST {{baseUrl}}/hr/employees
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -79,15 +79,15 @@ Content-Type: application/json
 }
 
 ### Obtener empleado
-GET {{baseUrl}}/rrhh/empleados/{{employee_id}}
+GET {{baseUrl}}/hr/employees/{{employee_id}}
 Authorization: Bearer {{token}}
 
 ### Resumen empleado
-GET {{baseUrl}}/rrhh/empleados/{{employee_id}}/resumen
+GET {{baseUrl}}/hr/employees/{{employee_id}}/summary
 Authorization: Bearer {{token}}
 
 ### Actualizar empleado
-PUT {{baseUrl}}/rrhh/empleados/{{employee_id}}
+PUT {{baseUrl}}/hr/employees/{{employee_id}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -103,15 +103,15 @@ Content-Type: application/json
 }
 
 ### Baja logica empleado
-DELETE {{baseUrl}}/rrhh/empleados/{{employee_id}}
+DELETE {{baseUrl}}/hr/employees/{{employee_id}}
 Authorization: Bearer {{token}}
 
-### Listar contratos
-GET {{baseUrl}}/rrhh/contratos?page=1&limit=10
+### List contracts
+GET {{baseUrl}}/hr/contracts?page=1&limit=10
 Authorization: Bearer {{token}}
 
 ### Crear contrato
-POST {{baseUrl}}/rrhh/contratos
+POST {{baseUrl}}/hr/contracts
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -126,11 +126,11 @@ Content-Type: application/json
 }
 
 ### Obtener contrato
-GET {{baseUrl}}/rrhh/contratos/{{contract_id}}
+GET {{baseUrl}}/hr/contracts/{{contract_id}}
 Authorization: Bearer {{token}}
 
 ### Actualizar contrato
-PUT {{baseUrl}}/rrhh/contratos/{{contract_id}}
+PUT {{baseUrl}}/hr/contracts/{{contract_id}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -145,15 +145,15 @@ Content-Type: application/json
 }
 
 ### Desactivar contrato
-DELETE {{baseUrl}}/rrhh/contratos/{{contract_id}}
+DELETE {{baseUrl}}/hr/contracts/{{contract_id}}
 Authorization: Bearer {{token}}
 
-### Listar ausencias
-GET {{baseUrl}}/rrhh/ausencias?page=1&limit=10
+### List absences
+GET {{baseUrl}}/hr/absences?page=1&limit=10
 Authorization: Bearer {{token}}
 
 ### Crear ausencia
-POST {{baseUrl}}/rrhh/ausencias
+POST {{baseUrl}}/hr/absences
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -168,11 +168,11 @@ Content-Type: application/json
 }
 
 ### Obtener ausencia
-GET {{baseUrl}}/rrhh/ausencias/{{absence_id}}
+GET {{baseUrl}}/hr/absences/{{absence_id}}
 Authorization: Bearer {{token}}
 
 ### Actualizar ausencia
-PUT {{baseUrl}}/rrhh/ausencias/{{absence_id}}
+PUT {{baseUrl}}/hr/absences/{{absence_id}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -187,23 +187,23 @@ Content-Type: application/json
 }
 
 ### Aprobar ausencia
-PATCH {{baseUrl}}/rrhh/ausencias/{{absence_id}}/aprobar
+PATCH {{baseUrl}}/hr/absences/{{absence_id}}/approve
 Authorization: Bearer {{token}}
 
 ### Rechazar ausencia
-PATCH {{baseUrl}}/rrhh/ausencias/{{absence_id}}/rechazar
+PATCH {{baseUrl}}/hr/absences/{{absence_id}}/reject
 Authorization: Bearer {{token}}
 
 ### Borrado logico ausencia
-DELETE {{baseUrl}}/rrhh/ausencias/{{absence_id}}
+DELETE {{baseUrl}}/hr/absences/{{absence_id}}
 Authorization: Bearer {{token}}
 
-### Listar nominas
-GET {{baseUrl}}/rrhh/nominas?page=1&limit=10
+### List payrolls
+GET {{baseUrl}}/hr/payrolls?page=1&limit=10
 Authorization: Bearer {{token}}
 
 ### Crear nomina
-POST {{baseUrl}}/rrhh/nominas
+POST {{baseUrl}}/hr/payrolls
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -216,15 +216,15 @@ Content-Type: application/json
 }
 
 ### Obtener nomina
-GET {{baseUrl}}/rrhh/nominas/{{payroll_id}}
+GET {{baseUrl}}/hr/payrolls/{{payroll_id}}
 Authorization: Bearer {{token}}
 
-### Listar evaluaciones
-GET {{baseUrl}}/rrhh/evaluaciones?page=1&limit=10
+### List evaluations
+GET {{baseUrl}}/hr/evaluations?page=1&limit=10
 Authorization: Bearer {{token}}
 
 ### Crear evaluacion
-POST {{baseUrl}}/rrhh/evaluaciones
+POST {{baseUrl}}/hr/evaluations
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -237,5 +237,5 @@ Content-Type: application/json
 }
 
 ### Obtener evaluacion
-GET {{baseUrl}}/rrhh/evaluaciones/{{evaluation_id}}
+GET {{baseUrl}}/hr/evaluations/{{evaluation_id}}
 Authorization: Bearer {{token}}

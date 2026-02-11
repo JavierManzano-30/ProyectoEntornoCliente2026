@@ -36,7 +36,7 @@ async function getDepartment(req, res, next) {
     });
 
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Departamento no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Department not found'));
     }
 
     return res.json(envelopeSuccess(row));
@@ -52,12 +52,12 @@ async function createDepartment(req, res, next) {
     if (companyError) return res.status(403).json(companyError);
 
     if (requiredErrors.length) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', requiredErrors));
     }
 
     const company_id = ensureCompanyId(req, req.body.company_id);
     if (!company_id) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'company_id es obligatorio'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'company_id is required'));
     }
 
     const row = await departmentService.createDepartment({
@@ -80,12 +80,12 @@ async function updateDepartment(req, res, next) {
     if (companyError) return res.status(403).json(companyError);
 
     if (requiredErrors.length) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', requiredErrors));
     }
 
     const company_id = ensureCompanyId(req, req.body.company_id);
     if (!company_id) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'company_id es obligatorio'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'company_id is required'));
     }
 
     const row = await departmentService.updateDepartment({
@@ -97,7 +97,7 @@ async function updateDepartment(req, res, next) {
     });
 
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Departamento no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Department not found'));
     }
 
     return res.json(envelopeSuccess(row));
@@ -114,7 +114,7 @@ async function deleteDepartment(req, res, next) {
     });
 
     if (!deleted) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Departamento no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Department not found'));
     }
 
     return res.status(204).send();

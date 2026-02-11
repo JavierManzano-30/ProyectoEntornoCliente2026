@@ -39,7 +39,7 @@ async function getAbsence(req, res, next) {
     });
 
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Ausencia no encontrada'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Absence not found'));
     }
 
     return res.json(envelopeSuccess(row));
@@ -64,12 +64,12 @@ async function createAbsence(req, res, next) {
     if (dateError) requiredErrors.push(dateError);
 
     if (requiredErrors.length) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', requiredErrors));
     }
 
     const company_id = ensureCompanyId(req, req.body.company_id);
     if (!company_id) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'company_id es obligatorio'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'company_id is required'));
     }
 
     const hasOverlap = await absenceService.hasOverlappingAbsence({
@@ -78,7 +78,7 @@ async function createAbsence(req, res, next) {
       end_date: req.body.end_date
     });
     if (hasOverlap) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Ausencia solapada'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Overlapping absence'));
     }
 
     const row = await absenceService.createAbsence({
@@ -113,12 +113,12 @@ async function updateAbsence(req, res, next) {
     if (dateError) requiredErrors.push(dateError);
 
     if (requiredErrors.length) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', requiredErrors));
     }
 
     const company_id = ensureCompanyId(req, req.body.company_id);
     if (!company_id) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'company_id es obligatorio'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'company_id is required'));
     }
 
     const hasOverlap = await absenceService.hasOverlappingAbsence({
@@ -128,7 +128,7 @@ async function updateAbsence(req, res, next) {
       exclude_id: req.params.id
     });
     if (hasOverlap) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Ausencia solapada'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Overlapping absence'));
     }
 
     const row = await absenceService.updateAbsence({
@@ -143,7 +143,7 @@ async function updateAbsence(req, res, next) {
     });
 
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Ausencia no encontrada'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Absence not found'));
     }
 
     return res.json(envelopeSuccess(row));
@@ -160,7 +160,7 @@ async function deleteAbsence(req, res, next) {
     });
 
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Ausencia no encontrada'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Absence not found'));
     }
 
     return res.status(204).send();
@@ -178,7 +178,7 @@ async function approveAbsence(req, res, next) {
     });
 
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Ausencia no encontrada'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Absence not found'));
     }
 
     return res.json(envelopeSuccess(row));
@@ -196,7 +196,7 @@ async function rejectAbsence(req, res, next) {
     });
 
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Ausencia no encontrada'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Absence not found'));
     }
 
     return res.json(envelopeSuccess(row));

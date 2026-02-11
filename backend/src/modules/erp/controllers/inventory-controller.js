@@ -4,7 +4,7 @@ const { validateRequiredFields, validateEnum } = require('../../../utils/validat
 const inventoryService = require('../services/inventory-service');
 
 function resolveCompanyId(req) {
-  return req.user?.companyId || req.user?.empresaId || req.user?.company_id || null;
+  return req.user?.companyId || req.user?.companyId || req.user?.company_id || null;
 }
 
 function mapWarehouse(row) {
@@ -71,7 +71,7 @@ async function createWarehouse(req, res, next) {
   try {
     const errors = validateRequiredFields(req.body, ['name']);
     if (errors.length) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', errors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', errors));
     }
     const typeErr = validateEnum(req.body.type, ['main', 'secondary', 'transit']);
     if (typeErr) {
@@ -94,7 +94,7 @@ async function updateWarehouse(req, res, next) {
     const companyId = resolveCompanyId(req);
     const row = await inventoryService.updateWarehouse(companyId, req.params.id, req.body);
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Almacen no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Warehouse not found'));
     }
     return res.json(envelopeSuccess(mapWarehouse(row)));
   } catch (err) {
@@ -107,7 +107,7 @@ async function deleteWarehouse(req, res, next) {
     const companyId = resolveCompanyId(req);
     const row = await inventoryService.deleteWarehouse(companyId, req.params.id);
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Almacen no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Warehouse not found'));
     }
     return res.status(204).send();
   } catch (err) {
@@ -136,7 +136,7 @@ async function getInventoryItem(req, res, next) {
     const companyId = resolveCompanyId(req);
     const row = await inventoryService.getInventoryById(companyId, req.params.id);
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Registro de inventario no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Inventory record not found'));
     }
     return res.json(envelopeSuccess(mapInventory(row)));
   } catch (err) {
@@ -159,7 +159,7 @@ async function updateInventoryItem(req, res, next) {
     const companyId = resolveCompanyId(req);
     const row = await inventoryService.updateInventoryItem(companyId, req.params.id, req.body);
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Registro de inventario no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Inventory record not found'));
     }
     return res.json(envelopeSuccess(mapInventory(row)));
   } catch (err) {
@@ -188,7 +188,7 @@ async function createMovement(req, res, next) {
   try {
     const errors = validateRequiredFields(req.body, ['productId', 'warehouseId', 'movementType', 'quantity', 'userId']);
     if (errors.length) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', errors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', errors));
     }
     const typeErr = validateEnum(req.body.movementType, ['in', 'out', 'adjustment', 'return', 'transfer']);
     if (typeErr) {

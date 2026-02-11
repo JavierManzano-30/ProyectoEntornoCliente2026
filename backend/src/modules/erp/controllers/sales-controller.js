@@ -4,7 +4,7 @@ const { validateRequiredFields, validateEnum } = require('../../../utils/validat
 const salesService = require('../services/sales-service');
 
 function resolveCompanyId(req) {
-  return req.user?.companyId || req.user?.empresaId || req.user?.company_id || null;
+  return req.user?.companyId || req.user?.companyId || req.user?.company_id || null;
 }
 
 function mapSalesOrder(row) {
@@ -102,7 +102,7 @@ async function createSalesOrder(req, res, next) {
   try {
     const errors = validateRequiredFields(req.body, ['clientId', 'orderNumber', 'orderDate', 'subtotal', 'tax', 'total']);
     if (errors.length) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', errors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', errors));
     }
     const statusErr = validateEnum(req.body.status, ['quote', 'confirmed', 'packed', 'shipped', 'delivered', 'canceled']);
     if (statusErr) {
@@ -162,7 +162,7 @@ async function updateSalesItem(req, res, next) {
     const companyId = resolveCompanyId(req);
     const row = await salesService.updateSalesItem(companyId, req.params.id, req.body);
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Item de venta no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Sales item not found'));
     }
     return res.json(envelopeSuccess(mapSalesItem(row)));
   } catch (err) {
@@ -175,7 +175,7 @@ async function deleteSalesItem(req, res, next) {
     const companyId = resolveCompanyId(req);
     const row = await salesService.deleteSalesItem(companyId, req.params.id);
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Item de venta no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Sales item not found'));
     }
     return res.status(204).send();
   } catch (err) {
@@ -216,7 +216,7 @@ async function createInvoice(req, res, next) {
   try {
     const errors = validateRequiredFields(req.body, ['clientId', 'invoiceNumber', 'issueDate', 'subtotal', 'total']);
     if (errors.length) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', errors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', errors));
     }
     const statusErr = validateEnum(req.body.status, ['draft', 'issued', 'voided', 'paid']);
     if (statusErr) {

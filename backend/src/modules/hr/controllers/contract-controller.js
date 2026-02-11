@@ -37,7 +37,7 @@ async function getContract(req, res, next) {
     });
 
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Contrato no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Contract not found'));
     }
 
     return res.json(envelopeSuccess(row));
@@ -62,12 +62,12 @@ async function createContract(req, res, next) {
     if (dateError) requiredErrors.push(dateError);
 
     if (requiredErrors.length) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', requiredErrors));
     }
 
     const company_id = ensureCompanyId(req, req.body.company_id);
     if (!company_id) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'company_id es obligatorio'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'company_id is required'));
     }
 
     const active = req.body.active !== undefined ? !!req.body.active : true;
@@ -78,7 +78,7 @@ async function createContract(req, res, next) {
         end_date: req.body.end_date || null
       });
       if (hasOverlap) {
-        return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Contrato activo solapado'));
+        return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Overlapping active contract'));
       }
     }
 
@@ -114,12 +114,12 @@ async function updateContract(req, res, next) {
     if (dateError) requiredErrors.push(dateError);
 
     if (requiredErrors.length) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', requiredErrors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', requiredErrors));
     }
 
     const company_id = ensureCompanyId(req, req.body.company_id);
     if (!company_id) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'company_id es obligatorio'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'company_id is required'));
     }
 
     const active = req.body.active !== undefined ? !!req.body.active : true;
@@ -131,7 +131,7 @@ async function updateContract(req, res, next) {
         exclude_id: req.params.id
       });
       if (hasOverlap) {
-        return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Contrato activo solapado'));
+        return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Overlapping active contract'));
       }
     }
 
@@ -147,7 +147,7 @@ async function updateContract(req, res, next) {
     });
 
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Contrato no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Contract not found'));
     }
 
     return res.json(envelopeSuccess(row));
@@ -164,7 +164,7 @@ async function deleteContract(req, res, next) {
     });
 
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Contrato no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Contract not found'));
     }
 
     return res.status(204).send();

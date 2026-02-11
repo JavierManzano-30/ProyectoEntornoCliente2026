@@ -1,7 +1,7 @@
 const { envelopeError } = require('../../../utils/envelope');
 
 function resolveCompanyId(req) {
-  return req.user?.companyId || req.user?.empresaId || req.user?.company_id || null;
+  return req.user?.companyId || req.user?.companyId || req.user?.company_id || null;
 }
 
 function ensureCompanyMatch(req, providedCompanyId) {
@@ -28,12 +28,12 @@ function validateDateRange(startDate, endDate, startField = 'start_date', endFie
   if (!startDate) return null;
   const start = new Date(startDate);
   if (Number.isNaN(start.getTime())) {
-    return { field: startField, message: `${startField} invalido` };
+    return { field: startField, message: `${startField} is invalid` };
   }
   if (!endDate) return null;
   const end = new Date(endDate);
   if (Number.isNaN(end.getTime())) {
-    return { field: endField, message: `${endField} invalido` };
+    return { field: endField, message: `${endField} is invalid` };
   }
   if (start > end) {
     return { field: endField, message: `${endField} debe ser igual o posterior a ${startField}` };

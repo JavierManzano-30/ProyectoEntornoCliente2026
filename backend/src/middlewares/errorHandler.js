@@ -1,7 +1,7 @@
 const { envelopeError } = require('../utils/envelope');
 
 function notFoundHandler(req, res) {
-  res.status(404).json(envelopeError('NOT_FOUND', 'Ruta no encontrada'));
+  res.status(404).json(envelopeError('NOT_FOUND', 'Route not found'));
 }
 
 function errorHandler(err, req, res, next) {
@@ -9,7 +9,7 @@ function errorHandler(err, req, res, next) {
   console.error(err);
   if (res.headersSent) return next(err);
   if (process.env.NODE_ENV === 'production') {
-    return res.status(500).json(envelopeError('INTERNAL_ERROR', 'Error interno'));
+    return res.status(500).json(envelopeError('INTERNAL_ERROR', 'Internal error'));
   }
 
   const details = [];
@@ -19,7 +19,7 @@ function errorHandler(err, req, res, next) {
   if (err?.hint) details.push({ hint: err.hint });
   if (err?.table) details.push({ table: err.table });
 
-  return res.status(500).json(envelopeError('INTERNAL_ERROR', 'Error interno', details));
+  return res.status(500).json(envelopeError('INTERNAL_ERROR', 'Internal error', details));
 }
 
 module.exports = { notFoundHandler, errorHandler };

@@ -4,7 +4,7 @@ const { validateRequiredFields, validateEnum } = require('../../../utils/validat
 const approvalService = require('../services/approval-service');
 
 function resolveCompanyId(req) {
-  return req.user?.companyId || req.user?.empresaId || req.user?.company_id || null;
+  return req.user?.companyId || req.user?.companyId || req.user?.company_id || null;
 }
 
 function mapApproval(row) {
@@ -56,7 +56,7 @@ async function listApprovals(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
     const { page, limit, offset } = getPaginationParams(req.query);
     const { processId } = req.query;
@@ -74,12 +74,12 @@ async function createApproval(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
 
     const errors = validateRequiredFields(req.body, ['processId', 'name', 'level', 'requiredApprovers']);
     if (errors.length) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', errors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', errors));
     }
 
     const row = await approvalService.createApproval(companyId, req.body);
@@ -93,12 +93,12 @@ async function updateApproval(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
 
     const row = await approvalService.updateApproval(companyId, req.params.id, req.body);
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Aprobacion no encontrada'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Approval not found'));
     }
     return res.json(envelopeSuccess(mapApproval(row)));
   } catch (err) {
@@ -110,11 +110,11 @@ async function deleteApproval(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
     const deleted = await approvalService.deleteApproval(companyId, req.params.id);
     if (!deleted) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Aprobacion no encontrada'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Approval not found'));
     }
     return res.status(204).send();
   } catch (err) {
@@ -126,7 +126,7 @@ async function listRequests(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
     const { page, limit, offset } = getPaginationParams(req.query);
     const { approvalId, status } = req.query;
@@ -144,14 +144,14 @@ async function createRequest(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
 
     const errors = validateRequiredFields(req.body, ['approvalId', 'requesterId', 'priority']);
     const priorityError = validateEnum(req.body.priority, ['low', 'medium', 'high']);
     if (priorityError) errors.push({ field: 'priority', message: priorityError });
     if (errors.length) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', errors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', errors));
     }
 
     const row = await approvalService.createRequest(companyId, req.body);
@@ -165,11 +165,11 @@ async function getRequest(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
     const request = await approvalService.getRequestById(companyId, req.params.id);
     if (!request) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Solicitud no encontrada'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Request not found'));
     }
     const responses = await approvalService.listResponses(companyId, req.params.id);
     const mapped = mapRequest(request);
@@ -185,19 +185,19 @@ async function updateRequestStatus(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
 
     const errors = validateRequiredFields(req.body, ['status']);
     const statusError = validateEnum(req.body.status, ['pending', 'approved', 'rejected', 'in_review']);
     if (statusError) errors.push({ field: 'status', message: statusError });
     if (errors.length) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', errors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', errors));
     }
 
     const row = await approvalService.updateRequestStatus(companyId, req.params.id, req.body.status);
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Solicitud no encontrada'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Request not found'));
     }
     return res.json(envelopeSuccess(mapRequest(row)));
   } catch (err) {
@@ -209,14 +209,14 @@ async function addResponse(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
 
     const errors = validateRequiredFields(req.body, ['approverId', 'decision']);
     const decisionError = validateEnum(req.body.decision, ['approved', 'rejected', 'pending']);
     if (decisionError) errors.push({ field: 'decision', message: decisionError });
     if (errors.length) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', errors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', errors));
     }
 
     const row = await approvalService.addResponse(companyId, req.params.requestId, req.body);

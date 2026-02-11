@@ -74,17 +74,17 @@ API base: `http://localhost:3001/api/v1`
 ```bash
 TOKEN="<TU_TOKEN>"
 
-curl -X GET "http://localhost:3001/api/v1/alm/proyectos?page=1&limit=10" \
+curl -X GET "http://localhost:3001/api/v1/alm/projects?page=1&limit=10" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
 Crear proyecto:
 
 ```bash
-curl -X POST "http://localhost:3001/api/v1/alm/proyectos" \
+curl -X POST "http://localhost:3001/api/v1/alm/projects" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"empresaId":"emp_1","nombre":"Proyecto Atlas","descripcion":"Migracion de CRM","fechaInicio":"2026-01-10","fechaFin":"2026-03-30","responsableId":"usr_10","estado":"planificacion","presupuesto":25000,"clienteId":"cli_5"}'
+  -d '{"companyId":"11111111-1111-1111-1111-111111111111","name":"Project Atlas","description":"CRM migration","startDate":"2026-01-10","endDate":"2026-03-30","responsibleId":"usr_10","status":"planned","budget":25000,"clientId":"cli_5"}'
 ```
 
 ## 📌 Dónde añadir nuevos endpoints
@@ -97,9 +97,9 @@ curl -X POST "http://localhost:3001/api/v1/alm/proyectos" \
 
 Cada módulo tiene un endpoint base de salud:
 - `/api/v1/core/health`
-- `/api/v1/rrhh/health`
+- `/api/v1/hr/health`
 - `/api/v1/crm/health`
 - `/api/v1/bpm/health`
 - `/api/v1/erp/health`
-- `/api/v1/soporte/health`
+- `/api/v1/support/health`
 - `/api/v1/bi/health`

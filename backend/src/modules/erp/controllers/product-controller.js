@@ -4,7 +4,7 @@ const { validateRequiredFields, validateEnum } = require('../../../utils/validat
 const productService = require('../services/product-service');
 
 function resolveCompanyId(req) {
-  return req.user?.companyId || req.user?.empresaId || req.user?.company_id || null;
+  return req.user?.companyId || req.user?.companyId || req.user?.company_id || null;
 }
 
 function mapProduct(row) {
@@ -59,7 +59,7 @@ async function getProduct(req, res, next) {
     const companyId = resolveCompanyId(req);
     const row = await productService.getProductById(companyId, req.params.id);
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Producto no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Product not found'));
     }
     return res.json(envelopeSuccess(mapProduct(row)));
   } catch (err) {
@@ -71,7 +71,7 @@ async function createProduct(req, res, next) {
   try {
     const errors = validateRequiredFields(req.body, ['productCode', 'name', 'costPrice', 'salePrice', 'status']);
     if (errors.length) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', errors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', errors));
     }
     const statusErr = validateEnum(req.body.status, ['active', 'inactive', 'discontinued']);
     if (statusErr) {
@@ -94,7 +94,7 @@ async function updateProduct(req, res, next) {
     const companyId = resolveCompanyId(req);
     const row = await productService.updateProduct(companyId, req.params.id, req.body);
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Producto no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Product not found'));
     }
     return res.json(envelopeSuccess(mapProduct(row)));
   } catch (err) {
@@ -107,7 +107,7 @@ async function deleteProduct(req, res, next) {
     const companyId = resolveCompanyId(req);
     const row = await productService.deleteProduct(companyId, req.params.id);
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Producto no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Product not found'));
     }
     return res.status(204).send();
   } catch (err) {
@@ -131,7 +131,7 @@ async function createCategory(req, res, next) {
   try {
     const errors = validateRequiredFields(req.body, ['name']);
     if (errors.length) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', errors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', errors));
     }
     const companyId = resolveCompanyId(req);
     const row = await productService.createCategory(companyId, req.body);

@@ -1,9 +1,10 @@
-export const auth = (req, res, next) => {
+function auth(req, res, next) {
   req.user = {
-    id: "USER_UUID",
-    empresa_id: "EMPRESA_UUID",
-    role: "admin"
+    id: 'USER_UUID',
+    company_id: 'COMPANY_UUID',
+    role: 'admin'
   };
-
   next();
-};
+}
+
+module.exports = { auth };

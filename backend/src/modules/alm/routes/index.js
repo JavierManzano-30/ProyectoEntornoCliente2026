@@ -7,6 +7,10 @@ const supabase = require('../controllers/supabaseController');
 
 const router = express.Router();
 
+router.get('/health', (req, res) => {
+  res.json({ success: true, data: { module: 'alm', status: 'ok' } });
+});
+
 // Public health check (no auth) for Supabase connectivity
 router.get('/supabase/health', supabase.supabaseHealth);
 

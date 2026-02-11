@@ -1,10 +1,12 @@
-import express from "express";
-import * as controller from "./bi.controller.js";
+const express = require('express');
+const controller = require('../controllers/bi.controller');
 
 const router = express.Router();
 
-router.get("/kpis", controller.getKPIs);
-router.post("/reports", controller.createReport);
-router.post("/reports/:id/run", controller.runReport);
+// Canonical (English)
+router.get('/kpis', controller.getKPIs);
+router.get('/reports', controller.listReports);
+router.post('/reports', controller.createReport);
+router.post('/reports/:id/run', controller.runReport);
 
-export default router;
+module.exports = router;

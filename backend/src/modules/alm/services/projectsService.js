@@ -55,7 +55,7 @@ function parseSort(sort) {
 
 function ensureCompanyId(companyId) {
   if (!companyId) {
-    throw createServiceError(403, 'FORBIDDEN', 'companyId no disponible en token');
+    throw createServiceError(403, 'FORBIDDEN', 'companyId not available in token');
   }
 }
 
@@ -95,7 +95,7 @@ async function getProject(companyId, id) {
 
   if (error) throw error;
   if (!data) {
-    throw createServiceError(404, 'RESOURCE_NOT_FOUND', 'Proyecto no encontrado');
+    throw createServiceError(404, 'RESOURCE_NOT_FOUND', 'Project not found');
   }
 
   return mapProject(data);
@@ -111,7 +111,7 @@ function validateProjectPayload(body) {
   const enumError = validateEnum(body.status, PROJECT_STATES);
   if (enumError) requiredErrors.push({ field: 'status', message: enumError });
   if (requiredErrors.length) {
-    throw createServiceError(400, 'VALIDATION_ERROR', 'Datos invalidos', requiredErrors);
+    throw createServiceError(400, 'VALIDATION_ERROR', 'Invalid data', requiredErrors);
   }
 }
 
@@ -170,7 +170,7 @@ async function updateProject(companyId, id, body) {
 
   if (error) throw error;
   if (!data) {
-    throw createServiceError(404, 'RESOURCE_NOT_FOUND', 'Proyecto no encontrado');
+    throw createServiceError(404, 'RESOURCE_NOT_FOUND', 'Project not found');
   }
 
   return mapProject(data);
@@ -189,7 +189,7 @@ async function deleteProject(companyId, id) {
 
   if (error) throw error;
   if (!data) {
-    throw createServiceError(404, 'RESOURCE_NOT_FOUND', 'Proyecto no encontrado');
+    throw createServiceError(404, 'RESOURCE_NOT_FOUND', 'Project not found');
   }
 }
 
@@ -221,7 +221,7 @@ async function getProjectStats(companyId, id) {
 
   if (projectError) throw projectError;
   if (!project) {
-    throw createServiceError(404, 'RESOURCE_NOT_FOUND', 'Proyecto no encontrado');
+    throw createServiceError(404, 'RESOURCE_NOT_FOUND', 'Project not found');
   }
 
   const { data: tasks, error: tasksError } = await supabase

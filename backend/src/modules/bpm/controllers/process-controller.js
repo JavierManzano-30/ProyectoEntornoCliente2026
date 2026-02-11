@@ -4,7 +4,7 @@ const { validateRequiredFields, validateEnum } = require('../../../utils/validat
 const processService = require('../services/process-service');
 
 function resolveCompanyId(req) {
-  return req.user?.companyId || req.user?.empresaId || req.user?.company_id || null;
+  return req.user?.companyId || req.user?.companyId || req.user?.company_id || null;
 }
 
 function mapProcess(row) {
@@ -43,7 +43,7 @@ async function listProcesses(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
     const { page, limit, offset } = getPaginationParams(req.query);
     const { status, search } = req.query;
@@ -62,11 +62,11 @@ async function getProcess(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
     const process = await processService.getProcessById(companyId, req.params.id);
     if (!process) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Proceso no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Process not found'));
     }
     const activities = await processService.listActivities(companyId, req.params.id);
     const mapped = mapProcess(process);
@@ -82,14 +82,14 @@ async function createProcess(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
 
     const errors = validateRequiredFields(req.body, ['name', 'status']);
     const statusError = validateEnum(req.body.status, ['active', 'inactive', 'archived']);
     if (statusError) errors.push({ field: 'status', message: statusError });
     if (errors.length) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', errors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', errors));
     }
 
     const row = await processService.createProcess(companyId, {
@@ -106,7 +106,7 @@ async function updateProcess(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
 
     if (req.body.status) {
@@ -118,7 +118,7 @@ async function updateProcess(req, res, next) {
 
     const row = await processService.updateProcess(companyId, req.params.id, req.body);
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Proceso no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Process not found'));
     }
     return res.json(envelopeSuccess(mapProcess(row)));
   } catch (err) {
@@ -130,11 +130,11 @@ async function deleteProcess(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
     const deleted = await processService.deleteProcess(companyId, req.params.id);
     if (!deleted) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Proceso no encontrado'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Process not found'));
     }
     return res.status(204).send();
   } catch (err) {
@@ -146,7 +146,7 @@ async function listActivities(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
     const rows = await processService.listActivities(companyId, req.params.processId);
     return res.json(envelopeSuccess(rows.map(mapActivity)));
@@ -159,14 +159,14 @@ async function createActivity(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
 
     const errors = validateRequiredFields(req.body, ['name', 'type', 'sortOrder']);
     const typeError = validateEnum(req.body.type, ['task', 'decision_gateway', 'event', 'wait']);
     if (typeError) errors.push({ field: 'type', message: typeError });
     if (errors.length) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', errors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', errors));
     }
 
     const row = await processService.createActivity(companyId, req.params.processId, req.body);
@@ -180,7 +180,7 @@ async function updateActivity(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
 
     if (req.body.type) {
@@ -204,7 +204,7 @@ async function deleteActivity(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
     const deleted = await processService.deleteActivity(companyId, req.params.id);
     if (!deleted) {

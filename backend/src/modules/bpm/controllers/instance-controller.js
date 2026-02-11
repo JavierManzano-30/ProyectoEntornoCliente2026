@@ -4,7 +4,7 @@ const { validateRequiredFields, validateEnum } = require('../../../utils/validat
 const instanceService = require('../services/instance-service');
 
 function resolveCompanyId(req) {
-  return req.user?.companyId || req.user?.empresaId || req.user?.company_id || null;
+  return req.user?.companyId || req.user?.companyId || req.user?.company_id || null;
 }
 
 function mapInstance(row) {
@@ -88,7 +88,7 @@ async function listInstances(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
     const { page, limit, offset } = getPaginationParams(req.query);
     const { processId, status } = req.query;
@@ -106,7 +106,7 @@ async function getInstance(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
     const instance = await instanceService.getInstanceById(companyId, req.params.id);
     if (!instance) {
@@ -126,12 +126,12 @@ async function createInstance(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
 
     const errors = validateRequiredFields(req.body, ['processId', 'startedBy']);
     if (errors.length) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', errors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', errors));
     }
 
     const row = await instanceService.createInstance(companyId, req.body);
@@ -145,7 +145,7 @@ async function updateInstance(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
 
     if (req.body.status) {
@@ -169,7 +169,7 @@ async function cancelInstance(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
     const row = await instanceService.cancelInstance(companyId, req.params.id);
     if (!row) {
@@ -185,7 +185,7 @@ async function listTasks(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
     const rows = await instanceService.listTasks(companyId, req.params.instanceId);
     return res.json(envelopeSuccess(rows.map(mapTask)));
@@ -198,7 +198,7 @@ async function updateTask(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
 
     if (req.body.status) {
@@ -210,7 +210,7 @@ async function updateTask(req, res, next) {
 
     const row = await instanceService.updateTask(companyId, req.params.id, req.body);
     if (!row) {
-      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Tarea no encontrada'));
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Task not found'));
     }
     return res.json(envelopeSuccess(mapTask(row)));
   } catch (err) {
@@ -222,12 +222,12 @@ async function addDocument(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
 
     const errors = validateRequiredFields(req.body, ['fileName']);
     if (errors.length) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', errors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', errors));
     }
 
     const row = await instanceService.addDocument(companyId, req.params.instanceId, {
@@ -244,7 +244,7 @@ async function listDocuments(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
     const rows = await instanceService.listDocuments(companyId, req.params.instanceId);
     return res.json(envelopeSuccess(rows.map(mapDocument)));
@@ -257,12 +257,12 @@ async function addComment(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
 
     const errors = validateRequiredFields(req.body, ['content']);
     if (errors.length) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Datos invalidos', errors));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', errors));
     }
 
     const row = await instanceService.addComment(companyId, req.params.instanceId, {
@@ -279,7 +279,7 @@ async function listComments(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
     const rows = await instanceService.listComments(companyId, req.params.instanceId);
     return res.json(envelopeSuccess(rows.map(mapComment)));
@@ -292,7 +292,7 @@ async function getAuditLog(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
     if (!companyId) {
-      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId requerido'));
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
     }
     const { page, limit, offset } = getPaginationParams(req.query);
     const { rows, totalItems } = await instanceService.getAuditLog(companyId, req.params.processId, { limit, offset });

@@ -3,7 +3,7 @@
 @companyId =  11111111-1111-1111-1111-111111111111
 @employeeId = 11111111-eeee-0000-0000-000000000001
 
-### Health check basico de tabla departamentos
+### Basic health check for departments table
 GET {{supabaseUrl}}/rest/v1/hr_departments?select=*&limit=5
 apikey: {{anonKey}}
 Authorization: Bearer {{anonKey}}

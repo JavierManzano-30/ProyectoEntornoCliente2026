@@ -1,14 +1,14 @@
 const express = require('express');
 const { requireAuth } = require('../../../middlewares/auth');
-const biRoutes = require('./bi.routes');
+const supportRoutes = require('./support.routes');
 
 const router = express.Router();
 
 router.get('/health', (req, res) => {
-  res.json({ success: true, data: { module: 'bi', status: 'ok' } });
+  res.json({ success: true, data: { module: 'support', status: 'ok' } });
 });
 
 router.use(requireAuth);
-router.use('/', biRoutes);
+router.use('/', supportRoutes);
 
 module.exports = router;

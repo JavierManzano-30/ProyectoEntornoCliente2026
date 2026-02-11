@@ -18,7 +18,7 @@ function validateRequiredFields(body, fields) {
 
 function validateEnum(value, allowed) {
   if (value === undefined || value === null) return null;
-  if (!allowed.includes(value)) return `Valor invalido. Permitidos: ${allowed.join(', ')}`;
+  if (!allowed.includes(value)) return `Invalid value. Allowed: ${allowed.join(', ')}`;
   return null;
 }
 
