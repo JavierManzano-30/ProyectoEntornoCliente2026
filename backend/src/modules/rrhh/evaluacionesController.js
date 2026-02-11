@@ -1,9 +1,12 @@
 <<<<<<< Updated upstream:backend/src/modules/rrhh/evaluacionesController.js
+<<<<<<< Updated upstream:backend/src/modules/rrhh/evaluacionesController.js
 const { pool } = require('../../config/db');
 const { envelopeSuccess, envelopeError } = require('../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../utils/pagination');
 const { validateRequiredFields, isNumber } = require('../../utils/validation');
 =======
+=======
+>>>>>>> Stashed changes:backend/src/modules/rrhh/controllers/evaluacionesController.js
 const supabase = require('../../../config/supabase');
 const { envelopeSuccess, envelopeError } = require('../../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../../utils/pagination');

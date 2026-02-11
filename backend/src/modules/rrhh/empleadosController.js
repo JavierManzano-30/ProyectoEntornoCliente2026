@@ -1,9 +1,12 @@
 <<<<<<< Updated upstream:backend/src/modules/rrhh/empleadosController.js
+<<<<<<< Updated upstream:backend/src/modules/rrhh/empleadosController.js
 const { pool } = require('../../config/db');
 const { envelopeSuccess, envelopeError } = require('../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../utils/pagination');
 const { validateRequiredFields } = require('../../utils/validation');
 =======
+=======
+>>>>>>> Stashed changes:backend/src/modules/rrhh/controllers/empleadosController.js
 const supabase = require('../../../config/supabase');
 const { envelopeSuccess, envelopeError } = require('../../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../../utils/pagination');

@@ -1,9 +1,12 @@
 <<<<<<< Updated upstream:backend/src/modules/rrhh/ausenciasController.js
+<<<<<<< Updated upstream:backend/src/modules/rrhh/ausenciasController.js
 const { pool } = require('../../config/db');
 const { envelopeSuccess, envelopeError } = require('../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../utils/pagination');
 const { validateRequiredFields } = require('../../utils/validation');
 =======
+=======
+>>>>>>> Stashed changes:backend/src/modules/rrhh/controllers/ausenciasController.js
 const supabase = require('../../../config/supabase');
 const { envelopeSuccess, envelopeError } = require('../../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../../utils/pagination');
