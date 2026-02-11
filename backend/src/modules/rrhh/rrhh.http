@@ -1,0 +1,241 @@
+@baseUrl = http://localhost:3001/api/v1
+@email = pepe@acme.com
+@password = secret123
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4M2VhOGNlOS0xOTlkLTRmYjItODVmYy1lOGU4MTkyN2VjY2IiLCJjb21wYW55SWQiOiI4ZGVkYjVmMS05YjEzLTRmNTItYmJkZS1kOTVmNGNkMjRiNjQiLCJyb2xlSWQiOiIxYjQ5NDc2MS1iNjY2LTQxYjYtYjcxNi1hMThlMTc5ZDJhNzQiLCJpYXQiOjE3NzA3OTkxNzYsImV4cCI6MTc3MDgyNzk3Nn0.Jakhl1upyH6WYAQqIAZjuguosHpugmifc-YqW4r68sQ
+@company_id = 8dedb5f1-9b13-4f52-bbde-d95f4cd24b64
+@employee_id = c2ca25ea-93b2-4587-bec5-9a5812b8fd32
+@department_id = 23f11798-3502-4133-99ae-fa5d80949842
+@contract_id = b24ae678-c335-4ce8-adcf-27235fdd0be2
+@absence_id = 07e5ebdf-f4ff-4d94-a088-9e80944304f4
+@payroll_id = 793af435-6e6d-4fce-b174-7be49768036a
+@evaluation_id = bd2ee9ae-61ff-4c32-9536-c659ca84dd9c
+
+### Health RRHH
+GET {{baseUrl}}/rrhh/health
+
+### Login CORE (copiar token de la respuesta a @token)
+POST {{baseUrl}}/core/auth/login
+Content-Type: application/json
+
+{
+  "email": "pepe@acme.com",
+  "password": "secret123"
+}
+
+### Listar departamentos
+GET {{baseUrl}}/rrhh/departamentos?page=1&limit=10
+Authorization: Bearer {{token}}
+
+### Crear departamento
+POST {{baseUrl}}/rrhh/departamentos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "company_id": "{{company_id}}",
+  "name": "Recursos Humanos",
+  "parent_department_id": null,
+  "active": true
+}
+
+### Obtener departamento
+GET {{baseUrl}}/rrhh/departamentos/{{department_id}}
+Authorization: Bearer {{token}}
+
+### Actualizar departamento
+PUT {{baseUrl}}/rrhh/departamentos/{{department_id}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "company_id": "{{company_id}}",
+  "name": "RRHH Corporativo",
+  "parent_department_id": null,
+  "active": true
+}
+
+### Borrar departamento (DELETE fisico)
+DELETE {{baseUrl}}/rrhh/departamentos/{{department_id}}
+Authorization: Bearer {{token}}
+
+### Listar empleados
+GET {{baseUrl}}/rrhh/empleados?page=1&limit=10
+Authorization: Bearer {{token}}
+
+### Crear empleado
+POST {{baseUrl}}/rrhh/empleados
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "company_id": "{{company_id}}",
+  "first_name": "Ana",
+  "last_name": "Lopez",
+  "email": "ana.lopez@empresa.com",
+  "status": "active",
+  "hire_date": "2026-02-01",
+  "department_id": "{{department_id}}",
+  "user_id": null
+}
+
+### Obtener empleado
+GET {{baseUrl}}/rrhh/empleados/{{employee_id}}
+Authorization: Bearer {{token}}
+
+### Resumen empleado
+GET {{baseUrl}}/rrhh/empleados/{{employee_id}}/resumen
+Authorization: Bearer {{token}}
+
+### Actualizar empleado
+PUT {{baseUrl}}/rrhh/empleados/{{employee_id}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "company_id": "{{company_id}}",
+  "first_name": "Ana Maria",
+  "last_name": "Lopez",
+  "email": "ana.maria.lopez@empresa.com",
+  "status": "active",
+  "hire_date": "2026-02-01",
+  "department_id": "{{department_id}}",
+  "user_id": null
+}
+
+### Baja logica empleado
+DELETE {{baseUrl}}/rrhh/empleados/{{employee_id}}
+Authorization: Bearer {{token}}
+
+### Listar contratos
+GET {{baseUrl}}/rrhh/contratos?page=1&limit=10
+Authorization: Bearer {{token}}
+
+### Crear contrato
+POST {{baseUrl}}/rrhh/contratos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "company_id": "{{company_id}}",
+  "employee_id": "{{employee_id}}",
+  "start_date": "2026-02-01",
+  "end_date": null,
+  "contract_type": "indefinido",
+  "salary": 28000,
+  "active": true
+}
+
+### Obtener contrato
+GET {{baseUrl}}/rrhh/contratos/{{contract_id}}
+Authorization: Bearer {{token}}
+
+### Actualizar contrato
+PUT {{baseUrl}}/rrhh/contratos/{{contract_id}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "company_id": "{{company_id}}",
+  "employee_id": "{{employee_id}}",
+  "start_date": "2026-02-01",
+  "end_date": "2026-12-31",
+  "contract_type": "temporal",
+  "salary": 29000,
+  "active": true
+}
+
+### Desactivar contrato
+DELETE {{baseUrl}}/rrhh/contratos/{{contract_id}}
+Authorization: Bearer {{token}}
+
+### Listar ausencias
+GET {{baseUrl}}/rrhh/ausencias?page=1&limit=10
+Authorization: Bearer {{token}}
+
+### Crear ausencia
+POST {{baseUrl}}/rrhh/ausencias
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "company_id": "{{company_id}}",
+  "employee_id": "{{employee_id}}",
+  "type": "vacaciones",
+  "start_date": "2026-08-01",
+  "end_date": "2026-08-15",
+  "status": "pending",
+  "notes": "Vacaciones verano"
+}
+
+### Obtener ausencia
+GET {{baseUrl}}/rrhh/ausencias/{{absence_id}}
+Authorization: Bearer {{token}}
+
+### Actualizar ausencia
+PUT {{baseUrl}}/rrhh/ausencias/{{absence_id}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "company_id": "{{company_id}}",
+  "employee_id": "{{employee_id}}",
+  "type": "permiso",
+  "start_date": "2026-08-01",
+  "end_date": "2026-08-05",
+  "status": "pending",
+  "notes": "Permiso personal"
+}
+
+### Aprobar ausencia
+PATCH {{baseUrl}}/rrhh/ausencias/{{absence_id}}/aprobar
+Authorization: Bearer {{token}}
+
+### Rechazar ausencia
+PATCH {{baseUrl}}/rrhh/ausencias/{{absence_id}}/rechazar
+Authorization: Bearer {{token}}
+
+### Borrado logico ausencia
+DELETE {{baseUrl}}/rrhh/ausencias/{{absence_id}}
+Authorization: Bearer {{token}}
+
+### Listar nominas
+GET {{baseUrl}}/rrhh/nominas?page=1&limit=10
+Authorization: Bearer {{token}}
+
+### Crear nomina
+POST {{baseUrl}}/rrhh/nominas
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "company_id": "{{company_id}}",
+  "employee_id": "{{employee_id}}",
+  "period": "2026-01",
+  "gross_amount": 2500,
+  "net_amount": 1900
+}
+
+### Obtener nomina
+GET {{baseUrl}}/rrhh/nominas/{{payroll_id}}
+Authorization: Bearer {{token}}
+
+### Listar evaluaciones
+GET {{baseUrl}}/rrhh/evaluaciones?page=1&limit=10
+Authorization: Bearer {{token}}
+
+### Crear evaluacion
+POST {{baseUrl}}/rrhh/evaluaciones
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "company_id": "{{company_id}}",
+  "employee_id": "{{employee_id}}",
+  "score": 85,
+  "review_date": "2026-01-31",
+  "notes": "Buen desempeno general"
+}
+
+### Obtener evaluacion
+GET {{baseUrl}}/rrhh/evaluaciones/{{evaluation_id}}
+Authorization: Bearer {{token}}
