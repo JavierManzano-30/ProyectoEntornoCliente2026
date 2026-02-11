@@ -1,0 +1,39 @@
+@supabaseUrl = https://qctgocielkphraivucua.supabase.co
+@anonKey = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjdGdvY2llbGtwaHJhaXZ1Y3VhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3OTA4MzAsImV4cCI6MjA4NTM2NjgzMH0.xluCLYZWGdvxW6V3IvZfA7HF_xVGAut9pMNLmh7MzKQ
+@companyId =  11111111-1111-1111-1111-111111111111
+@employeeId = 11111111-eeee-0000-0000-000000000001
+
+### Health check basico de tabla departamentos
+GET {{supabaseUrl}}/rest/v1/hr_departments?select=*&limit=5
+apikey: {{anonKey}}
+Authorization: Bearer {{anonKey}}
+
+### Departamentos por company_id
+GET {{supabaseUrl}}/rest/v1/hr_departments?select=*&company_id=eq.{{companyId}}
+apikey: {{anonKey}}
+Authorization: Bearer {{anonKey}}
+
+### Empleados por company_id
+GET {{supabaseUrl}}/rest/v1/hr_employees?select=*&company_id=eq.{{companyId}}&limit=20
+apikey: {{anonKey}}
+Authorization: Bearer {{anonKey}}
+
+### Contratos por employee_id
+GET {{supabaseUrl}}/rest/v1/hr_contracts?select=*&employee_id=eq.{{employeeId}}
+apikey: {{anonKey}}
+Authorization: Bearer {{anonKey}}
+
+### Ausencias por employee_id
+GET {{supabaseUrl}}/rest/v1/hr_absences?select=*&employee_id=eq.{{employeeId}}
+apikey: {{anonKey}}
+Authorization: Bearer {{anonKey}}
+
+### Nominas por employee_id
+GET {{supabaseUrl}}/rest/v1/hr_payrolls?select=*&employee_id=eq.{{employeeId}}
+apikey: {{anonKey}}
+Authorization: Bearer {{anonKey}}
+
+### Evaluaciones por employee_id
+GET {{supabaseUrl}}/rest/v1/hr_evaluations?select=*&employee_id=eq.{{employeeId}}
+apikey: {{anonKey}}
+Authorization: Bearer {{anonKey}}

@@ -1,61 +1,54 @@
 const express = require('express');
 const { requireAuth } = require('../../middleware/auth');
 
-const departamentos = require('./departamentosController');
-const empleados = require('./empleadosController');
-const contratos = require('./contratosController');
-const ausencias = require('./ausenciasController');
-const nominas = require('./nominasController');
-const evaluaciones = require('./evaluacionesController');
+const departments = require('./controllers/department-controller');
+const employees = require('./controllers/employee-controller');
+const contracts = require('./controllers/contract-controller');
+const absences = require('./controllers/absence-controller');
+const payrolls = require('./controllers/payroll-controller');
+const evaluations = require('./controllers/evaluation-controller');
 
 const router = express.Router();
 
-// Healthcheck del módulo RRHH
 router.get('/health', (req, res) => {
   res.json({ success: true, data: { module: 'rrhh', status: 'ok' } });
 });
 
-// Proteger el resto de rutas con autenticación
 router.use(requireAuth);
 
-// Departamentos
-router.get('/departamentos', departamentos.listDepartamentos);
-router.post('/departamentos', departamentos.createDepartamento);
-router.get('/departamentos/:id', departamentos.getDepartamento);
-router.put('/departamentos/:id', departamentos.updateDepartamento);
-router.delete('/departamentos/:id', departamentos.deleteDepartamento);
+router.get('/departamentos', departments.listDepartments);
+router.post('/departamentos', departments.createDepartment);
+router.get('/departamentos/:id', departments.getDepartment);
+router.put('/departamentos/:id', departments.updateDepartment);
+router.delete('/departamentos/:id', departments.deleteDepartment);
 
-// Empleados
-router.get('/empleados', empleados.listEmpleados);
-router.post('/empleados', empleados.createEmpleado);
-router.get('/empleados/:id', empleados.getEmpleado);
-router.put('/empleados/:id', empleados.updateEmpleado);
-router.delete('/empleados/:id', empleados.deleteEmpleado);
+router.get('/empleados', employees.listEmployees);
+router.post('/empleados', employees.createEmployee);
+router.get('/empleados/:id', employees.getEmployee);
+router.get('/empleados/:id/resumen', employees.getEmployeeSummary);
+router.put('/empleados/:id', employees.updateEmployee);
+router.delete('/empleados/:id', employees.deleteEmployee);
 
-// Contratos
-router.get('/contratos', contratos.listContratos);
-router.post('/contratos', contratos.createContrato);
-router.get('/contratos/:id', contratos.getContrato);
-router.put('/contratos/:id', contratos.updateContrato);
-router.delete('/contratos/:id', contratos.deleteContrato);
+router.get('/contratos', contracts.listContracts);
+router.post('/contratos', contracts.createContract);
+router.get('/contratos/:id', contracts.getContract);
+router.put('/contratos/:id', contracts.updateContract);
+router.delete('/contratos/:id', contracts.deleteContract);
 
-// Ausencias
-router.get('/ausencias', ausencias.listAusencias);
-router.post('/ausencias', ausencias.createAusencia);
-router.get('/ausencias/:id', ausencias.getAusencia);
-router.put('/ausencias/:id', ausencias.updateAusencia);
-router.delete('/ausencias/:id', ausencias.deleteAusencia);
-router.patch('/ausencias/:id/aprobar', ausencias.aprobarAusencia);
-router.patch('/ausencias/:id/rechazar', ausencias.rechazarAusencia);
+router.get('/ausencias', absences.listAbsences);
+router.post('/ausencias', absences.createAbsence);
+router.get('/ausencias/:id', absences.getAbsence);
+router.put('/ausencias/:id', absences.updateAbsence);
+router.delete('/ausencias/:id', absences.deleteAbsence);
+router.patch('/ausencias/:id/aprobar', absences.approveAbsence);
+router.patch('/ausencias/:id/rechazar', absences.rejectAbsence);
 
-// Nóminas (solo alta y consulta, no edición/eliminación)
-router.get('/nominas', nominas.listNominas);
-router.post('/nominas', nominas.createNomina);
-router.get('/nominas/:id', nominas.getNomina);
+router.get('/nominas', payrolls.listPayrolls);
+router.post('/nominas', payrolls.createPayroll);
+router.get('/nominas/:id', payrolls.getPayroll);
 
-// Evaluaciones (alta y consulta)
-router.get('/evaluaciones', evaluaciones.listEvaluaciones);
-router.post('/evaluaciones', evaluaciones.createEvaluacion);
-router.get('/evaluaciones/:id', evaluaciones.getEvaluacion);
+router.get('/evaluaciones', evaluations.listEvaluations);
+router.post('/evaluaciones', evaluations.createEvaluation);
+router.get('/evaluaciones/:id', evaluations.getEvaluation);
 
 module.exports = router;
