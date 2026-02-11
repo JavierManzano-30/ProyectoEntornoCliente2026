@@ -78,13 +78,13 @@ Notas de esquema (syneraDb.sql):
 - IDs en ALM son `TEXT` (no UUID) y se generan en la API.
 
 ### Proyectos
-- `GET /alm/proyectos`
-- `POST /alm/proyectos`
-- `GET /alm/proyectos/{id}`
-- `PUT /alm/proyectos/{id}`
-- `DELETE /alm/proyectos/{id}`
-- `GET /alm/proyectos/{id}/tareas`
-- `GET /alm/proyectos/{id}/estadisticas`
+- `GET /alm/projects`
+- `POST /alm/projects`
+- `GET /alm/projects/{id}`
+- `PUT /alm/projects/{id}`
+- `DELETE /alm/projects/{id}`
+- `GET /alm/projects/{id}/tasks`
+- `GET /alm/projects/{id}/stats`
 
 Filtros y paginacion (listas):
 - `page`, `limit`, `sort`
@@ -127,13 +127,13 @@ Ejemplo response (POST):
 ```
 
 ### Tareas
-- `GET /alm/tareas`
-- `POST /alm/tareas`
-- `GET /alm/tareas/{id}`
-- `PUT /alm/tareas/{id}`
-- `DELETE /alm/tareas/{id}`
-- `PATCH /alm/tareas/{id}/estado`
-- `PATCH /alm/tareas/{id}/asignar`
+- `GET /alm/tasks`
+- `POST /alm/tasks`
+- `GET /alm/tasks/{id}`
+- `PUT /alm/tasks/{id}`
+- `DELETE /alm/tasks/{id}`
+- `PATCH /alm/tasks/{id}/status`
+- `PATCH /alm/tasks/{id}/assign`
 
 Filtros y paginacion (listas):
 - `page`, `limit`, `sort`
@@ -175,13 +175,13 @@ Ejemplo response (POST):
 }
 
 ### Tiempos
-- `GET /alm/tiempos`
-- `POST /alm/tiempos`
-- `PUT /alm/tiempos/{id}`
-- `DELETE /alm/tiempos/{id}`
-- `GET /alm/tiempos/proyecto/{id}/resumen`
-- `GET /alm/tiempos/usuario/{id}`
-- `GET /alm/tiempos/tarea/{id}`
+- `GET /alm/times`
+- `POST /alm/times`
+- `PUT /alm/times/{id}`
+- `DELETE /alm/times/{id}`
+- `GET /alm/times/project/{id}/summary`
+- `GET /alm/times/user/{id}`
+- `GET /alm/times/task/{id}`
 
 Filtros y paginacion (listas):
 - `page`, `limit`

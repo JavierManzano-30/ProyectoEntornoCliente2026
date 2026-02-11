@@ -17,13 +17,13 @@ Este módulo sigue las convenciones de `backend/docs/api/convenciones-api.md`:
 
 ## Proyectos
 
-- `GET /proyectos`
-- `POST /proyectos`
-- `GET /proyectos/{id}`
-- `PUT /proyectos/{id}`
-- `DELETE /proyectos/{id}`
-- `GET /proyectos/{id}/tareas`
-- `GET /proyectos/{id}/estadisticas`
+- `GET /projects`
+- `POST /projects`
+- `GET /projects/{id}`
+- `PUT /projects/{id}`
+- `DELETE /projects/{id}`
+- `GET /projects/{id}/tasks`
+- `GET /projects/{id}/stats`
 
 Filtros en listado:
 - `companyId`, `status`, `clientId`, `responsibleId`, `startDate`, `endDate`
@@ -31,7 +31,7 @@ Filtros en listado:
 
 `sort` soporta: `name`, `startDate`, `endDate`, `status`, `createdAt` (prefijo `-` para DESC).
 
-Ejemplo POST `/proyectos`:
+Ejemplo POST `/projects`:
 ```json
 {
   "companyId": "7f1b9b7a-3a4a-4f1b-9b6a-7f6c2b9e1f10",
@@ -75,7 +75,7 @@ Ejemplo response (listado con `meta`):
 }
 ```
 
-Respuesta `GET /proyectos/{id}/estadisticas`:
+Respuesta `GET /projects/{id}/stats`:
 ```json
 {
   "success": true,
@@ -93,13 +93,13 @@ Respuesta `GET /proyectos/{id}/estadisticas`:
 
 ## Tareas
 
-- `GET /tareas`
-- `POST /tareas`
-- `GET /tareas/{id}`
-- `PUT /tareas/{id}`
-- `DELETE /tareas/{id}`
-- `PATCH /tareas/{id}/estado`
-- `PATCH /tareas/{id}/asignar`
+- `GET /tasks`
+- `POST /tasks`
+- `GET /tasks/{id}`
+- `PUT /tasks/{id}`
+- `DELETE /tasks/{id}`
+- `PATCH /tasks/{id}/status`
+- `PATCH /tasks/{id}/assign`
 
 Filtros en listado:
 - `companyId`, `status`, `priority`, `projectId`, `assignedTo`, `dueDate`
@@ -107,7 +107,7 @@ Filtros en listado:
 
 `sort` soporta: `title`, `status`, `priority`, `dueDate`, `createdAt` (prefijo `-` para DESC).
 
-Ejemplo POST `/tareas`:
+Ejemplo POST `/tasks`:
 ```json
 {
   "companyId": "7f1b9b7a-3a4a-4f1b-9b6a-7f6c2b9e1f10",
@@ -122,31 +122,31 @@ Ejemplo POST `/tareas`:
 }
 ```
 
-Ejemplo PATCH `/tareas/{id}/estado`:
+Ejemplo PATCH `/tasks/{id}/status`:
 ```json
 { "status": "in_progress" }
 ```
 
-Ejemplo PATCH `/tareas/{id}/asignar`:
+Ejemplo PATCH `/tasks/{id}/assign`:
 ```json
 { "assignedTo": "usr_20" }
 ```
 
 ## Tiempos (registro de horas)
 
-- `GET /tiempos`
-- `POST /tiempos`
-- `PUT /tiempos/{id}`
-- `DELETE /tiempos/{id}`
-- `GET /tiempos/proyecto/{id}/resumen`
-- `GET /tiempos/usuario/{id}`
-- `GET /tiempos/tarea/{id}`
+- `GET /times`
+- `POST /times`
+- `PUT /times/{id}`
+- `DELETE /times/{id}`
+- `GET /times/project/{id}/summary`
+- `GET /times/user/{id}`
+- `GET /times/task/{id}`
 
 Filtros en listado:
 - `companyId`, `taskId`, `userId`, `entryDate`
 - `page`, `limit`
 
-Ejemplo POST `/tiempos`:
+Ejemplo POST `/times`:
 ```json
 {
   "companyId": "7f1b9b7a-3a4a-4f1b-9b6a-7f6c2b9e1f10",
@@ -158,7 +158,7 @@ Ejemplo POST `/tiempos`:
 }
 ```
 
-Respuesta `GET /tiempos/proyecto/{id}/resumen`:
+Respuesta `GET /times/project/{id}/summary`:
 ```json
 {
   "success": true,

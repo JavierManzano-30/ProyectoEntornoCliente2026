@@ -1,7 +1,7 @@
 @baseUrl = http://localhost:3001
-@token = {{login.response.body.token}}
-@companyId = {{login.response.body.companyId}}
-@userId = {{login.response.body.userId}}
+@token = {{login.token}}
+@companyId = {{login.companyId}}
+@userId = {{login.userId}}
 @almCompanyId = 11111111-1111-1111-1111-111111111111
 @almUserId = user-1
 
@@ -39,7 +39,7 @@ POST {{baseUrl}}/api/v1/core/auth/login
 Content-Type: application/json
 
 {
-  "email": "pepe@acme.com",
+  "email": "ana.lopez@demo.com",
   "password": "secret123"
 }
 
@@ -61,12 +61,12 @@ Content-Type: application/json
 GET {{baseUrl}}/api/v1/alm/supabase/health
 
 ### ALM - List Projects (requires JWT)
-GET {{baseUrl}}/api/v1/alm/proyectos?page=1&limit=10&companyId={{almCompanyId}}
+GET {{baseUrl}}/api/v1/alm/projects?page=1&limit=10&companyId={{almCompanyId}}
 Authorization: Bearer {{token}}
 
 ### ALM - Create Project (requires JWT)
 # @name almCreateProject
-POST {{baseUrl}}/api/v1/alm/proyectos
+POST {{baseUrl}}/api/v1/alm/projects
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -81,30 +81,30 @@ Content-Type: application/json
 
 ### ALM - Create Task (requires JWT)
 # @name almCreateTask
-POST {{baseUrl}}/api/v1/alm/tareas
+POST {{baseUrl}}/api/v1/alm/tasks
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
   "companyId": "{{almCompanyId}}",
-  "projectId": "{{almCreateProject.response.body.data.id}}",
+  "projectId": "{{almCreateProject.data.id}}",
   "title": "Tarea ALM",
   "status": "pending",
   "priority": "medium"
 }
 
 ### ALM - List Tasks (requires JWT)
-GET {{baseUrl}}/api/v1/alm/tareas?companyId={{almCompanyId}}
+GET {{baseUrl}}/api/v1/alm/tasks?companyId={{almCompanyId}}
 Authorization: Bearer {{token}}
 
 ### ALM - Create Time Entry (requires JWT)
-POST {{baseUrl}}/api/v1/alm/tiempos
+POST {{baseUrl}}/api/v1/alm/times
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
   "companyId": "{{almCompanyId}}",
-  "taskId": "{{almCreateTask.response.body.data.id}}",
+  "taskId": "{{almCreateTask.data.id}}",
   "userId": "{{almUserId}}",
   "entryDate": "2026-01-11",
   "hours": 1.5
@@ -129,7 +129,7 @@ Content-Type: application/json
 }
 
 ### CRM - Get Client Details (requires JWT)
-GET {{baseUrl}}/api/v1/crm/clientes/{{crmCreateClient.response.body.data.id}}
+GET {{baseUrl}}/api/v1/crm/clientes/{{crmCreateClient.data.id}}
 Authorization: Bearer {{token}}
 
 ### CRM - Create Pipeline (requires JWT)
@@ -155,7 +155,7 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "pipelineId": "{{crmCreatePipeline.response.body.data.id}}",
+  "pipelineId": "{{crmCreatePipeline.data.id}}",
   "name": "Prospección",
   "sortOrder": 1,
   "defaultProbability": 20
@@ -168,7 +168,7 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "clientId": "{{crmCreateClient.response.body.data.id}}",
+  "clientId": "{{crmCreateClient.data.id}}",
   "name": "Juan",
   "lastName": "Pérez",
   "jobTitle": "CTO",
@@ -178,7 +178,7 @@ Content-Type: application/json
 }
 
 ### CRM - List Contacts (requires JWT)
-GET {{baseUrl}}/api/v1/crm/contactos?clientId={{crmCreateClient.response.body.data.id}}
+GET {{baseUrl}}/api/v1/crm/contactos?clientId={{crmCreateClient.data.id}}
 Authorization: Bearer {{token}}
 
 ### CRM - Create Opportunity (requires JWT)
@@ -188,9 +188,9 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "clientId": "{{crmCreateClient.response.body.data.id}}",
-  "pipelineId": "{{crmCreatePipeline.response.body.data.id}}",
-  "stageId": "{{crmCreateStage.response.body.data.id}}",
+  "clientId": "{{crmCreateClient.data.id}}",
+  "pipelineId": "{{crmCreatePipeline.data.id}}",
+  "stageId": "{{crmCreateStage.data.id}}",
   "title": "Venta Software ERP",
   "description": "Implementación completa",
   "estimatedValue": 50000,
@@ -204,16 +204,16 @@ GET {{baseUrl}}/api/v1/crm/oportunidades?page=1&limit=10
 Authorization: Bearer {{token}}
 
 ### CRM - Get Opportunity Details (requires JWT)
-GET {{baseUrl}}/api/v1/crm/oportunidades/{{crmCreateOpportunity.response.body.data.id}}
+GET {{baseUrl}}/api/v1/crm/oportunidades/{{crmCreateOpportunity.data.id}}
 Authorization: Bearer {{token}}
 
 ### CRM - Update Opportunity Stage (requires JWT)
-PATCH {{baseUrl}}/api/v1/crm/oportunidades/{{crmCreateOpportunity.response.body.data.id}}/stage
+PATCH {{baseUrl}}/api/v1/crm/oportunidades/{{crmCreateOpportunity.data.id}}/stage
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "stageId": "{{crmCreateStage.response.body.data.id}}",
+  "stageId": "{{crmCreateStage.data.id}}",
   "sortOrder": 1
 }
 
@@ -225,8 +225,8 @@ Content-Type: application/json
 
 {
   "userId": "test-user-1",
-  "clientId": "{{crmCreateClient.response.body.data.id}}",
-  "opportunityId": "{{crmCreateOpportunity.response.body.data.id}}",
+  "clientId": "{{crmCreateClient.data.id}}",
+  "opportunityId": "{{crmCreateOpportunity.data.id}}",
   "type": "call",
   "subject": "Primera llamada",
   "description": "Conversación inicial",
@@ -239,19 +239,19 @@ GET {{baseUrl}}/api/v1/crm/actividades?page=1&limit=10
 Authorization: Bearer {{token}}
 
 ### CRM - Get Activity Details (requires JWT)
-GET {{baseUrl}}/api/v1/crm/actividades/{{crmCreateActivity.response.body.data.id}}
+GET {{baseUrl}}/api/v1/crm/actividades/{{crmCreateActivity.data.id}}
 Authorization: Bearer {{token}}
 
 ### CRM - Mark Activity as Completed (requires JWT)
-PATCH {{baseUrl}}/api/v1/crm/actividades/{{crmCreateActivity.response.body.data.id}}/completar
+PATCH {{baseUrl}}/api/v1/crm/actividades/{{crmCreateActivity.data.id}}/completar
 Authorization: Bearer {{token}}
 
 ### CRM - Convert Lead to Customer (requires JWT)
-POST {{baseUrl}}/api/v1/crm/clientes/{{crmCreateClient.response.body.data.id}}/convertir
+POST {{baseUrl}}/api/v1/crm/clientes/{{crmCreateClient.data.id}}/convertir
 Authorization: Bearer {{token}}
 
 ### CRM - Update Client (requires JWT)
-PUT {{baseUrl}}/api/v1/crm/clientes/{{crmCreateClient.response.body.data.id}}
+PUT {{baseUrl}}/api/v1/crm/clientes/{{crmCreateClient.data.id}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -261,7 +261,7 @@ Content-Type: application/json
 }
 
 ### ⚠️ CRM - Delete Client (CUIDADO: Eliminará en cascada contactos, oportunidades y actividades)
-# DELETE {{baseUrl}}/api/v1/crm/clientes/{{crmCreateClient.response.body.data.id}}
+# DELETE {{baseUrl}}/api/v1/crm/clientes/{{crmCreateClient.data.id}}
 # Authorization: Bearer {{token}}
 
 ### RRHH - Health (public)

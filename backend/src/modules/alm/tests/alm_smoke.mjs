@@ -56,13 +56,13 @@ const ids = {
 
 async function rollback() {
   try {
-    if (ids.timeId) await request('DELETE', `/tiempos/${ids.timeId}`);
+    if (ids.timeId) await request('DELETE', `/times/${ids.timeId}`);
   } catch {}
   try {
-    if (ids.taskId) await request('DELETE', `/tareas/${ids.taskId}`);
+    if (ids.taskId) await request('DELETE', `/tasks/${ids.taskId}`);
   } catch {}
   try {
-    if (ids.projectId) await request('DELETE', `/proyectos/${ids.projectId}`);
+    if (ids.projectId) await request('DELETE', `/projects/${ids.projectId}`);
   } catch {}
 }
 
@@ -71,7 +71,7 @@ async function main() {
   const responsibleId = process.env.ALM_TEST_USER_ID || 'user-1';
 
   // Projects
-  const projectCreate = await request('POST', '/proyectos', {
+  const projectCreate = await request('POST', '/projects', {
     companyId,
     name: 'ALM Smoke Project',
     startDate: nowDate(),
@@ -80,10 +80,10 @@ async function main() {
   });
   ids.projectId = projectCreate?.data?.id;
 
-  await request('GET', `/proyectos/${ids.projectId}`);
-  await request('GET', `/proyectos/${ids.projectId}/estadisticas`);
+  await request('GET', `/projects/${ids.projectId}`);
+  await request('GET', `/projects/${ids.projectId}/stats`);
 
-  await request('PUT', `/proyectos/${ids.projectId}`, {
+  await request('PUT', `/projects/${ids.projectId}`, {
     companyId,
     name: 'ALM Smoke Project Updated',
     startDate: nowDate(),
@@ -92,7 +92,7 @@ async function main() {
   });
 
   // Tasks
-  const taskCreate = await request('POST', '/tareas', {
+  const taskCreate = await request('POST', '/tasks', {
     companyId,
     projectId: ids.projectId,
     title: 'ALM Smoke Task',
@@ -101,12 +101,12 @@ async function main() {
   });
   ids.taskId = taskCreate?.data?.id;
 
-  await request('GET', `/tareas/${ids.taskId}`);
-  await request('PATCH', `/tareas/${ids.taskId}/estado`, { status: 'in_progress' });
-  await request('PATCH', `/tareas/${ids.taskId}/asignar`, { assignedTo: responsibleId });
+  await request('GET', `/tasks/${ids.taskId}`);
+  await request('PATCH', `/tasks/${ids.taskId}/status`, { status: 'in_progress' });
+  await request('PATCH', `/tasks/${ids.taskId}/assign`, { assignedTo: responsibleId });
 
   // Time entries
-  const timeCreate = await request('POST', '/tiempos', {
+  const timeCreate = await request('POST', '/times', {
     companyId,
     taskId: ids.taskId,
     userId: responsibleId,
@@ -115,9 +115,9 @@ async function main() {
   });
   ids.timeId = timeCreate?.data?.id;
 
-  await request('GET', `/tiempos/tarea/${ids.taskId}`);
-  await request('GET', `/tiempos/usuario/${responsibleId}`);
-  await request('GET', `/tiempos/proyecto/${ids.projectId}/resumen`);
+  await request('GET', `/times/task/${ids.taskId}`);
+  await request('GET', `/times/user/${responsibleId}`);
+  await request('GET', `/times/project/${ids.projectId}/summary`);
 
   await rollback();
   // eslint-disable-next-line no-console
