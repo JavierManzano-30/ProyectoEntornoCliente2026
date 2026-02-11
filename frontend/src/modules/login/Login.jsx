@@ -18,7 +18,7 @@ const Login = () => {
         setError('');
         // Simulación de login exitoso
         alert('Login exitoso');
-        navigate('/core'); // Redirige al dashboard principal
+        navigate('/main'); // Redirige al centro de modulos
     };
 
     return (

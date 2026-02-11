@@ -33,6 +33,7 @@ import {
 // Lazy imports para Login y Landing
 const Login = React.lazy(() => import("./modules/login"));
 const Landing = React.lazy(() => import("./modules/landing"));
+const MainHub = React.lazy(() => import("./modules/main"));
 
 // Páginas del módulo CRM
 import CRMDashboard from "./modules/crm/pages/CRMDashboard";
@@ -98,6 +99,7 @@ function App() {
                   <Route path="/" element={<Landing />} />
                   {/* Ruta de Login (pública) */}
                   <Route path="/login" element={<Login />} />
+                  <Route path="/main" element={<MainHub />} />
 
                   {/* Rutas del módulo de soporte */}
                   <Route path="/soporte" element={<MainLayout module="soporte" />}>

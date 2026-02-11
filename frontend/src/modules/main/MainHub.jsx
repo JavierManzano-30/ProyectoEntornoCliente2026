@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Shield,
@@ -83,40 +83,61 @@ const modules = [
 
 const MainHub = () => {
   const navigate = useNavigate();
-  const trackRef = useRef(null);
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  const scrollCards = (direction) => {
-    if (!trackRef.current) return;
-    const amount = direction === "left" ? -360 : 360;
-    trackRef.current.scrollBy({ left: amount, behavior: "smooth" });
+  const goPrev = () => {
+    setActiveIndex((prev) => (prev - 1 + modules.length) % modules.length);
+  };
+
+  const goNext = () => {
+    setActiveIndex((prev) => (prev + 1) % modules.length);
+  };
+
+  const getRelativePosition = (index) => {
+    let diff = index - activeIndex;
+    if (diff > modules.length / 2) diff -= modules.length;
+    if (diff < -modules.length / 2) diff += modules.length;
+    return diff;
   };
 
   return (
     <div className="main-hub-page">
+      <header className="main-hub-topbar">
+        <div className="main-hub-brand">
+          <img src="/images/synera-logo.png" alt="SYNERA Logo" />
+          <span>SYNERA</span>
+        </div>
+      </header>
+
       <header className="main-hub-header">
-        <h1>Centro de Modulos</h1>
+        <h1>Espacio de SYNERA</h1>
         <p>Selecciona un modulo para acceder a su funcionalidad principal.</p>
       </header>
 
-      <section className="main-hub-carousel">
+      <section className="main-hub-carousel-wrap">
         <button
           type="button"
-          className="carousel-control"
-          onClick={() => scrollCards("left")}
+          className="carousel-control left"
+          onClick={goPrev}
           aria-label="Desplazar a la izquierda"
         >
           <ChevronLeft size={20} />
         </button>
 
-        <div className="carousel-track" ref={trackRef}>
-          {modules.map((item) => {
+        <div className="main-hub-carousel">
+          {modules.map((item, index) => {
             const Icon = item.icon;
+            const position = getRelativePosition(index);
+            const isVisible = Math.abs(position) <= 2;
+            const isCenter = position === 0;
+
             return (
               <button
                 key={item.id}
                 type="button"
-                className="module-card"
-                onClick={() => navigate(item.path)}
+                className={`module-card pos-${position} ${isCenter ? "is-center" : ""} ${isVisible ? "" : "is-hidden"}`}
+                disabled={!isCenter}
+                onClick={() => isCenter && navigate(item.path)}
               >
                 <div className="module-card-inner">
                   <div className="module-card-face module-card-front">
@@ -140,8 +161,8 @@ const MainHub = () => {
 
         <button
           type="button"
-          className="carousel-control"
-          onClick={() => scrollCards("right")}
+          className="carousel-control right"
+          onClick={goNext}
           aria-label="Desplazar a la derecha"
         >
           <ChevronRight size={20} />

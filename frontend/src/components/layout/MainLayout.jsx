@@ -168,6 +168,9 @@ const MainLayout = ({ module = "soporte" }) => {
           <div className="header-content">
             <h2 className="header-title header-title-blue">{currentNav.title}</h2>
             <div className="header-actions">
+              <NavLink to="/main" className="header-module-link">
+                Main
+              </NavLink>
               <NavLink to="/core" className="header-module-link">
                 Core
               </NavLink>
