@@ -1,0 +1,94 @@
+/* Fondo ilustrado similar al ejemplo */
+.landing-bg {
+    min-height: 100vh;
+    width: 100vw;
+    background: linear-gradient(180deg, #1a3557 0%, #6fa1d6 60%, #e0eafc 100%);
+    background-image: url('../../images/landing-bg.png');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.landing-logo-bar {
+    display: flex;
+    align-items: center;
+    padding: 2rem 2rem 0 2rem;
+}
+
+.landing-logo {
+    height: 48px;
+    width: 48px;
+    margin-right: 1rem;
+}
+
+.landing-brand {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.12em;
+}
+
+.landing-center-box {
+    margin: 4rem auto 0 auto;
+    background: rgba(60, 110, 180, 0.85);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(30, 60, 120, 0.18);
+    padding: 3rem 2.5rem;
+    max-width: 420px;
+    text-align: center;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.landing-center-box h1 {
+    font-size: 2.4rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.landing-divider {
+    border: none;
+    border-top: 2px solid #fff;
+    margin: 0.8rem 0;
+    width: 80%;
+    align-self: center;
+}
+
+.landing-btn {
+    background: #fff;
+    color: #3c6eb4;
+    padding: 0.9rem 2.2rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-decoration: none;
+    margin: 1rem 0;
+    box-shadow: 0 2px 8px rgba(60, 110, 180, 0.12);
+    transition: background 0.2s, color 0.2s;
+}
+
+.landing-btn:hover {
+    background: #3c6eb4;
+    color: #fff;
+}
+
+.landing-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 1rem;
+}
+
+.landing-links a {
+    color: #fff;
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+.feature-card p {
+    color: #2d3a4b;
+    font-size: 1rem;
+}

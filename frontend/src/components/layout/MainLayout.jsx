@@ -1,5 +1,5 @@
 import React from "react";
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Ticket,
@@ -25,6 +25,11 @@ import {
 import "./MainLayout.css";
 
 const MainLayout = ({ module = "soporte" }) => {
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    // Aquí podrías limpiar el estado de sesión si lo hubiera
+    navigate('/');
+  };
   const navigationConfig = {
     soporte: {
       title: "Módulo de Soporte",
@@ -178,6 +183,9 @@ const MainLayout = ({ module = "soporte" }) => {
               </NavLink>
               <button className="header-button">
                 <Settings size={20} />
+              </button>
+              <button className="header-button logout-btn" onClick={handleLogout} title="Cerrar sesión">
+                Cerrar sesión
               </button>
             </div>
           </div>

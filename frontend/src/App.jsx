@@ -20,7 +20,6 @@ import DepartmentManagement from "./modules/rrhh/pages/DepartmentManagement";
 
 // Páginas del módulo CORE
 import {
-  Login,
   Dashboard,
   UserList,
   UserDetail,
@@ -30,6 +29,10 @@ import {
   CompanyForm,
   RoleManagement,
 } from "./modules/core";
+
+// Lazy imports para Login y Landing
+const Login = React.lazy(() => import("./modules/login"));
+const Landing = React.lazy(() => import("./modules/landing"));
 
 // Páginas del módulo CRM
 import CRMDashboard from "./modules/crm/pages/CRMDashboard";
@@ -89,15 +92,15 @@ function App() {
         <BPMProvider>
           <BIProvider>
             <SoporteProvider>
-              <Routes>
-              {/* Redirección inicial */}
-              <Route path="/" element={<Navigate to="/core" replace />} />
+              <React.Suspense fallback={<div>Cargando...</div>}>
+                <Routes>
+                  {/* Landing page como home */}
+                  <Route path="/" element={<Landing />} />
+                  {/* Ruta de Login (pública) */}
+                  <Route path="/login" element={<Login />} />
 
-              {/* Ruta de Login (pública) */}
-              <Route path="/login" element={<Login />} />
-
-              {/* Rutas del módulo de soporte */}
-              <Route path="/soporte" element={<MainLayout module="soporte" />}>
+                  {/* Rutas del módulo de soporte */}
+                  <Route path="/soporte" element={<MainLayout module="soporte" />}>
                 <Route index element={<SupportDashboard />} />
                 <Route path="tickets" element={<TicketList />} />
                 <Route path="tickets/:id" element={<TicketDetail />} />
@@ -184,16 +187,17 @@ function App() {
               <Route path="reportes" element={<FinancialReporting />} />
             </Route>
 
-            {/* Ruta 404 */}
-            <Route
-              path="*"
-              element={
-                <div style={{ padding: "2rem", textAlign: "center" }}>
-                  Página no encontrada
-                </div>
-              }
-            />
-          </Routes>
+                  {/* Ruta 404 */}
+                  <Route
+                    path="*"
+                    element={
+                      <div style={{ padding: "2rem", textAlign: "center" }}>
+                        Página no encontrada
+                      </div>
+                    }
+                  />
+                </Routes>
+              </React.Suspense>
             </SoporteProvider>
           </BIProvider>
         </BPMProvider>
