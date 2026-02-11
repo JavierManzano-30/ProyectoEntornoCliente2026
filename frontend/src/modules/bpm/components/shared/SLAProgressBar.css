@@ -1,0 +1,101 @@
+.sla-progress-bar-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sla-progress-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.sla-progress-icon {
+  display: flex;
+  align-items: center;
+}
+
+.sla-progress-label {
+  font-weight: 500;
+  flex: 1;
+}
+
+.sla-status-on_time {
+  color: #10b981;
+}
+
+.sla-status-at_risk {
+  color: #f59e0b;
+}
+
+.sla-status-overdue {
+  color: #ef4444;
+}
+
+.sla-status-completed {
+  color: #6b7280;
+}
+
+.sla-progress-time {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.sla-progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: #e5e7eb;
+  border-radius: 9999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.sla-progress-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.sla-fill-on_time {
+  background-color: #10b981;
+}
+
+.sla-fill-at_risk {
+  background-color: #f59e0b;
+}
+
+.sla-fill-overdue {
+  background-color: #ef4444;
+}
+
+.sla-fill-completed {
+  background-color: #6b7280;
+}
+
+.sla-progress-percentage {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+/* Tamaños */
+.sla-progress-small .sla-progress-bar {
+  height: 4px;
+}
+
+.sla-progress-small .sla-progress-header {
+  font-size: 0.75rem;
+}
+
+.sla-progress-medium .sla-progress-bar {
+  height: 8px;
+}
+
+.sla-progress-large .sla-progress-bar {
+  height: 12px;
+}
+
+.sla-progress-large .sla-progress-header {
+  font-size: 1rem;
+}

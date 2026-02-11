@@ -4,6 +4,104 @@
   padding: 2rem;
 }
 
+/* Selector de empresa (DEMO) */
+.empresa-selector-demo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 1px solid #fbbf24;
+  border-radius: 6px;
+  color: #92400e;
+}
+
+.empresa-select {
+  border: none;
+  background: transparent;
+  font-size: 0.875rem;
+  color: #92400e;
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 180px;
+}
+
+.empresa-select:focus {
+  outline: none;
+}
+
+/* Selector de tablón */
+.dashboard-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.dashboard-subtitle .separator {
+  color: #cbd5e1;
+  margin: 0 0.25rem;
+}
+
+.tablon-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  color: #64748b;
+}
+
+.tablon-select {
+  border: none;
+  background: transparent;
+  font-size: 0.875rem;
+  color: #1e293b;
+  font-weight: 500;
+  cursor: pointer;
+  min-width: 200px;
+}
+
+.tablon-select:focus {
+  outline: none;
+}
+
+/* Banner de información del tablón */
+.tablon-info-banner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-left: 4px solid #3b82f6;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.tablon-icon {
+  font-size: 2rem;
+}
+
+.tablon-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.tablon-details strong {
+  font-size: 1rem;
+  color: #1e293b;
+}
+
+.tablon-description {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
 .dashboard-kanban-section {
   margin-top: 1rem;
 }

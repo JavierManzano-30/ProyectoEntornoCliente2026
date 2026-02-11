@@ -1,0 +1,32 @@
+// Estados de proyectos
+export const PROJECT_STATUS = {
+  PLANNING: 'planificacion',
+  IN_PROGRESS: 'en_curso',
+  PAUSED: 'pausado',
+  COMPLETED: 'completado',
+  CANCELLED: 'cancelado'
+};
+
+export const PROJECT_STATUS_LABELS = {
+  [PROJECT_STATUS.PLANNING]: 'Planificación',
+  [PROJECT_STATUS.IN_PROGRESS]: 'En Curso',
+  [PROJECT_STATUS.PAUSED]: 'Pausado',
+  [PROJECT_STATUS.COMPLETED]: 'Completado',
+  [PROJECT_STATUS.CANCELLED]: 'Cancelado'
+};
+
+export const PROJECT_STATUS_COLORS = {
+  [PROJECT_STATUS.PLANNING]: '#6b7280',
+  [PROJECT_STATUS.IN_PROGRESS]: '#2563eb',
+  [PROJECT_STATUS.PAUSED]: '#f59e0b',
+  [PROJECT_STATUS.COMPLETED]: '#10b981',
+  [PROJECT_STATUS.CANCELLED]: '#ef4444'
+};
+
+export const PROJECT_STATUS_BG_COLORS = {
+  [PROJECT_STATUS.PLANNING]: '#f3f4f6',
+  [PROJECT_STATUS.IN_PROGRESS]: '#eff6ff',
+  [PROJECT_STATUS.PAUSED]: '#fef3c7',
+  [PROJECT_STATUS.COMPLETED]: '#d1fae5',
+  [PROJECT_STATUS.CANCELLED]: '#fee2e2'
+};

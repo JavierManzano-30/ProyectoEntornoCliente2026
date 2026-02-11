@@ -10,8 +10,16 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error('Missing SUPABASE_URL or SUPABASE_ANON_KEY in environment');
 }
 
+if (process.env.NODE_ENV !== 'production') {
+  const keyPrefix = supabaseKey.startsWith('eyJ') ? 'eyJ' : supabaseKey.slice(0, 4);
+  // eslint-disable-next-line no-console
+  console.log(`[supabase] using key prefix: ${keyPrefix}`);
+}
+
 const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: { persistSession: false }
+  auth: {
+    persistSession: false
+  }
 });
 
 module.exports = supabase;

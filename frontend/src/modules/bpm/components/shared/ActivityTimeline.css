@@ -1,0 +1,151 @@
+.activity-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem 0;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 1rem;
+  position: relative;
+}
+
+.timeline-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.timeline-icon {
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background-color: white;
+}
+
+.timeline-icon-success {
+  color: #10b981;
+}
+
+.timeline-icon-error {
+  color: #ef4444;
+}
+
+.timeline-icon-info {
+  color: #3b82f6;
+}
+
+.timeline-icon-warning {
+  color: #f59e0b;
+}
+
+.timeline-icon-default {
+  color: #9ca3af;
+}
+
+.timeline-line {
+  width: 2px;
+  flex-grow: 1;
+  background-color: #e5e7eb;
+  margin-top: 0.5rem;
+  min-height: 1.5rem;
+}
+
+.timeline-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.timeline-type {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 0.875rem;
+}
+
+.timeline-date {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.timeline-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.timeline-title {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #374151;
+  margin: 0;
+}
+
+.timeline-description {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.timeline-user {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.timeline-user-label {
+  color: #9ca3af;
+}
+
+.timeline-user-name {
+  color: #4b5563;
+  font-weight: 500;
+}
+
+.timeline-meta {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.timeline-meta-label {
+  color: #9ca3af;
+}
+
+.timeline-meta-value {
+  color: #4b5563;
+}
+
+.timeline-comment {
+  background-color: #f9fafb;
+  border-left: 3px solid #e5e7eb;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  margin-top: 0.5rem;
+}
+
+.timeline-comment p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #4b5563;
+  font-style: italic;
+}
+
+.activity-timeline-empty {
+  padding: 2rem;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.875rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+}

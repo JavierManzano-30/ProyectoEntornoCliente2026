@@ -20,6 +20,12 @@ export const API_ENDPOINTS = {
     escalation: '/soporte/escalados',
     dashboard: '/soporte/dashboard',
     stats: '/soporte/estadisticas',
+    reports: '/soporte/reportes',
+    tablones: '/soporte/tablones',
+    categorias: '/soporte/categorias',
+    prioridades: '/soporte/prioridades',
+    notificaciones: '/soporte/notificaciones',
+    config: '/soporte/config',
   },
   // Módulo CRM
   crm: {
@@ -33,5 +39,17 @@ export const API_ENDPOINTS = {
     activityById: (id) => `/crm/actividades/${id}`,
     dashboard: '/crm/dashboard',
     stats: '/crm/estadisticas',
+  },
+  // Módulo BI
+  bi: {
+    kpis: '/bi/kpis',
+    dashboard: '/bi/dashboard',
+    reports: '/bi/reportes',
+    reportById: (id) => `/bi/reportes/${id}`,
+    datasets: '/bi/datasets',
+    datasetById: (id) => `/bi/datasets/${id}`,
+    alerts: '/bi/alertas',
+    metrics: '/bi/metricas',
+    metricById: (id) => `/bi/metricas/${id}`,
   },
 };

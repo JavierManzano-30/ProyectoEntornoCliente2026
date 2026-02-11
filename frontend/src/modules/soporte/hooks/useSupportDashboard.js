@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import soporteService from '../services/soporteService';
+import { useSoporteContext } from '../context/SoporteContext';
 
 export const useSupportDashboard = () => {
+  const { usuario } = useSoporteContext();
   const [dashboardData, setDashboardData] = useState(null);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -13,8 +15,8 @@ export const useSupportDashboard = () => {
       setError(null);
       
       const [dashboard, statistics] = await Promise.all([
-        soporteService.getDashboardData(),
-        soporteService.getStats(),
+        soporteService.getDashboardData(usuario.empresaId),
+        soporteService.getStats({ empresaId: usuario.empresaId }),
       ]);
       
       setDashboardData(dashboard);
@@ -25,7 +27,7 @@ export const useSupportDashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [usuario.empresaId]);
 
   useEffect(() => {
     fetchDashboardData();
