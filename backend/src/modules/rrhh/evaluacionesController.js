@@ -1,7 +1,14 @@
+<<<<<<< Updated upstream:backend/src/modules/rrhh/evaluacionesController.js
 const { pool } = require('../../config/db');
 const { envelopeSuccess, envelopeError } = require('../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../utils/pagination');
 const { validateRequiredFields, isNumber } = require('../../utils/validation');
+=======
+const supabase = require('../../../config/supabase');
+const { envelopeSuccess, envelopeError } = require('../../../utils/envelope');
+const { getPaginationParams, buildPaginationMeta } = require('../../../utils/pagination');
+const { validateRequiredFields, isNumber } = require('../../../utils/validation');
+>>>>>>> Stashed changes:backend/src/modules/rrhh/controllers/evaluacionesController.js
 
 function resolveCompanyId(req) {
   return req.user?.companyId || req.user?.empresaId || req.user?.company_id || null;
@@ -30,39 +37,29 @@ function mapEvaluacion(row) {
 async function listEvaluaciones(req, res, next) {
   try {
     const { page, limit, offset } = getPaginationParams(req.query);
-    const filters = [];
-    const values = [];
     const tokenCompanyId = resolveCompanyId(req);
 
+    let query = supabase
+      .from('hr_evaluations')
+      .select('*', { count: 'exact' })
+      .order('created_at', { ascending: false });
+
     if (tokenCompanyId) {
-      values.push(tokenCompanyId);
-      filters.push(`company_id = $${values.length}`);
+      query = query.eq('company_id', tokenCompanyId);
     } else if (req.query.empresaId) {
-      values.push(req.query.empresaId);
-      filters.push(`company_id = $${values.length}`);
+      query = query.eq('company_id', req.query.empresaId);
     }
     if (req.query.empleadoId) {
-      values.push(req.query.empleadoId);
-      filters.push(`employee_id = $${values.length}`);
+      query = query.eq('employee_id', req.query.empleadoId);
     }
 
-    const whereClause = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
+    const { data: rows, count, error } = await query.range(offset, offset + limit - 1);
+    if (error) {
+      throw error;
+    }
 
-    const countQuery = `SELECT COUNT(*)::int AS total FROM hr_evaluations ${whereClause}`;
-    const countResult = await pool.query(countQuery, values);
-    const totalItems = countResult.rows[0]?.total || 0;
-
-    values.push(limit, offset);
-    const listQuery = `
-      SELECT *
-      FROM hr_evaluations
-      ${whereClause}
-      ORDER BY created_at DESC
-      LIMIT $${values.length - 1} OFFSET $${values.length}
-    `;
-
-    const result = await pool.query(listQuery, values);
-    const data = result.rows.map(mapEvaluacion);
+    const totalItems = count || 0;
+    const data = (rows || []).map(mapEvaluacion);
     const meta = buildPaginationMeta(page, limit, totalItems);
 
     return res.json(envelopeSuccess(data, meta));
@@ -75,19 +72,20 @@ async function getEvaluacion(req, res, next) {
   try {
     const { id } = req.params;
     const tokenCompanyId = resolveCompanyId(req);
-    const values = [id];
-    let query = 'SELECT * FROM hr_evaluations WHERE id = $1';
+    let query = supabase.from('hr_evaluations').select('*').eq('id', id);
     if (tokenCompanyId) {
-      values.push(tokenCompanyId);
-      query += ` AND company_id = $2`;
+      query = query.eq('company_id', tokenCompanyId);
     }
-    const result = await pool.query(query, values);
-    if (!result.rows.length) {
+    const { data: row, error } = await query.maybeSingle();
+    if (error) {
+      throw error;
+    }
+    if (!row) {
       return res
         .status(404)
         .json(envelopeError('RESOURCE_NOT_FOUND', 'Evaluacion no encontrada'));
     }
-    return res.json(envelopeSuccess(mapEvaluacion(result.rows[0])));
+    return res.json(envelopeSuccess(mapEvaluacion(row)));
   } catch (err) {
     return next(err);
   }
@@ -129,23 +127,23 @@ async function createEvaluacion(req, res, next) {
         .json(envelopeError('VALIDATION_ERROR', 'empresaId es obligatorio'));
     }
 
-    const insertQuery = `
-      INSERT INTO hr_evaluations (
-        company_id, employee_id, score, review_date, notes
-      )
-      VALUES ($1, $2, $3, $4, $5)
-      RETURNING *
-    `;
+    const { data: row, error } = await supabase
+      .from('hr_evaluations')
+      .insert({
+        company_id: companyId,
+        employee_id: req.body.empleadoId,
+        score: req.body.puntuacion,
+        review_date: req.body.fechaRevision,
+        notes: req.body.notas || null
+      })
+      .select('*')
+      .single();
 
-    const result = await pool.query(insertQuery, [
-      companyId,
-      req.body.empleadoId,
-      req.body.puntuacion,
-      req.body.fechaRevision,
-      req.body.notas || null
-    ]);
+    if (error) {
+      throw error;
+    }
 
-    return res.status(201).json(envelopeSuccess(mapEvaluacion(result.rows[0])));
+    return res.status(201).json(envelopeSuccess(mapEvaluacion(row)));
   } catch (err) {
     return next(err);
   }

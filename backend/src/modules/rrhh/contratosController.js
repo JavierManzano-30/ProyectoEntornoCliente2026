@@ -27,20 +27,25 @@ function validateDateRange(startDate, endDate) {
 }
 
 async function hasOverlappingActiveContract({ employeeId, startDate, endDate, excludeId }) {
-  const result = await pool.query(
-    `
-      SELECT 1
-      FROM hr_contracts
-      WHERE employee_id = $1
-        AND active = true
-        AND id <> COALESCE($2, '00000000-0000-0000-0000-000000000000')
-        AND start_date <= COALESCE($4, 'infinity'::date)
-        AND COALESCE(end_date, 'infinity'::date) >= $3
-      LIMIT 1
-    `,
-    [employeeId, excludeId || null, startDate, endDate || null]
-  );
-  return result.rows.length > 0;
+  let query = supabase
+    .from('hr_contracts')
+    .select('id', { count: 'exact' })
+    .eq('employee_id', employeeId)
+    .eq('active', true);
+
+  if (excludeId) {
+    query = query.neq('id', excludeId);
+  }
+  if (endDate) {
+    query = query.lte('start_date', endDate);
+  }
+  query = query.or(`end_date.is.null,end_date.gte.${startDate}`);
+
+  const { count, error } = await query.limit(1);
+  if (error) {
+    throw error;
+  }
+  return (count || 0) > 0;
 }
 
 function mapContrato(row) {
@@ -60,43 +65,32 @@ function mapContrato(row) {
 async function listContratos(req, res, next) {
   try {
     const { page, limit, offset } = getPaginationParams(req.query);
-    const filters = [];
-    const values = [];
     const tokenCompanyId = resolveCompanyId(req);
 
+    let query = supabase
+      .from('hr_contracts')
+      .select('*', { count: 'exact' })
+      .order('created_at', { ascending: false });
+
     if (tokenCompanyId) {
-      values.push(tokenCompanyId);
-      filters.push(`company_id = $${values.length}`);
+      query = query.eq('company_id', tokenCompanyId);
     } else if (req.query.empresaId) {
-      values.push(req.query.empresaId);
-      filters.push(`company_id = $${values.length}`);
+      query = query.eq('company_id', req.query.empresaId);
     }
     if (req.query.empleadoId) {
-      values.push(req.query.empleadoId);
-      filters.push(`employee_id = $${values.length}`);
+      query = query.eq('employee_id', req.query.empleadoId);
     }
     if (req.query.activo !== undefined) {
-      values.push(req.query.activo === 'true');
-      filters.push(`active = $${values.length}`);
+      query = query.eq('active', req.query.activo === 'true');
     }
 
-    const whereClause = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
+    const { data: rows, count, error } = await query.range(offset, offset + limit - 1);
+    if (error) {
+      throw error;
+    }
 
-    const countQuery = `SELECT COUNT(*)::int AS total FROM hr_contracts ${whereClause}`;
-    const countResult = await pool.query(countQuery, values);
-    const totalItems = countResult.rows[0]?.total || 0;
-
-    values.push(limit, offset);
-    const listQuery = `
-      SELECT *
-      FROM hr_contracts
-      ${whereClause}
-      ORDER BY created_at DESC
-      LIMIT $${values.length - 1} OFFSET $${values.length}
-    `;
-
-    const result = await pool.query(listQuery, values);
-    const data = result.rows.map(mapContrato);
+    const totalItems = count || 0;
+    const data = (rows || []).map(mapContrato);
     const meta = buildPaginationMeta(page, limit, totalItems);
 
     return res.json(envelopeSuccess(data, meta));
@@ -109,19 +103,20 @@ async function getContrato(req, res, next) {
   try {
     const { id } = req.params;
     const tokenCompanyId = resolveCompanyId(req);
-    const values = [id];
-    let query = 'SELECT * FROM hr_contracts WHERE id = $1';
+    let query = supabase.from('hr_contracts').select('*').eq('id', id);
     if (tokenCompanyId) {
-      values.push(tokenCompanyId);
-      query += ` AND company_id = $2`;
+      query = query.eq('company_id', tokenCompanyId);
     }
-    const result = await pool.query(query, values);
-    if (!result.rows.length) {
+    const { data: row, error } = await query.maybeSingle();
+    if (error) {
+      throw error;
+    }
+    if (!row) {
       return res
         .status(404)
         .json(envelopeError('RESOURCE_NOT_FOUND', 'Contrato no encontrado'));
     }
-    return res.json(envelopeSuccess(mapContrato(result.rows[0])));
+    return res.json(envelopeSuccess(mapContrato(row)));
   } catch (err) {
     return next(err);
   }
@@ -174,25 +169,25 @@ async function createContrato(req, res, next) {
       }
     }
 
-    const insertQuery = `
-      INSERT INTO hr_contracts (
-        company_id, employee_id, start_date, end_date, contract_type, salary, active
-      )
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
-      RETURNING *
-    `;
+    const { data: row, error } = await supabase
+      .from('hr_contracts')
+      .insert({
+        company_id: companyId,
+        employee_id: req.body.empleadoId,
+        start_date: req.body.fechaInicio,
+        end_date: req.body.fechaFin || null,
+        contract_type: req.body.tipoContrato,
+        salary: req.body.salario,
+        active
+      })
+      .select('*')
+      .single();
 
-    const result = await pool.query(insertQuery, [
-      companyId,
-      req.body.empleadoId,
-      req.body.fechaInicio,
-      req.body.fechaFin || null,
-      req.body.tipoContrato,
-      req.body.salario,
-      active
-    ]);
+    if (error) {
+      throw error;
+    }
 
-    return res.status(201).json(envelopeSuccess(mapContrato(result.rows[0])));
+    return res.status(201).json(envelopeSuccess(mapContrato(row)));
   } catch (err) {
     return next(err);
   }
@@ -247,37 +242,31 @@ async function updateContrato(req, res, next) {
       }
     }
 
-    const updateQuery = `
-      UPDATE hr_contracts
-      SET company_id = $1,
-          employee_id = $2,
-          start_date = $3,
-          end_date = $4,
-          contract_type = $5,
-          salary = $6,
-          active = $7
-      WHERE id = $8
-      RETURNING *
-    `;
+    const { data: row, error } = await supabase
+      .from('hr_contracts')
+      .update({
+        company_id: companyId,
+        employee_id: req.body.empleadoId,
+        start_date: req.body.fechaInicio,
+        end_date: req.body.fechaFin || null,
+        contract_type: req.body.tipoContrato,
+        salary: req.body.salario,
+        active
+      })
+      .eq('id', id)
+      .select('*')
+      .single();
 
-    const result = await pool.query(updateQuery, [
-      companyId,
-      req.body.empleadoId,
-      req.body.fechaInicio,
-      req.body.fechaFin || null,
-      req.body.tipoContrato,
-      req.body.salario,
-      active,
-      id
-    ]);
-
-    if (!result.rows.length) {
+    if (error) {
+      throw error;
+    }
+    if (!row) {
       return res
         .status(404)
         .json(envelopeError('RESOURCE_NOT_FOUND', 'Contrato no encontrado'));
     }
 
-    return res.json(envelopeSuccess(mapContrato(result.rows[0])));
+    return res.json(envelopeSuccess(mapContrato(row)));
   } catch (err) {
     return next(err);
   }
@@ -287,29 +276,31 @@ async function deleteContrato(req, res, next) {
   try {
     const { id } = req.params;
     const tokenCompanyId = resolveCompanyId(req);
-    const values = [id];
-    let query = `
-      UPDATE hr_contracts
-      SET active = false,
-          end_date = COALESCE(end_date, CURRENT_DATE)
-      WHERE id = $1
-      RETURNING *
-    `;
+    let lookup = supabase.from('hr_contracts').select('id, end_date').eq('id', id);
     if (tokenCompanyId) {
-      query = `
-        UPDATE hr_contracts
-        SET active = false,
-            end_date = COALESCE(end_date, CURRENT_DATE)
-        WHERE id = $1 AND company_id = $2
-        RETURNING *
-      `;
-      values.push(tokenCompanyId);
+      lookup = lookup.eq('company_id', tokenCompanyId);
     }
-    const result = await pool.query(query, values);
-    if (!result.rowCount) {
+    const { data: existing, error: lookupError } = await lookup.maybeSingle();
+    if (lookupError) {
+      throw lookupError;
+    }
+    if (!existing) {
       return res
         .status(404)
         .json(envelopeError('RESOURCE_NOT_FOUND', 'Contrato no encontrado'));
+    }
+    const today = new Date().toISOString().slice(0, 10);
+    const endDate = existing.end_date || today;
+    let query = supabase
+      .from('hr_contracts')
+      .update({ active: false, end_date: endDate })
+      .eq('id', id);
+    if (tokenCompanyId) {
+      query = query.eq('company_id', tokenCompanyId);
+    }
+    const { error } = await query.select('id');
+    if (error) {
+      throw error;
     }
     return res.status(204).send();
   } catch (err) {

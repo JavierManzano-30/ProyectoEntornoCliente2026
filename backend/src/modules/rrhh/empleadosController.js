@@ -1,7 +1,14 @@
+<<<<<<< Updated upstream:backend/src/modules/rrhh/empleadosController.js
 const { pool } = require('../../config/db');
 const { envelopeSuccess, envelopeError } = require('../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../utils/pagination');
 const { validateRequiredFields } = require('../../utils/validation');
+=======
+const supabase = require('../../../config/supabase');
+const { envelopeSuccess, envelopeError } = require('../../../utils/envelope');
+const { getPaginationParams, buildPaginationMeta } = require('../../../utils/pagination');
+const { validateRequiredFields } = require('../../../utils/validation');
+>>>>>>> Stashed changes:backend/src/modules/rrhh/controllers/empleadosController.js
 
 function resolveCompanyId(req) {
   return req.user?.companyId || req.user?.empresaId || req.user?.company_id || null;
@@ -33,49 +40,38 @@ function mapEmpleado(row) {
 async function listEmpleados(req, res, next) {
   try {
     const { page, limit, offset } = getPaginationParams(req.query);
-    const filters = [];
-    const values = [];
     const tokenCompanyId = resolveCompanyId(req);
 
+    let query = supabase
+      .from('hr_employees')
+      .select('*', { count: 'exact' })
+      .order('created_at', { ascending: false });
+
     if (tokenCompanyId) {
-      values.push(tokenCompanyId);
-      filters.push(`company_id = $${values.length}`);
+      query = query.eq('company_id', tokenCompanyId);
     } else if (req.query.empresaId) {
-      values.push(req.query.empresaId);
-      filters.push(`company_id = $${values.length}`);
+      query = query.eq('company_id', req.query.empresaId);
     }
     if (req.query.departamentoId) {
-      values.push(req.query.departamentoId);
-      filters.push(`department_id = $${values.length}`);
+      query = query.eq('department_id', req.query.departamentoId);
     }
     if (req.query.estado) {
-      values.push(req.query.estado);
-      filters.push(`status = $${values.length}`);
+      query = query.eq('status', req.query.estado);
     }
     if (req.query.search) {
-      values.push(`%${req.query.search}%`);
-      filters.push(
-        `(first_name ILIKE $${values.length} OR last_name ILIKE $${values.length} OR email ILIKE $${values.length})`
+      const search = req.query.search;
+      query = query.or(
+        `first_name.ilike.%${search}%,last_name.ilike.%${search}%,email.ilike.%${search}%`
       );
     }
 
-    const whereClause = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
+    const { data: rows, count, error } = await query.range(offset, offset + limit - 1);
+    if (error) {
+      throw error;
+    }
 
-    const countQuery = `SELECT COUNT(*)::int AS total FROM hr_employees ${whereClause}`;
-    const countResult = await pool.query(countQuery, values);
-    const totalItems = countResult.rows[0]?.total || 0;
-
-    values.push(limit, offset);
-    const listQuery = `
-      SELECT *
-      FROM hr_employees
-      ${whereClause}
-      ORDER BY created_at DESC
-      LIMIT $${values.length - 1} OFFSET $${values.length}
-    `;
-
-    const result = await pool.query(listQuery, values);
-    const data = result.rows.map(mapEmpleado);
+    const totalItems = count || 0;
+    const data = (rows || []).map(mapEmpleado);
     const meta = buildPaginationMeta(page, limit, totalItems);
 
     return res.json(envelopeSuccess(data, meta));
@@ -88,20 +84,21 @@ async function getEmpleado(req, res, next) {
   try {
     const { id } = req.params;
     const tokenCompanyId = resolveCompanyId(req);
-    const values = [id];
-    let query = 'SELECT * FROM hr_employees WHERE id = $1';
+    let query = supabase.from('hr_employees').select('*').eq('id', id);
     if (tokenCompanyId) {
-      values.push(tokenCompanyId);
-      query += ` AND company_id = $2`;
+      query = query.eq('company_id', tokenCompanyId);
     }
-    const result = await pool.query(query, values);
-    if (!result.rows.length) {
+    const { data: row, error } = await query.maybeSingle();
+    if (error) {
+      throw error;
+    }
+    if (!row) {
       return res
         .status(404)
         .json(envelopeError('RESOURCE_NOT_FOUND', 'Empleado no encontrado'));
     }
 
-    return res.json(envelopeSuccess(mapEmpleado(result.rows[0])));
+    return res.json(envelopeSuccess(mapEmpleado(row)));
   } catch (err) {
     return next(err);
   }
@@ -144,18 +141,26 @@ async function createEmpleado(req, res, next) {
       RETURNING *
     `;
 
-    const result = await pool.query(insertQuery, [
-      companyId,
-      req.body.nombre,
-      req.body.apellidos,
-      req.body.email,
-      req.body.estado || 'active',
-      req.body.fechaAlta,
-      req.body.departamentoId,
-      req.body.usuarioId || null
-    ]);
+    const { data: row, error } = await supabase
+      .from('hr_employees')
+      .insert({
+        company_id: companyId,
+        first_name: req.body.nombre,
+        last_name: req.body.apellidos,
+        email: req.body.email,
+        status: req.body.estado || 'active',
+        hire_date: req.body.fechaAlta,
+        department_id: req.body.departamentoId,
+        user_id: req.body.usuarioId || null
+      })
+      .select('*')
+      .single();
 
-    return res.status(201).json(envelopeSuccess(mapEmpleado(result.rows[0])));
+    if (error) {
+      throw error;
+    }
+
+    return res.status(201).json(envelopeSuccess(mapEmpleado(row)));
   } catch (err) {
     return next(err);
   }
@@ -205,25 +210,32 @@ async function updateEmpleado(req, res, next) {
       RETURNING *
     `;
 
-    const result = await pool.query(updateQuery, [
-      companyId,
-      req.body.nombre,
-      req.body.apellidos,
-      req.body.email,
-      req.body.estado || 'active',
-      req.body.fechaAlta,
-      req.body.departamentoId,
-      req.body.usuarioId || null,
-      id
-    ]);
+    const { data: row, error } = await supabase
+      .from('hr_employees')
+      .update({
+        company_id: companyId,
+        first_name: req.body.nombre,
+        last_name: req.body.apellidos,
+        email: req.body.email,
+        status: req.body.estado || 'active',
+        hire_date: req.body.fechaAlta,
+        department_id: req.body.departamentoId,
+        user_id: req.body.usuarioId || null
+      })
+      .eq('id', id)
+      .select('*')
+      .single();
 
-    if (!result.rows.length) {
+    if (error) {
+      throw error;
+    }
+    if (!row) {
       return res
         .status(404)
         .json(envelopeError('RESOURCE_NOT_FOUND', 'Empleado no encontrado'));
     }
 
-    return res.json(envelopeSuccess(mapEmpleado(result.rows[0])));
+    return res.json(envelopeSuccess(mapEmpleado(row)));
   } catch (err) {
     return next(err);
   }
@@ -234,26 +246,18 @@ async function deleteEmpleado(req, res, next) {
   try {
     const { id } = req.params;
     const tokenCompanyId = resolveCompanyId(req);
-    const updateQuery = `
-      UPDATE hr_employees
-      SET status = 'inactive'
-      WHERE id = $1
-      RETURNING *
-    `;
-
-    const values = [id];
-    let query = updateQuery;
+    let query = supabase
+      .from('hr_employees')
+      .update({ status: 'inactive' })
+      .eq('id', id);
     if (tokenCompanyId) {
-      query = `
-        UPDATE hr_employees
-        SET status = 'inactive'
-        WHERE id = $1 AND company_id = $2
-        RETURNING *
-      `;
-      values.push(tokenCompanyId);
+      query = query.eq('company_id', tokenCompanyId);
     }
-    const result = await pool.query(query, values);
-    if (!result.rows.length) {
+    const { data: rows, error } = await query.select('id');
+    if (error) {
+      throw error;
+    }
+    if (!rows || !rows.length) {
       return res
         .status(404)
         .json(envelopeError('RESOURCE_NOT_FOUND', 'Empleado no encontrado'));

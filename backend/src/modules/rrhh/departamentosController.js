@@ -1,7 +1,14 @@
+<<<<<<< Updated upstream:backend/src/modules/rrhh/departamentosController.js
 const { pool } = require('../../config/db');
 const { envelopeSuccess, envelopeError } = require('../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../utils/pagination');
 const { validateRequiredFields } = require('../../utils/validation');
+=======
+const supabase = require('../../../config/supabase');
+const { envelopeSuccess, envelopeError } = require('../../../utils/envelope');
+const { getPaginationParams, buildPaginationMeta } = require('../../../utils/pagination');
+const { validateRequiredFields } = require('../../../utils/validation');
+>>>>>>> Stashed changes:backend/src/modules/rrhh/controllers/departamentosController.js
 
 function resolveCompanyId(req) {
   return req.user?.companyId || req.user?.empresaId || req.user?.company_id || null;
@@ -29,39 +36,29 @@ function mapDepartamento(row) {
 async function listDepartamentos(req, res, next) {
   try {
     const { page, limit, offset } = getPaginationParams(req.query);
-    const filters = [];
-    const values = [];
     const tokenCompanyId = resolveCompanyId(req);
 
+    let query = supabase
+      .from('hr_departments')
+      .select('*', { count: 'exact' })
+      .order('created_at', { ascending: false });
+
     if (tokenCompanyId) {
-      values.push(tokenCompanyId);
-      filters.push(`company_id = $${values.length}`);
+      query = query.eq('company_id', tokenCompanyId);
     } else if (req.query.empresaId) {
-      values.push(req.query.empresaId);
-      filters.push(`company_id = $${values.length}`);
+      query = query.eq('company_id', req.query.empresaId);
     }
     if (req.query.activo !== undefined) {
-      values.push(req.query.activo === 'true');
-      filters.push(`active = $${values.length}`);
+      query = query.eq('active', req.query.activo === 'true');
     }
 
-    const whereClause = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
+    const { data: rows, count, error } = await query.range(offset, offset + limit - 1);
+    if (error) {
+      throw error;
+    }
 
-    const countQuery = `SELECT COUNT(*)::int AS total FROM hr_departments ${whereClause}`;
-    const countResult = await pool.query(countQuery, values);
-    const totalItems = countResult.rows[0]?.total || 0;
-
-    values.push(limit, offset);
-    const listQuery = `
-      SELECT *
-      FROM hr_departments
-      ${whereClause}
-      ORDER BY created_at DESC
-      LIMIT $${values.length - 1} OFFSET $${values.length}
-    `;
-
-    const result = await pool.query(listQuery, values);
-    const data = result.rows.map(mapDepartamento);
+    const totalItems = count || 0;
+    const data = (rows || []).map(mapDepartamento);
     const meta = buildPaginationMeta(page, limit, totalItems);
 
     return res.json(envelopeSuccess(data, meta));
@@ -74,19 +71,20 @@ async function getDepartamento(req, res, next) {
   try {
     const { id } = req.params;
     const tokenCompanyId = resolveCompanyId(req);
-    const values = [id];
-    let query = 'SELECT * FROM hr_departments WHERE id = $1';
+    let query = supabase.from('hr_departments').select('*').eq('id', id);
     if (tokenCompanyId) {
-      values.push(tokenCompanyId);
-      query += ` AND company_id = $2`;
+      query = query.eq('company_id', tokenCompanyId);
     }
-    const result = await pool.query(query, values);
-    if (!result.rows.length) {
+    const { data: row, error } = await query.maybeSingle();
+    if (error) {
+      throw error;
+    }
+    if (!row) {
       return res
         .status(404)
         .json(envelopeError('RESOURCE_NOT_FOUND', 'Departamento no encontrado'));
     }
-    return res.json(envelopeSuccess(mapDepartamento(result.rows[0])));
+    return res.json(envelopeSuccess(mapDepartamento(row)));
   } catch (err) {
     return next(err);
   }
@@ -112,20 +110,22 @@ async function createDepartamento(req, res, next) {
         .json(envelopeError('VALIDATION_ERROR', 'empresaId es obligatorio'));
     }
 
-    const insertQuery = `
-      INSERT INTO hr_departments (company_id, name, parent_department_id, active)
-      VALUES ($1, $2, $3, $4)
-      RETURNING *
-    `;
+    const { data: row, error } = await supabase
+      .from('hr_departments')
+      .insert({
+        company_id: companyId,
+        name: req.body.nombre,
+        parent_department_id: req.body.parentDepartmentId || null,
+        active: req.body.activo !== undefined ? !!req.body.activo : true
+      })
+      .select('*')
+      .single();
 
-    const result = await pool.query(insertQuery, [
-      companyId,
-      req.body.nombre,
-      req.body.parentDepartmentId || null,
-      req.body.activo !== undefined ? !!req.body.activo : true
-    ]);
+    if (error) {
+      throw error;
+    }
 
-    return res.status(201).json(envelopeSuccess(mapDepartamento(result.rows[0])));
+    return res.status(201).json(envelopeSuccess(mapDepartamento(row)));
   } catch (err) {
     return next(err);
   }
@@ -152,31 +152,28 @@ async function updateDepartamento(req, res, next) {
         .json(envelopeError('VALIDATION_ERROR', 'empresaId es obligatorio'));
     }
 
-    const updateQuery = `
-      UPDATE hr_departments
-      SET company_id = $1,
-          name = $2,
-          parent_department_id = $3,
-          active = $4
-      WHERE id = $5
-      RETURNING *
-    `;
+    const { data: row, error } = await supabase
+      .from('hr_departments')
+      .update({
+        company_id: companyId,
+        name: req.body.nombre,
+        parent_department_id: req.body.parentDepartmentId || null,
+        active: req.body.activo !== undefined ? !!req.body.activo : true
+      })
+      .eq('id', id)
+      .select('*')
+      .single();
 
-    const result = await pool.query(updateQuery, [
-      companyId,
-      req.body.nombre,
-      req.body.parentDepartmentId || null,
-      req.body.activo !== undefined ? !!req.body.activo : true,
-      id
-    ]);
-
-    if (!result.rows.length) {
+    if (error) {
+      throw error;
+    }
+    if (!row) {
       return res
         .status(404)
         .json(envelopeError('RESOURCE_NOT_FOUND', 'Departamento no encontrado'));
     }
 
-    return res.json(envelopeSuccess(mapDepartamento(result.rows[0])));
+    return res.json(envelopeSuccess(mapDepartamento(row)));
   } catch (err) {
     return next(err);
   }
@@ -186,14 +183,15 @@ async function deleteDepartamento(req, res, next) {
   try {
     const { id } = req.params;
     const tokenCompanyId = resolveCompanyId(req);
-    const values = [id];
-    let query = 'DELETE FROM hr_departments WHERE id = $1';
+    let query = supabase.from('hr_departments').delete().eq('id', id);
     if (tokenCompanyId) {
-      values.push(tokenCompanyId);
-      query += ' AND company_id = $2';
+      query = query.eq('company_id', tokenCompanyId);
     }
-    const result = await pool.query(query, values);
-    if (!result.rowCount) {
+    const { error, count } = await query.select('id', { count: 'exact' });
+    if (error) {
+      throw error;
+    }
+    if (!count) {
       return res
         .status(404)
         .json(envelopeError('RESOURCE_NOT_FOUND', 'Departamento no encontrado'));

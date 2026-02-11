@@ -1,7 +1,14 @@
+<<<<<<< Updated upstream:backend/src/modules/rrhh/ausenciasController.js
 const { pool } = require('../../config/db');
 const { envelopeSuccess, envelopeError } = require('../../utils/envelope');
 const { getPaginationParams, buildPaginationMeta } = require('../../utils/pagination');
 const { validateRequiredFields } = require('../../utils/validation');
+=======
+const supabase = require('../../../config/supabase');
+const { envelopeSuccess, envelopeError } = require('../../../utils/envelope');
+const { getPaginationParams, buildPaginationMeta } = require('../../../utils/pagination');
+const { validateRequiredFields } = require('../../../utils/validation');
+>>>>>>> Stashed changes:backend/src/modules/rrhh/controllers/ausenciasController.js
 
 function resolveCompanyId(req) {
   return req.user?.companyId || req.user?.empresaId || req.user?.company_id || null;
@@ -27,20 +34,25 @@ function validateDateRange(startDate, endDate) {
 }
 
 async function hasOverlappingAbsence({ employeeId, startDate, endDate, excludeId }) {
-  const result = await pool.query(
-    `
-      SELECT 1
-      FROM hr_absences
-      WHERE employee_id = $1
-        AND status IN ('pending', 'approved')
-        AND id <> COALESCE($2, '00000000-0000-0000-0000-000000000000')
-        AND start_date <= COALESCE($4, 'infinity'::date)
-        AND end_date >= $3
-      LIMIT 1
-    `,
-    [employeeId, excludeId || null, startDate, endDate]
-  );
-  return result.rows.length > 0;
+  let query = supabase
+    .from('hr_absences')
+    .select('id', { count: 'exact' })
+    .eq('employee_id', employeeId)
+    .in('status', ['pending', 'approved']);
+
+  if (excludeId) {
+    query = query.neq('id', excludeId);
+  }
+  if (endDate) {
+    query = query.lte('start_date', endDate);
+  }
+  query = query.gte('end_date', startDate);
+
+  const { count, error } = await query.limit(1);
+  if (error) {
+    throw error;
+  }
+  return (count || 0) > 0;
 }
 
 function mapAusencia(row) {
@@ -60,47 +72,35 @@ function mapAusencia(row) {
 async function listAusencias(req, res, next) {
   try {
     const { page, limit, offset } = getPaginationParams(req.query);
-    const filters = [];
-    const values = [];
     const tokenCompanyId = resolveCompanyId(req);
 
+    let query = supabase
+      .from('hr_absences')
+      .select('*', { count: 'exact' })
+      .order('created_at', { ascending: false });
+
     if (tokenCompanyId) {
-      values.push(tokenCompanyId);
-      filters.push(`company_id = $${values.length}`);
+      query = query.eq('company_id', tokenCompanyId);
     } else if (req.query.empresaId) {
-      values.push(req.query.empresaId);
-      filters.push(`company_id = $${values.length}`);
+      query = query.eq('company_id', req.query.empresaId);
     }
     if (req.query.empleadoId) {
-      values.push(req.query.empleadoId);
-      filters.push(`employee_id = $${values.length}`);
+      query = query.eq('employee_id', req.query.empleadoId);
     }
     if (req.query.estado) {
-      values.push(req.query.estado);
-      filters.push(`status = $${values.length}`);
+      query = query.eq('status', req.query.estado);
     }
     if (req.query.tipo) {
-      values.push(req.query.tipo);
-      filters.push(`type = $${values.length}`);
+      query = query.eq('type', req.query.tipo);
     }
 
-    const whereClause = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
+    const { data: rows, count, error } = await query.range(offset, offset + limit - 1);
+    if (error) {
+      throw error;
+    }
 
-    const countQuery = `SELECT COUNT(*)::int AS total FROM hr_absences ${whereClause}`;
-    const countResult = await pool.query(countQuery, values);
-    const totalItems = countResult.rows[0]?.total || 0;
-
-    values.push(limit, offset);
-    const listQuery = `
-      SELECT *
-      FROM hr_absences
-      ${whereClause}
-      ORDER BY created_at DESC
-      LIMIT $${values.length - 1} OFFSET $${values.length}
-    `;
-
-    const result = await pool.query(listQuery, values);
-    const data = result.rows.map(mapAusencia);
+    const totalItems = count || 0;
+    const data = (rows || []).map(mapAusencia);
     const meta = buildPaginationMeta(page, limit, totalItems);
 
     return res.json(envelopeSuccess(data, meta));
@@ -113,19 +113,20 @@ async function getAusencia(req, res, next) {
   try {
     const { id } = req.params;
     const tokenCompanyId = resolveCompanyId(req);
-    const values = [id];
-    let query = 'SELECT * FROM hr_absences WHERE id = $1';
+    let query = supabase.from('hr_absences').select('*').eq('id', id);
     if (tokenCompanyId) {
-      values.push(tokenCompanyId);
-      query += ` AND company_id = $2`;
+      query = query.eq('company_id', tokenCompanyId);
     }
-    const result = await pool.query(query, values);
-    if (!result.rows.length) {
+    const { data: row, error } = await query.maybeSingle();
+    if (error) {
+      throw error;
+    }
+    if (!row) {
       return res
         .status(404)
         .json(envelopeError('RESOURCE_NOT_FOUND', 'Ausencia no encontrada'));
     }
-    return res.json(envelopeSuccess(mapAusencia(result.rows[0])));
+    return res.json(envelopeSuccess(mapAusencia(row)));
   } catch (err) {
     return next(err);
   }
@@ -175,25 +176,25 @@ async function createAusencia(req, res, next) {
         .json(envelopeError('VALIDATION_ERROR', 'Ausencia solapada'));
     }
 
-    const insertQuery = `
-      INSERT INTO hr_absences (
-        company_id, employee_id, type, start_date, end_date, status, notes
-      )
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
-      RETURNING *
-    `;
+    const { data: row, error } = await supabase
+      .from('hr_absences')
+      .insert({
+        company_id: companyId,
+        employee_id: req.body.empleadoId,
+        type: req.body.tipo,
+        start_date: req.body.fechaInicio,
+        end_date: req.body.fechaFin,
+        status: req.body.estado || 'pending',
+        notes: req.body.notas || null
+      })
+      .select('*')
+      .single();
 
-    const result = await pool.query(insertQuery, [
-      companyId,
-      req.body.empleadoId,
-      req.body.tipo,
-      req.body.fechaInicio,
-      req.body.fechaFin,
-      req.body.estado || 'pending',
-      req.body.notas || null
-    ]);
+    if (error) {
+      throw error;
+    }
 
-    return res.status(201).json(envelopeSuccess(mapAusencia(result.rows[0])));
+    return res.status(201).json(envelopeSuccess(mapAusencia(row)));
   } catch (err) {
     return next(err);
   }
@@ -245,37 +246,31 @@ async function updateAusencia(req, res, next) {
         .json(envelopeError('VALIDATION_ERROR', 'Ausencia solapada'));
     }
 
-    const updateQuery = `
-      UPDATE hr_absences
-      SET company_id = $1,
-          employee_id = $2,
-          type = $3,
-          start_date = $4,
-          end_date = $5,
-          status = $6,
-          notes = $7
-      WHERE id = $8
-      RETURNING *
-    `;
+    const { data: row, error } = await supabase
+      .from('hr_absences')
+      .update({
+        company_id: companyId,
+        employee_id: req.body.empleadoId,
+        type: req.body.tipo,
+        start_date: req.body.fechaInicio,
+        end_date: req.body.fechaFin,
+        status: req.body.estado || 'pending',
+        notes: req.body.notas || null
+      })
+      .eq('id', id)
+      .select('*')
+      .single();
 
-    const result = await pool.query(updateQuery, [
-      companyId,
-      req.body.empleadoId,
-      req.body.tipo,
-      req.body.fechaInicio,
-      req.body.fechaFin,
-      req.body.estado || 'pending',
-      req.body.notas || null,
-      id
-    ]);
-
-    if (!result.rows.length) {
+    if (error) {
+      throw error;
+    }
+    if (!row) {
       return res
         .status(404)
         .json(envelopeError('RESOURCE_NOT_FOUND', 'Ausencia no encontrada'));
     }
 
-    return res.json(envelopeSuccess(mapAusencia(result.rows[0])));
+    return res.json(envelopeSuccess(mapAusencia(row)));
   } catch (err) {
     return next(err);
   }
@@ -285,24 +280,18 @@ async function deleteAusencia(req, res, next) {
   try {
     const { id } = req.params;
     const tokenCompanyId = resolveCompanyId(req);
-    const values = [id];
-    let query = `
-      UPDATE hr_absences
-      SET status = 'rejected'
-      WHERE id = $1
-      RETURNING *
-    `;
+    let query = supabase
+      .from('hr_absences')
+      .update({ status: 'rejected' })
+      .eq('id', id);
     if (tokenCompanyId) {
-      query = `
-        UPDATE hr_absences
-        SET status = 'rejected'
-        WHERE id = $1 AND company_id = $2
-        RETURNING *
-      `;
-      values.push(tokenCompanyId);
+      query = query.eq('company_id', tokenCompanyId);
     }
-    const result = await pool.query(query, values);
-    if (!result.rowCount) {
+    const { data: rows, error } = await query.select('id');
+    if (error) {
+      throw error;
+    }
+    if (!rows || !rows.length) {
       return res
         .status(404)
         .json(envelopeError('RESOURCE_NOT_FOUND', 'Ausencia no encontrada'));
@@ -317,19 +306,23 @@ async function aprobarAusencia(req, res, next) {
   try {
     const { id } = req.params;
     const tokenCompanyId = resolveCompanyId(req);
-    const values = ['approved', id];
-    let query = 'UPDATE hr_absences SET status = $1 WHERE id = $2 RETURNING *';
+    let query = supabase
+      .from('hr_absences')
+      .update({ status: 'approved' })
+      .eq('id', id);
     if (tokenCompanyId) {
-      query = 'UPDATE hr_absences SET status = $1 WHERE id = $2 AND company_id = $3 RETURNING *';
-      values.push(tokenCompanyId);
+      query = query.eq('company_id', tokenCompanyId);
     }
-    const result = await pool.query(query, values);
-    if (!result.rows.length) {
+    const { data: row, error } = await query.select('*').single();
+    if (error) {
+      throw error;
+    }
+    if (!row) {
       return res
         .status(404)
         .json(envelopeError('RESOURCE_NOT_FOUND', 'Ausencia no encontrada'));
     }
-    return res.json(envelopeSuccess(mapAusencia(result.rows[0])));
+    return res.json(envelopeSuccess(mapAusencia(row)));
   } catch (err) {
     return next(err);
   }
@@ -339,19 +332,23 @@ async function rechazarAusencia(req, res, next) {
   try {
     const { id } = req.params;
     const tokenCompanyId = resolveCompanyId(req);
-    const values = ['rejected', id];
-    let query = 'UPDATE hr_absences SET status = $1 WHERE id = $2 RETURNING *';
+    let query = supabase
+      .from('hr_absences')
+      .update({ status: 'rejected' })
+      .eq('id', id);
     if (tokenCompanyId) {
-      query = 'UPDATE hr_absences SET status = $1 WHERE id = $2 AND company_id = $3 RETURNING *';
-      values.push(tokenCompanyId);
+      query = query.eq('company_id', tokenCompanyId);
     }
-    const result = await pool.query(query, values);
-    if (!result.rows.length) {
+    const { data: row, error } = await query.select('*').single();
+    if (error) {
+      throw error;
+    }
+    if (!row) {
       return res
         .status(404)
         .json(envelopeError('RESOURCE_NOT_FOUND', 'Ausencia no encontrada'));
     }
-    return res.json(envelopeSuccess(mapAusencia(result.rows[0])));
+    return res.json(envelopeSuccess(mapAusencia(row)));
   } catch (err) {
     return next(err);
   }
