@@ -40,6 +40,113 @@
   gap: 16px;
 }
 
+.department-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: 16px;
+}
+
+.department-modal {
+  width: 100%;
+  max-width: 560px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
+  padding: 20px;
+}
+
+.department-modal h3 {
+  margin: 0 0 16px;
+  color: #0f172a;
+  font-size: 20px;
+}
+
+.department-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.department-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.department-form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.department-form-group input,
+.department-form-group select {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #1e293b;
+  background: #ffffff;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.department-form-group input:focus,
+.department-form-group select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.department-form-group input:disabled,
+.department-form-group select:disabled {
+  background: #f8fafc;
+  color: #64748b;
+}
+
+.department-checkbox-group {
+  margin-top: 2px;
+}
+
+.department-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #334155;
+  cursor: pointer;
+}
+
+.department-checkbox-label input {
+  margin: 0;
+}
+
+.department-field-error {
+  margin: 0;
+  color: #dc2626;
+  font-size: 12px;
+}
+
+.department-form-error {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.department-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+
 .department-node {
   margin-bottom: 8px;
 }
@@ -150,4 +257,35 @@
   .department-node {
     margin-left: 0 !important;
   }
+
+  .department-form-actions {
+    flex-direction: column-reverse;
+  }
+}
+
+body.dark-mode .department-modal {
+  background: #111827;
+  border: 1px solid #374151;
+}
+
+body.dark-mode .department-modal h3 {
+  color: #f3f4f6;
+}
+
+body.dark-mode .department-form-group label,
+body.dark-mode .department-checkbox-label {
+  color: #cbd5e1;
+}
+
+body.dark-mode .department-form-group input,
+body.dark-mode .department-form-group select {
+  background: #1f2937;
+  border-color: #4b5563;
+  color: #e5e7eb;
+}
+
+body.dark-mode .department-form-error {
+  background: #450a0a;
+  border-color: #7f1d1d;
+  color: #fca5a5;
 }

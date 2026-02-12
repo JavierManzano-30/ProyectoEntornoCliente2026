@@ -148,6 +148,17 @@ const buildAbsencePayload = (data = {}) => {
   };
 };
 
+const buildDepartmentPayload = (data = {}) => {
+  const companyId = data.company_id || data.companyId || localStorage.getItem('companyId') || null;
+
+  return {
+    company_id: companyId,
+    name: data.name || '',
+    parent_department_id: data.parent_department_id || data.parentId || null,
+    active: data.active !== undefined ? Boolean(data.active) : true,
+  };
+};
+
 export const getEmployees = async (params = {}) => {
   const [employeesResponse, departmentsResponse, contractsResponse] = await Promise.all([
     api.get(ENDPOINTS.EMPLOYEES, { params }),
@@ -383,12 +394,12 @@ export const getDepartment = async (id) => {
 };
 
 export const createDepartment = async (data) => {
-  const response = await api.post(ENDPOINTS.DEPARTMENTS, data);
+  const response = await api.post(ENDPOINTS.DEPARTMENTS, buildDepartmentPayload(data));
   return mapDepartment(response.data);
 };
 
 export const updateDepartment = async (id, data) => {
-  const response = await api.put(`${ENDPOINTS.DEPARTMENTS}/${id}`, data);
+  const response = await api.put(`${ENDPOINTS.DEPARTMENTS}/${id}`, buildDepartmentPayload(data));
   return mapDepartment(response.data);
 };
 

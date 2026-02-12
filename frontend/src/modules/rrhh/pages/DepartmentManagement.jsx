@@ -8,6 +8,12 @@ import Card from '../../../components/common/Card';
 import { Plus, Edit, Trash2, Users, Building2 } from 'lucide-react';
 import './DepartmentManagement.css';
 
+const INITIAL_FORM = {
+  name: '',
+  parentId: '',
+  active: true,
+};
+
 const DepartmentManagement = () => {
   const {
     departments,
@@ -23,6 +29,90 @@ const DepartmentManagement = () => {
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingDepartment, setEditingDepartment] = useState(null);
+  const [formData, setFormData] = useState(INITIAL_FORM);
+  const [formErrors, setFormErrors] = useState({});
+  const [formErrorMessage, setFormErrorMessage] = useState('');
+
+  const openCreateModal = () => {
+    setEditingDepartment(null);
+    setFormData(INITIAL_FORM);
+    setFormErrors({});
+    setFormErrorMessage('');
+    setShowCreateModal(true);
+  };
+
+  const openEditModal = (department) => {
+    setEditingDepartment(department);
+    setFormData({
+      name: department.name || '',
+      parentId: department.parentId || '',
+      active: department.active !== false,
+    });
+    setFormErrors({});
+    setFormErrorMessage('');
+    setShowCreateModal(true);
+  };
+
+  const closeModal = () => {
+    if (processing) return;
+    setShowCreateModal(false);
+    setEditingDepartment(null);
+    setFormData(INITIAL_FORM);
+    setFormErrors({});
+    setFormErrorMessage('');
+  };
+
+  const handleFormChange = (field) => (event) => {
+    const value = field === 'active' ? event.target.checked : event.target.value;
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormErrors((prev) => ({ ...prev, [field]: '' }));
+    setFormErrorMessage('');
+  };
+
+  const validateForm = () => {
+    const nextErrors = {};
+
+    if (!formData.name.trim()) {
+      nextErrors.name = 'El nombre es obligatorio';
+    }
+
+    if (
+      editingDepartment &&
+      formData.parentId &&
+      String(formData.parentId) === String(editingDepartment.id)
+    ) {
+      nextErrors.parentId = 'Un departamento no puede ser su propio padre';
+    }
+
+    setFormErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const handleSubmitDepartment = async (event) => {
+    event.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    try {
+      const payload = {
+        name: formData.name.trim(),
+        parentId: formData.parentId || null,
+        active: formData.active,
+      };
+
+      if (editingDepartment) {
+        await handleUpdate(editingDepartment.id, payload);
+      } else {
+        await handleCreate(payload);
+      }
+
+      closeModal();
+    } catch (err) {
+      setFormErrorMessage(err.response?.data?.error?.message || err.message || 'No se pudo guardar el departamento');
+    }
+  };
 
   const onDelete = async (id, name) => {
     if (window.confirm(`¿Estás seguro de eliminar el departamento "${name}"?`)) {
@@ -34,9 +124,9 @@ const DepartmentManagement = () => {
     }
   };
 
-  const renderDepartmentNode = (dept, level = 0) => {
+  const renderDepartmentNode = (dept) => {
     return (
-      <div key={dept.id} className="department-node" style={{ marginLeft: `${level * 30}px` }}>
+      <div key={dept.id} className="department-node">
         <Card padding="medium" className="department-card">
           <div className="department-card-content">
             <div className="department-info">
@@ -57,7 +147,7 @@ const DepartmentManagement = () => {
                 variant="secondary"
                 size="small"
                 icon={Edit}
-                onClick={() => setEditingDepartment(dept)}
+                onClick={() => openEditModal(dept)}
               >
                 Editar
               </Button>
@@ -75,7 +165,7 @@ const DepartmentManagement = () => {
         </Card>
         {dept.children && dept.children.length > 0 && (
           <div className="department-children">
-            {dept.children.map(child => renderDepartmentNode(child, level + 1))}
+            {dept.children.map(child => renderDepartmentNode(child))}
           </div>
         )}
       </div>
@@ -94,7 +184,7 @@ const DepartmentManagement = () => {
           <Button 
             variant="primary" 
             icon={Plus}
-            onClick={() => setShowCreateModal(true)}
+            onClick={openCreateModal}
           >
             Nuevo Departamento
           </Button>
@@ -136,7 +226,7 @@ const DepartmentManagement = () => {
               <p>No hay departamentos creados</p>
               <Button 
                 variant="primary" 
-                onClick={() => setShowCreateModal(true)}
+                onClick={openCreateModal}
               >
                 Crear Primer Departamento
               </Button>
@@ -144,6 +234,74 @@ const DepartmentManagement = () => {
           </Card>
         )}
       </div>
+
+      {showCreateModal && (
+        <div className="department-modal-overlay" onClick={closeModal}>
+          <div className="department-modal" onClick={(event) => event.stopPropagation()}>
+            <h3>{editingDepartment ? 'Editar Departamento' : 'Nuevo Departamento'}</h3>
+
+            <form onSubmit={handleSubmitDepartment} className="department-form">
+              {formErrorMessage && (
+                <div className="department-form-error">{formErrorMessage}</div>
+              )}
+
+              <div className="department-form-group">
+                <label htmlFor="department-name">Nombre *</label>
+                <input
+                  id="department-name"
+                  type="text"
+                  value={formData.name}
+                  onChange={handleFormChange('name')}
+                  disabled={processing}
+                />
+                {formErrors.name && <p className="department-field-error">{formErrors.name}</p>}
+              </div>
+
+              <div className="department-form-group">
+                <label htmlFor="department-parent">Departamento padre</label>
+                <select
+                  id="department-parent"
+                  value={formData.parentId}
+                  onChange={handleFormChange('parentId')}
+                  disabled={processing}
+                >
+                  <option value="">Ninguno</option>
+                  {departments
+                    .filter((department) => !editingDepartment || String(department.id) !== String(editingDepartment.id))
+                    .map((department) => (
+                      <option key={department.id} value={department.id}>
+                        {department.name}
+                      </option>
+                    ))}
+                </select>
+                {formErrors.parentId && <p className="department-field-error">{formErrors.parentId}</p>}
+              </div>
+
+              <div className="department-form-group department-checkbox-group">
+                <label htmlFor="department-active" className="department-checkbox-label">
+                  <input
+                    id="department-active"
+                    type="checkbox"
+                    checked={formData.active}
+                    onChange={handleFormChange('active')}
+                    disabled={processing}
+                  />
+                  <span>Departamento activo</span>
+                </label>
+              </div>
+
+              <div className="department-form-actions">
+                <Button type="button" variant="secondary" onClick={closeModal} disabled={processing}>
+                  Cancelar
+                </Button>
+                <Button type="submit" variant="primary" loading={processing}>
+                  {editingDepartment ? 'Guardar Cambios' : 'Crear Departamento'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
