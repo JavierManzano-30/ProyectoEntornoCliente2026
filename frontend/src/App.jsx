@@ -43,6 +43,7 @@ import CRMDashboard from "./modules/crm/pages/CRMDashboard";
 import CustomerList from "./modules/crm/pages/CustomerList";
 import CustomerForm from "./modules/crm/pages/CustomerForm";
 import LeadList from "./modules/crm/pages/LeadList";
+import LeadForm from "./modules/crm/pages/LeadForm";
 import OpportunityBoard from "./modules/crm/pages/OpportunityBoard";
 import ActivityList from "./modules/crm/pages/ActivityList";
 
@@ -153,6 +154,9 @@ function App() {
               <Route path="clientes/:id" element={<CustomerForm />} />
               <Route path="clientes/:id/editar" element={<CustomerForm />} />
               <Route path="leads" element={<LeadList />} />
+              <Route path="leads/nuevo" element={<LeadForm />} />
+              <Route path="leads/:id" element={<LeadForm />} />
+              <Route path="leads/:id/editar" element={<LeadForm />} />
               <Route path="oportunidades" element={<OpportunityBoard />} />
               <Route path="actividades" element={<ActivityList />} />
             </Route>

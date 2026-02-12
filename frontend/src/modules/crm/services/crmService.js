@@ -58,6 +58,7 @@ const mapLeadFromCustomer = (item = {}) => ({
   valorEstimado: normalizeNumber(item.valorEstimado ?? item.totalPipelineValue),
   email: item.email,
   telefono: item.phone,
+  descripcion: item.notes || '',
   fechaCreacion: item.createdAt,
   fechaActualizacion: item.updatedAt,
 });
