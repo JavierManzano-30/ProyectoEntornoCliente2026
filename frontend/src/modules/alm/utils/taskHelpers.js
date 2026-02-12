@@ -10,7 +10,8 @@ export const filterTasks = (tasks, filters) => {
     if (filters.proyectoId && task.proyectoId !== filters.proyectoId) return false;
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
-      if (!task.titulo.toLowerCase().includes(searchLower) &&
+      const taskTitle = (task.titulo || task.nombre || '').toLowerCase();
+      if (!taskTitle.includes(searchLower) &&
           !task.descripcion?.toLowerCase().includes(searchLower)) {
         return false;
       }

@@ -14,7 +14,7 @@ export const useTasks = (initialFilters = {}) => {
   const fetchTasks = async () => {
     try {
       setLoading(true);
-      const response = await getTasks(filters.proyectoId ? { proyectoId: filters.proyectoId } : {});
+      const response = await getTasks(filters.proyectoId ? { projectId: filters.proyectoId } : {});
       setTasks(response.data || []);
       setError(null);
     } catch (err) {
