@@ -1,0 +1,116 @@
+.task-form-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.task-form-submit-error {
+  margin-bottom: 16px;
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.task-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.task-form-full-width {
+  grid-column: 1 / -1;
+}
+
+.task-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.task-form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.task-form-group input,
+.task-form-group select,
+.task-form-group textarea {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #1e293b;
+  background: #ffffff;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-family: inherit;
+}
+
+.task-form-group textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+
+.task-form-group input:focus,
+.task-form-group select:focus,
+.task-form-group textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.task-form-group input:disabled,
+.task-form-group select:disabled,
+.task-form-group textarea:disabled {
+  background: #f8fafc;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.task-form-field-error {
+  margin: 0;
+  color: #dc2626;
+  font-size: 12px;
+}
+
+.task-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+@media (max-width: 768px) {
+  .task-form-page {
+    padding: 16px;
+  }
+
+  .task-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .task-form-actions {
+    flex-direction: column-reverse;
+  }
+}
+
+body.dark-mode .task-form-group label {
+  color: #cbd5e1;
+}
+
+body.dark-mode .task-form-group input,
+body.dark-mode .task-form-group select,
+body.dark-mode .task-form-group textarea {
+  background: #1f2937;
+  border-color: #4b5563;
+  color: #e5e7eb;
+}
+
+body.dark-mode .task-form-actions {
+  border-top-color: #374151;
+}

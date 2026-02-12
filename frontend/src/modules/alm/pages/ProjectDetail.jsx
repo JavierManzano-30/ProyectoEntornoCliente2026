@@ -183,7 +183,11 @@ const ProjectDetail = () => {
           <Card padding="large">
             <div className="tasks-header">
               <h3 className="card-title">Tareas del Proyecto</h3>
-              <Button variant="primary" size="small">
+              <Button
+                variant="primary"
+                size="small"
+                onClick={() => navigate(`/alm/tareas/nueva?proyectoId=${id}`)}
+              >
                 Nueva Tarea
               </Button>
             </div>

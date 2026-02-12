@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTasks } from '../hooks/useTasks';
-import { updateTaskStatus } from '../services/almService';
+import { deleteTask, updateTaskStatus } from '../services/almService';
 import PageHeader from '../../../components/common/PageHeader';
 import LoadingSpinner from '../../../components/common/LoadingSpinner';
 import ErrorMessage from '../../../components/common/ErrorMessage';
@@ -11,7 +12,8 @@ import { Search, Plus, LayoutGrid, List } from 'lucide-react';
 import './TaskManagement.css';
 
 const TaskManagement = () => {
-  const { tasks, loading, error } = useTasks();
+  const navigate = useNavigate();
+  const { tasks, loading, error, refetch } = useTasks();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterPriority, setFilterPriority] = useState('all');
@@ -47,8 +49,20 @@ const TaskManagement = () => {
   const handleStatusChange = async (taskId, newStatus) => {
     try {
       await updateTaskStatus(taskId, newStatus);
+      await refetch();
     } catch (err) {
       console.error('Error updating task status:', err);
+    }
+  };
+
+  const handleDeleteTask = async (taskId) => {
+    if (!window.confirm('¿Seguro que quieres eliminar esta tarea?')) return;
+
+    try {
+      await deleteTask(taskId);
+      await refetch();
+    } catch (err) {
+      console.error('Error deleting task:', err);
     }
   };
 
@@ -119,7 +133,12 @@ const TaskManagement = () => {
               </button>
             </div>
 
-            <Button variant="primary" icon={Plus} size="small">
+            <Button
+              variant="primary"
+              icon={Plus}
+              size="small"
+              onClick={() => navigate('/alm/tareas/nueva')}
+            >
               Nueva Tarea
             </Button>
           </div>
@@ -143,8 +162,8 @@ const TaskManagement = () => {
               key={task.id}
               task={task}
               onStatusChange={handleStatusChange}
-              onEdit={(id) => console.log('Edit task:', id)}
-              onDelete={(id) => console.log('Delete task:', id)}
+              onEdit={(taskId) => navigate(`/alm/tareas/${taskId}/editar`)}
+              onDelete={handleDeleteTask}
             />
           ))}
         </div>
@@ -166,8 +185,8 @@ const TaskManagement = () => {
                     task={task}
                     compact
                     onStatusChange={handleStatusChange}
-                    onEdit={(id) => console.log('Edit task:', id)}
-                    onDelete={(id) => console.log('Delete task:', id)}
+                    onEdit={(taskId) => navigate(`/alm/tareas/${taskId}/editar`)}
+                    onDelete={handleDeleteTask}
                   />
                 ))}
               </div>

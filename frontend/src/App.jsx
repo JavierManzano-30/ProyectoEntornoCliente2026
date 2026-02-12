@@ -54,6 +54,7 @@ import {
   ProjectForm,
   ProjectDetail,
   TaskManagement,
+  TaskForm,
   TimeTracking,
 } from "./modules/alm";
 
@@ -181,6 +182,8 @@ function App() {
               <Route path="proyectos/:id" element={<ProjectDetail />} />
               <Route path="proyectos/:id/editar" element={<ProjectForm />} />
               <Route path="tareas" element={<TaskManagement />} />
+              <Route path="tareas/nueva" element={<TaskForm />} />
+              <Route path="tareas/:id/editar" element={<TaskForm />} />
               <Route path="tiempos" element={<TimeTracking />} />
             </Route>
 
