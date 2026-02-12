@@ -1,178 +1,193 @@
 import api from '../../../lib/axios';
-import { mockProjects, mockTasks, mockTimeEntries, mockALMStats } from '../data/mockData';
 
-// Modo mock para desarrollo sin backend
-const USE_MOCK_DATA = true;
+const mapProject = (row = {}) => ({
+  id: row.id,
+  nombre: row.name,
+  descripcion: row.description,
+  estado: row.status,
+  fechaInicio: row.start_date,
+  fechaFin: row.end_date,
+  presupuesto: Number(row.budget || 0),
+  responsableId: row.responsible_id,
+  clienteId: row.client_id,
+  progreso: Number(row.progress || 0),
+  horasEstimadas: Number(row.estimated_hours || 0),
+  horasTrabajadas: Number(row.spent_hours || 0),
+  createdAt: row.created_at,
+  updatedAt: row.updated_at,
+});
 
-// === PROYECTOS ===
+const mapTask = (row = {}) => ({
+  id: row.id,
+  proyectoId: row.project_id,
+  nombre: row.title || row.name,
+  descripcion: row.description,
+  estado: row.status,
+  prioridad: row.priority,
+  asignadoA: row.assignee_id,
+  fechaInicio: row.start_date,
+  fechaFin: row.due_date,
+  horasEstimadas: Number(row.estimated_hours || 0),
+  horasTrabajadas: Number(row.spent_hours || 0),
+  createdAt: row.created_at,
+  updatedAt: row.updated_at,
+});
+
+const mapTime = (row = {}) => ({
+  id: row.id,
+  proyectoId: row.project_id,
+  tareaId: row.task_id,
+  usuarioId: row.user_id,
+  fecha: row.date,
+  horas: Number(row.hours || 0),
+  descripcion: row.description,
+  createdAt: row.created_at,
+  updatedAt: row.updated_at,
+});
 
 export const getProjects = async (filters = {}) => {
-  if (USE_MOCK_DATA) {
-    return { data: mockProjects };
-  }
-  const response = await api.get('/alm/proyectos', { params: filters });
-  return response.data;
+  const response = await api.get('/alm/projects', { params: filters });
+  return { data: (response.data || []).map(mapProject) };
 };
 
 export const getProject = async (id) => {
-  if (USE_MOCK_DATA) {
-    const project = mockProjects.find(p => p.id === parseInt(id));
-    return { data: project };
-  }
-  const response = await api.get(`/alm/proyectos/${id}`);
-  return response.data;
+  const response = await api.get(`/alm/projects/${id}`);
+  return { data: mapProject(response.data) };
 };
 
 export const createProject = async (projectData) => {
-  if (USE_MOCK_DATA) {
-    const newProject = { id: mockProjects.length + 1, ...projectData };
-    return { data: newProject };
-  }
-  const response = await api.post('/alm/proyectos', projectData);
-  return response.data;
+  const payload = {
+    name: projectData.nombre,
+    description: projectData.descripcion,
+    status: projectData.estado,
+    start_date: projectData.fechaInicio,
+    end_date: projectData.fechaFin,
+    budget: projectData.presupuesto,
+    responsible_id: projectData.responsableId,
+    client_id: projectData.clienteId,
+  };
+  const response = await api.post('/alm/projects', payload);
+  return { data: mapProject(response.data) };
 };
 
 export const updateProject = async (id, projectData) => {
-  if (USE_MOCK_DATA) {
-    return { data: { id, ...projectData } };
-  }
-  const response = await api.put(`/alm/proyectos/${id}`, projectData);
-  return response.data;
+  const payload = {
+    name: projectData.nombre,
+    description: projectData.descripcion,
+    status: projectData.estado,
+    start_date: projectData.fechaInicio,
+    end_date: projectData.fechaFin,
+    budget: projectData.presupuesto,
+    responsible_id: projectData.responsableId,
+    client_id: projectData.clienteId,
+  };
+  const response = await api.put(`/alm/projects/${id}`, payload);
+  return { data: mapProject(response.data) };
 };
 
 export const deleteProject = async (id) => {
-  if (USE_MOCK_DATA) {
-    return { data: { success: true } };
-  }
-  const response = await api.delete(`/alm/proyectos/${id}`);
-  return response.data;
+  await api.delete(`/alm/projects/${id}`);
+  return { data: { success: true } };
 };
 
-// === TAREAS ===
-
 export const getTasks = async (filters = {}) => {
-  if (USE_MOCK_DATA) {
-    let tasks = [...mockTasks];
-    if (filters.proyectoId) {
-      tasks = tasks.filter(t => t.proyectoId === parseInt(filters.proyectoId));
-    }
-    return { data: tasks };
-  }
-  const response = await api.get('/alm/tareas', { params: filters });
-  return response.data;
+  const response = await api.get('/alm/tasks', { params: filters });
+  return { data: (response.data || []).map(mapTask) };
 };
 
 export const getTask = async (id) => {
-  if (USE_MOCK_DATA) {
-    const task = mockTasks.find(t => t.id === parseInt(id));
-    return { data: task };
-  }
-  const response = await api.get(`/alm/tareas/${id}`);
-  return response.data;
+  const response = await api.get(`/alm/tasks/${id}`);
+  return { data: mapTask(response.data) };
 };
 
 export const createTask = async (taskData) => {
-  if (USE_MOCK_DATA) {
-    const newTask = { id: mockTasks.length + 1, ...taskData };
-    return { data: newTask };
-  }
-  const response = await api.post('/alm/tareas', taskData);
-  return response.data;
+  const payload = {
+    project_id: taskData.proyectoId,
+    title: taskData.nombre,
+    description: taskData.descripcion,
+    status: taskData.estado,
+    priority: taskData.prioridad,
+    assignee_id: taskData.asignadoA,
+    due_date: taskData.fechaFin,
+    estimated_hours: taskData.horasEstimadas,
+  };
+  const response = await api.post('/alm/tasks', payload);
+  return { data: mapTask(response.data) };
 };
 
 export const updateTask = async (id, taskData) => {
-  if (USE_MOCK_DATA) {
-    return { data: { id, ...taskData } };
-  }
-  const response = await api.put(`/alm/tareas/${id}`, taskData);
-  return response.data;
+  const payload = {
+    title: taskData.nombre,
+    description: taskData.descripcion,
+    status: taskData.estado,
+    priority: taskData.prioridad,
+    assignee_id: taskData.asignadoA,
+    due_date: taskData.fechaFin,
+    estimated_hours: taskData.horasEstimadas,
+  };
+  const response = await api.put(`/alm/tasks/${id}`, payload);
+  return { data: mapTask(response.data) };
 };
 
 export const deleteTask = async (id) => {
-  if (USE_MOCK_DATA) {
-    return { data: { success: true } };
-  }
-  const response = await api.delete(`/alm/tareas/${id}`);
-  return response.data;
+  await api.delete(`/alm/tasks/${id}`);
+  return { data: { success: true } };
 };
 
 export const updateTaskStatus = async (id, estado) => {
-  if (USE_MOCK_DATA) {
-    return { data: { id, estado } };
-  }
-  const response = await api.patch(`/alm/tareas/${id}/estado`, { estado });
-  return response.data;
+  const response = await api.patch(`/alm/tasks/${id}/status`, { status: estado });
+  return { data: mapTask(response.data) };
 };
 
-// === REGISTRO DE TIEMPOS ===
-
 export const getTimeEntries = async (filters = {}) => {
-  if (USE_MOCK_DATA) {
-    let entries = [...mockTimeEntries];
-    if (filters.proyectoId) {
-      entries = entries.filter(e => e.proyectoId === parseInt(filters.proyectoId));
-    }
-    if (filters.tareaId) {
-      entries = entries.filter(e => e.tareaId === parseInt(filters.tareaId));
-    }
-    return { data: entries };
-  }
-  const response = await api.get('/alm/tiempos', { params: filters });
-  return response.data;
+  const response = await api.get('/alm/times', { params: filters });
+  return { data: (response.data || []).map(mapTime) };
 };
 
 export const createTimeEntry = async (timeData) => {
-  if (USE_MOCK_DATA) {
-    const newEntry = { id: mockTimeEntries.length + 1, ...timeData };
-    return { data: newEntry };
-  }
-  const response = await api.post('/alm/tiempos', timeData);
-  return response.data;
+  const payload = {
+    project_id: timeData.proyectoId,
+    task_id: timeData.tareaId,
+    date: timeData.fecha,
+    hours: timeData.horas,
+    description: timeData.descripcion,
+  };
+  const response = await api.post('/alm/times', payload);
+  return { data: mapTime(response.data) };
 };
 
 export const updateTimeEntry = async (id, timeData) => {
-  if (USE_MOCK_DATA) {
-    return { data: { id, ...timeData } };
-  }
-  const response = await api.put(`/alm/tiempos/${id}`, timeData);
-  return response.data;
+  const payload = {
+    project_id: timeData.proyectoId,
+    task_id: timeData.tareaId,
+    date: timeData.fecha,
+    hours: timeData.horas,
+    description: timeData.descripcion,
+  };
+  const response = await api.put(`/alm/times/${id}`, payload);
+  return { data: mapTime(response.data) };
 };
 
 export const deleteTimeEntry = async (id) => {
-  if (USE_MOCK_DATA) {
-    return { data: { success: true } };
-  }
-  const response = await api.delete(`/alm/tiempos/${id}`);
-  return response.data;
+  await api.delete(`/alm/times/${id}`);
+  return { data: { success: true } };
 };
 
-// === ESTADÍSTICAS ===
-
 export const getALMStats = async () => {
-  if (USE_MOCK_DATA) {
-    return { data: mockALMStats };
-  }
-  const response = await api.get('/alm/estadisticas');
-  return response.data;
+  const projects = (await getProjects()).data;
+  const tasks = (await getTasks()).data;
+
+  return {
+    data: {
+      totalProyectos: projects.length,
+      proyectosActivos: projects.filter((p) => p.estado === 'active' || p.estado === 'en_curso').length,
+      totalTareas: tasks.length,
+      tareasCompletadas: tasks.filter((t) => t.estado === 'completed' || t.estado === 'completada').length,
+    },
+  };
 };
 
 export const getProjectStats = async (projectId) => {
-  if (USE_MOCK_DATA) {
-    const project = mockProjects.find(p => p.id === parseInt(projectId));
-    const tasks = mockTasks.filter(t => t.proyectoId === parseInt(projectId));
-    const timeEntries = mockTimeEntries.filter(e => e.proyectoId === parseInt(projectId));
-    
-    return {
-      data: {
-        proyecto: project,
-        totalTareas: tasks.length,
-        tareasCompletadas: tasks.filter(t => t.estado === 'completada').length,
-        horasTrabajadas: timeEntries.reduce((sum, e) => sum + e.horas, 0),
-        tareas: tasks,
-        registrosTiempo: timeEntries
-      }
-    };
-  }
-  const response = await api.get(`/alm/proyectos/${projectId}/estadisticas`);
-  return response.data;
+  const response = await api.get(`/alm/projects/${projectId}/stats`);
+  return { data: response.data };
 };

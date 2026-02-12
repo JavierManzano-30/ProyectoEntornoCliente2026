@@ -17,7 +17,7 @@ export const useSoporteContext = () => {
 
 export const SoporteProvider = ({ children }) => {
   // Datos del usuario autenticado desde localStorage
-  const [usuario, setUsuario] = useState(() => {
+  const [usuario] = useState(() => {
     const userId = localStorage.getItem('userId');
     const companyId = localStorage.getItem('companyId');
     const roleId = localStorage.getItem('roleId');
@@ -59,23 +59,9 @@ export const SoporteProvider = ({ children }) => {
     }
   };
 
-  // DEMO: Cambiar empresa para pruebas
-  const cambiarEmpresa = (empresaId) => {
-    const empresas = {
-      1: { nombre: 'TechCorp Solutions', departamento: 'TI e Infraestructura', departamentoId: 1 },
-      2: { nombre: 'InnovaDigital S.A.', departamento: 'Soporte Técnico', departamentoId: 5 },
-      3: { nombre: 'GlobalServices Ltd', departamento: 'Operaciones', departamentoId: 8 },
-    };
-    const empresa = empresas[empresaId];
-    if (empresa) {
-      setUsuario({
-        ...usuario,
-        empresaId,
-        empresaNombre: empresa.nombre,
-        departamentoId: empresa.departamentoId,
-        departamentoNombre: empresa.departamento,
-      });
-    }
+  const cambiarEmpresa = () => {
+    // Bloqueado por seguridad: la empresa viene del token JWT.
+    return null;
   };
 
   // Obtener tickets filtrados automáticamente por empresa
@@ -104,7 +90,7 @@ export const SoporteProvider = ({ children }) => {
     empresaConfig,
     loading,
     loadEmpresaConfig,
-    cambiarEmpresa, // DEMO: Para cambiar entre empresas
+    cambiarEmpresa,
     getTickets,
     getSLAs,
     getReports,

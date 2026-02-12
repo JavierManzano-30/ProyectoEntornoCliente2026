@@ -8,13 +8,13 @@ import LoadingSpinner from '../../../components/common/LoadingSpinner';
 import ErrorMessage from '../../../components/common/ErrorMessage';
 import KanbanBoard from '../components/kanban/KanbanBoard';
 import TicketDetailModal from '../components/kanban/TicketDetailModal';
-import { Ticket, Clock, CheckCircle, AlertTriangle, TrendingUp, Plus, LayoutGrid, Layers, Building2, RefreshCw } from 'lucide-react';
+import { Ticket, Clock, CheckCircle, AlertTriangle, TrendingUp, Plus, LayoutGrid, Layers, Building2 } from 'lucide-react';
 import Button from '../../../components/common/Button';
 import './SupportDashboard.css';
 
 const SupportDashboard = () => {
   const { dashboardData, stats, loading, error, refetch } = useSupportDashboard();
-  const { usuario, empresaConfig, tieneMultiplesTablenes, tablonUnico, coloresTema, cambiarEmpresa } = useSoporteContext();
+  const { usuario, empresaConfig, tieneMultiplesTablenes, tablonUnico, coloresTema } = useSoporteContext();
   const navigate = useNavigate();
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [viewMode, setViewMode] = useState('kanban'); // 'kanban' o 'stats'
@@ -30,10 +30,6 @@ const SupportDashboard = () => {
 
   const handleNewTicket = () => {
     navigate('/soporte/tickets/nuevo');
-  };
-
-  const handleChangeEmpresa = (empresaId) => {
-    cambiarEmpresa(Number(empresaId));
   };
 
   if (loading) return <LoadingSpinner fullScreen text="Cargando dashboard..." />;
@@ -91,21 +87,6 @@ const SupportDashboard = () => {
         }
         actions={
           <>
-            {/* DEMO: Selector de empresa para pruebas */}
-            <div className="empresa-selector-demo">
-              <Building2 size={16} />
-              <select
-                value={usuario.empresaId}
-                onChange={(e) => handleChangeEmpresa(e.target.value)}
-                className="empresa-select"
-                title="Cambiar empresa (solo en modo demo)"
-              >
-                <option value={1}>TechCorp Solutions</option>
-                <option value={2}>InnovaDigital S.A.</option>
-                <option value={3}>GlobalServices Ltd</option>
-              </select>
-            </div>
-            
             {tieneMultiplesTablenes && (
               <div className="tablon-selector">
                 <Layers size={18} />

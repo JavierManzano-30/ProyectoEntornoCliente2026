@@ -1,270 +1,376 @@
 import axiosInstance from '../../../lib/axios';
 import { API_ENDPOINTS } from '../../../config/api';
-import { mockCustomers, mockLeads, mockOpportunities, mockActivities, mockDashboardData } from '../data/mockData';
 
-// Modo de demostración (cambiar a false cuando el backend esté listo)
-// TODO: Implementar endpoint /dashboard en backend
-const DEMO_MODE = true;
+const STAGE_FALLBACK_BY_SORT = ['prospecto', 'calificacion', 'propuesta', 'negociacion', 'ganada', 'perdida'];
+
+let stageMapCache = null;
+
+const normalizeNumber = (value) => Number(value || 0);
+
+const resolveStageById = (stageId) => {
+  if (!stageMapCache || !stageId) return 'prospecto';
+  return stageMapCache.get(stageId) || 'prospecto';
+};
+
+const mapCustomer = (item = {}) => ({
+  id: item.id,
+  nombre: item.name,
+  cif: item.taxId || '',
+  estado: item.type === 'customer' ? 'activo' : 'inactivo',
+  responsableId: item.responsibleId,
+  responsable: item.responsibleId ? { id: item.responsibleId, nombre: 'Responsable' } : null,
+  valorTotal: normalizeNumber(item.totalPipelineValue),
+  email: item.email,
+  telefono: item.phone,
+  tipo: item.type,
+  fechaCreacion: item.createdAt,
+  fechaActualizacion: item.updatedAt,
+  ciudad: item.city,
+  direccion: item.address,
+  notas: item.notes,
+});
+
+const mapLeadFromCustomer = (item = {}) => ({
+  id: item.id,
+  nombre: item.name,
+  cif: item.taxId || '',
+  fuente: 'sitio_web',
+  estado: item.type === 'lead' ? 'nuevo' : 'calificado',
+  responsableId: item.responsibleId,
+  responsable: item.responsibleId ? { id: item.responsibleId, nombre: 'Responsable' } : null,
+  valorEstimado: normalizeNumber(item.totalPipelineValue),
+  email: item.email,
+  telefono: item.phone,
+  fechaCreacion: item.createdAt,
+  fechaActualizacion: item.updatedAt,
+});
+
+const mapOpportunity = (item = {}) => ({
+  id: item.id,
+  nombre: item.title,
+  descripcion: item.description,
+  fase: resolveStageById(item.stageId),
+  clienteId: item.clientId,
+  cliente: item.clientId ? { id: item.clientId, nombre: 'Cliente' } : null,
+  valor: normalizeNumber(item.estimatedValue),
+  probabilidad: normalizeNumber(item.probability),
+  fechaCierreEstimada: item.expectedCloseDate,
+  responsableId: item.responsibleId,
+  responsable: item.responsibleId ? { id: item.responsibleId, nombre: 'Responsable' } : null,
+  prioridad: 'media',
+  pipelineId: item.pipelineId,
+  stageId: item.stageId,
+  sortOrder: item.sortOrder,
+  createdAt: item.createdAt,
+  updatedAt: item.updatedAt,
+});
+
+const mapActivity = (item = {}) => ({
+  id: item.id,
+  titulo: item.title,
+  descripcion: item.description,
+  tipo: item.type,
+  estado: item.isCompleted ? 'completada' : 'pendiente',
+  responsableId: item.responsibleId,
+  responsable: item.responsibleId ? { id: item.responsibleId, nombre: 'Responsable' } : null,
+  fechaProgramada: item.scheduledAt,
+  fechaCompletado: item.completedAt,
+  clienteId: item.clientId,
+  oportunidadId: item.opportunityId,
+  createdAt: item.createdAt,
+  updatedAt: item.updatedAt,
+});
+
+async function ensureStageMap() {
+  if (stageMapCache) return;
+
+  stageMapCache = new Map();
+
+  try {
+    const response = await axiosInstance.get(API_ENDPOINTS.crm.pipelines);
+    const pipelines = Array.isArray(response.data) ? response.data : [];
+    pipelines.forEach((pipeline) => {
+      (pipeline.stages || []).forEach((stage, index) => {
+        const rawName = (stage.name || '').toLowerCase();
+        let normalized = STAGE_FALLBACK_BY_SORT[index] || 'prospecto';
+
+        if (rawName.includes('calif')) normalized = 'calificacion';
+        if (rawName.includes('propu')) normalized = 'propuesta';
+        if (rawName.includes('negoc')) normalized = 'negociacion';
+        if (rawName.includes('won') || rawName.includes('ganad')) normalized = 'ganada';
+        if (rawName.includes('lost') || rawName.includes('perdid')) normalized = 'perdida';
+
+        stageMapCache.set(stage.id, normalized);
+      });
+    });
+  } catch {
+    // Fallback sin bloquear la UI.
+  }
+}
 
 class CRMService {
-  // ============ CLIENTES ============
-  
   async getCustomers(params = {}) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      return mockCustomers.filter(c => c.tipo === 'cliente');
-    }
     const response = await axiosInstance.get(API_ENDPOINTS.crm.customers, { params });
-    return response.data;
+    const items = Array.isArray(response.data) ? response.data : [];
+    return items.map(mapCustomer);
   }
 
   async getCustomerById(id) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      const customer = mockCustomers.find(c => c.id === parseInt(id));
-      if (!customer) throw new Error('Cliente no encontrado');
-      return customer;
-    }
     const response = await axiosInstance.get(API_ENDPOINTS.crm.customerById(id));
-    return response.data;
+    return mapCustomer(response.data);
   }
 
   async createCustomer(customerData) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      return { ...customerData, id: mockCustomers.length + 1 };
-    }
-    const response = await axiosInstance.post(API_ENDPOINTS.crm.customers, customerData);
-    return response.data;
+    const payload = {
+      name: customerData.nombre,
+      taxId: customerData.cif,
+      email: customerData.email,
+      phone: customerData.telefono,
+      address: customerData.direccion,
+      city: customerData.ciudad,
+      responsibleId: customerData.responsableId,
+      type: customerData.tipo === 'lead' ? 'lead' : 'customer',
+      notes: customerData.notas,
+    };
+    const response = await axiosInstance.post(API_ENDPOINTS.crm.customers, payload);
+    return mapCustomer(response.data);
   }
 
   async updateCustomer(id, customerData) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      const customer = mockCustomers.find(c => c.id === parseInt(id));
-      return { ...customer, ...customerData };
-    }
-    const response = await axiosInstance.put(API_ENDPOINTS.crm.customerById(id), customerData);
-    return response.data;
+    const payload = {
+      name: customerData.nombre,
+      taxId: customerData.cif,
+      email: customerData.email,
+      phone: customerData.telefono,
+      address: customerData.direccion,
+      city: customerData.ciudad,
+      responsibleId: customerData.responsableId,
+      type: customerData.tipo === 'lead' ? 'lead' : 'customer',
+      notes: customerData.notas,
+    };
+    const response = await axiosInstance.put(API_ENDPOINTS.crm.customerById(id), payload);
+    return mapCustomer(response.data);
   }
 
   async deleteCustomer(id) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      return { success: true };
-    }
-    const response = await axiosInstance.delete(API_ENDPOINTS.crm.customerById(id));
-    return response.data;
+    await axiosInstance.delete(API_ENDPOINTS.crm.customerById(id));
+    return { success: true };
   }
 
-  // ============ LEADS ============
-  
   async getLeads(params = {}) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      return mockLeads;
-    }
-    const response = await axiosInstance.get(API_ENDPOINTS.crm.leads, { params });
-    return response.data;
+    const response = await axiosInstance.get(API_ENDPOINTS.crm.customers, { params: { ...params, type: 'lead' } });
+    const items = Array.isArray(response.data) ? response.data : [];
+    return items.map(mapLeadFromCustomer);
   }
 
   async getLeadById(id) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      const lead = mockLeads.find(l => l.id === parseInt(id));
-      if (!lead) throw new Error('Lead no encontrado');
-      return lead;
-    }
-    const response = await axiosInstance.get(API_ENDPOINTS.crm.leadById(id));
-    return response.data;
+    const response = await axiosInstance.get(API_ENDPOINTS.crm.customerById(id));
+    return mapLeadFromCustomer(response.data);
   }
 
   async createLead(leadData) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      return { ...leadData, id: mockLeads.length + 1 };
-    }
-    const response = await axiosInstance.post(API_ENDPOINTS.crm.leads, leadData);
-    return response.data;
+    const payload = {
+      name: leadData.nombre,
+      taxId: leadData.cif,
+      email: leadData.email,
+      phone: leadData.telefono,
+      responsibleId: leadData.responsableId,
+      type: 'lead',
+      notes: leadData.descripcion,
+    };
+    const response = await axiosInstance.post(API_ENDPOINTS.crm.customers, payload);
+    return mapLeadFromCustomer(response.data);
   }
 
   async updateLead(id, leadData) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      const lead = mockLeads.find(l => l.id === parseInt(id));
-      return { ...lead, ...leadData };
-    }
-    const response = await axiosInstance.put(API_ENDPOINTS.crm.leadById(id), leadData);
-    return response.data;
+    const payload = {
+      name: leadData.nombre,
+      taxId: leadData.cif,
+      email: leadData.email,
+      phone: leadData.telefono,
+      responsibleId: leadData.responsableId,
+      type: 'lead',
+      notes: leadData.descripcion,
+    };
+    const response = await axiosInstance.put(API_ENDPOINTS.crm.customerById(id), payload);
+    return mapLeadFromCustomer(response.data);
   }
 
   async deleteLead(id) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      return { success: true };
-    }
-    const response = await axiosInstance.delete(API_ENDPOINTS.crm.leadById(id));
+    await axiosInstance.delete(API_ENDPOINTS.crm.customerById(id));
+    return { success: true };
+  }
+
+  async convertLead(id) {
+    const response = await axiosInstance.post(`${API_ENDPOINTS.crm.customerById(id)}/convert`);
     return response.data;
   }
 
-  async convertLead(id, conversionData) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      return { 
-        success: true, 
-        customerId: Math.floor(Math.random() * 1000),
-        opportunityId: Math.floor(Math.random() * 1000),
-      };
-    }
-    const response = await axiosInstance.post(`${API_ENDPOINTS.crm.leadById(id)}/convertir`, conversionData);
-    return response.data;
-  }
-
-  // ============ OPORTUNIDADES ============
-  
   async getOpportunities(params = {}) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      return mockOpportunities;
-    }
+    await ensureStageMap();
     const response = await axiosInstance.get(API_ENDPOINTS.crm.opportunities, { params });
-    return response.data;
+    const items = Array.isArray(response.data) ? response.data : [];
+    return items.map(mapOpportunity);
   }
 
   async getOpportunityById(id) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      const opportunity = mockOpportunities.find(o => o.id === parseInt(id));
-      if (!opportunity) throw new Error('Oportunidad no encontrada');
-      return opportunity;
-    }
+    await ensureStageMap();
     const response = await axiosInstance.get(API_ENDPOINTS.crm.opportunityById(id));
-    return response.data;
+    return mapOpportunity(response.data);
   }
 
   async createOpportunity(opportunityData) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      return { ...opportunityData, id: mockOpportunities.length + 1 };
-    }
-    const response = await axiosInstance.post(API_ENDPOINTS.crm.opportunities, opportunityData);
-    return response.data;
+    const payload = {
+      clientId: opportunityData.clienteId,
+      pipelineId: opportunityData.pipelineId,
+      stageId: opportunityData.stageId,
+      title: opportunityData.nombre,
+      description: opportunityData.descripcion,
+      estimatedValue: opportunityData.valor,
+      probability: opportunityData.probabilidad,
+      expectedCloseDate: opportunityData.fechaCierreEstimada,
+      responsibleId: opportunityData.responsableId,
+      sortOrder: opportunityData.sortOrder,
+      currency: 'EUR',
+    };
+    const response = await axiosInstance.post(API_ENDPOINTS.crm.opportunities, payload);
+    return mapOpportunity(response.data);
   }
 
   async updateOpportunity(id, opportunityData) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      const opportunity = mockOpportunities.find(o => o.id === parseInt(id));
-      return { ...opportunity, ...opportunityData };
-    }
-    const response = await axiosInstance.put(API_ENDPOINTS.crm.opportunityById(id), opportunityData);
-    return response.data;
+    const payload = {
+      clientId: opportunityData.clienteId,
+      pipelineId: opportunityData.pipelineId,
+      stageId: opportunityData.stageId,
+      title: opportunityData.nombre,
+      description: opportunityData.descripcion,
+      estimatedValue: opportunityData.valor,
+      probability: opportunityData.probabilidad,
+      expectedCloseDate: opportunityData.fechaCierreEstimada,
+      responsibleId: opportunityData.responsableId,
+      sortOrder: opportunityData.sortOrder,
+      currency: 'EUR',
+    };
+    const response = await axiosInstance.put(API_ENDPOINTS.crm.opportunityById(id), payload);
+    return mapOpportunity(response.data);
   }
 
   async deleteOpportunity(id) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      return { success: true };
-    }
-    const response = await axiosInstance.delete(API_ENDPOINTS.crm.opportunityById(id));
-    return response.data;
+    await axiosInstance.delete(API_ENDPOINTS.crm.opportunityById(id));
+    return { success: true };
   }
 
-  async updateOpportunityStage(id, stage) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      const opportunity = mockOpportunities.find(o => o.id === parseInt(id));
-      return { ...opportunity, fase: stage, fechaActualizacion: new Date().toISOString() };
-    }
-    const response = await axiosInstance.patch(`${API_ENDPOINTS.crm.opportunityById(id)}/fase`, { fase: stage });
-    return response.data;
+  async updateOpportunityStage(id, stageId) {
+    const response = await axiosInstance.patch(`${API_ENDPOINTS.crm.opportunityById(id)}/stage`, { stageId });
+    return mapOpportunity(response.data);
   }
 
-  // ============ ACTIVIDADES ============
-  
   async getActivities(params = {}) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      return mockActivities;
-    }
     const response = await axiosInstance.get(API_ENDPOINTS.crm.activities, { params });
-    return response.data;
+    const items = Array.isArray(response.data) ? response.data : [];
+    return items.map(mapActivity);
   }
 
   async getActivityById(id) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      const activity = mockActivities.find(a => a.id === parseInt(id));
-      if (!activity) throw new Error('Actividad no encontrada');
-      return activity;
-    }
     const response = await axiosInstance.get(API_ENDPOINTS.crm.activityById(id));
-    return response.data;
+    return mapActivity(response.data);
   }
 
   async createActivity(activityData) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      return { ...activityData, id: mockActivities.length + 1 };
-    }
-    const response = await axiosInstance.post(API_ENDPOINTS.crm.activities, activityData);
-    return response.data;
+    const payload = {
+      type: activityData.tipo,
+      title: activityData.titulo,
+      description: activityData.descripcion,
+      scheduledAt: activityData.fechaProgramada,
+      responsibleId: activityData.responsableId,
+      clientId: activityData.clienteId,
+      opportunityId: activityData.oportunidadId,
+      isCompleted: activityData.estado === 'completada',
+    };
+    const response = await axiosInstance.post(API_ENDPOINTS.crm.activities, payload);
+    return mapActivity(response.data);
   }
 
   async updateActivity(id, activityData) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      const activity = mockActivities.find(a => a.id === parseInt(id));
-      return { ...activity, ...activityData };
-    }
-    const response = await axiosInstance.put(API_ENDPOINTS.crm.activityById(id), activityData);
-    return response.data;
+    const payload = {
+      type: activityData.tipo,
+      title: activityData.titulo,
+      description: activityData.descripcion,
+      scheduledAt: activityData.fechaProgramada,
+      responsibleId: activityData.responsableId,
+      clientId: activityData.clienteId,
+      opportunityId: activityData.oportunidadId,
+      isCompleted: activityData.estado === 'completada',
+    };
+    const response = await axiosInstance.put(API_ENDPOINTS.crm.activityById(id), payload);
+    return mapActivity(response.data);
   }
 
   async deleteActivity(id) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      return { success: true };
-    }
-    const response = await axiosInstance.delete(API_ENDPOINTS.crm.activityById(id));
-    return response.data;
+    await axiosInstance.delete(API_ENDPOINTS.crm.activityById(id));
+    return { success: true };
   }
 
   async completeActivity(id) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      const activity = mockActivities.find(a => a.id === parseInt(id));
-      return { ...activity, estado: 'completada', fechaCompletado: new Date().toISOString() };
-    }
-    const response = await axiosInstance.patch(`${API_ENDPOINTS.crm.activityById(id)}/completar`);
-    return response.data;
+    const response = await axiosInstance.patch(`${API_ENDPOINTS.crm.activityById(id)}/complete`);
+    return mapActivity(response.data);
   }
 
-  // ============ DASHBOARD ============
-  
   async getDashboardData(params = {}) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      return mockDashboardData;
-    }
-    const response = await axiosInstance.get(API_ENDPOINTS.crm.dashboard, { params });
-    return response.data;
+    const [customers, leads, opportunities, activities] = await Promise.all([
+      this.getCustomers(params),
+      this.getLeads(params),
+      this.getOpportunities(params),
+      this.getActivities(params),
+    ]);
+
+    const valorPipeline = opportunities.reduce((acc, opp) => {
+      if (opp.fase !== 'ganada' && opp.fase !== 'perdida') return acc + normalizeNumber(opp.valor);
+      return acc;
+    }, 0);
+
+    const ganadas = opportunities.filter((opp) => opp.fase === 'ganada').length;
+    const tasaConversion = opportunities.length ? Math.round((ganadas / opportunities.length) * 100) : 0;
+
+    const pipelineMap = new Map();
+    opportunities.forEach((opp) => {
+      const prev = pipelineMap.get(opp.fase) || { fase: opp.fase, cantidad: 0, valor: 0 };
+      prev.cantidad += 1;
+      prev.valor += normalizeNumber(opp.valor);
+      pipelineMap.set(opp.fase, prev);
+    });
+
+    const pipelinePorFase = Array.from(pipelineMap.values());
+    const topOportunidades = [...opportunities]
+      .sort((a, b) => normalizeNumber(b.valor) - normalizeNumber(a.valor))
+      .slice(0, 3);
+    const actividadesRecientes = [...activities]
+      .sort((a, b) => new Date(b.fechaProgramada || 0) - new Date(a.fechaProgramada || 0))
+      .slice(0, 5);
+
+    return {
+      resumen: {
+        totalClientes: customers.length,
+        totalLeads: leads.length,
+        totalOportunidades: opportunities.length,
+        valorPipeline,
+        tasaConversion,
+      },
+      pipelinePorFase,
+      actividadesRecientes,
+      topOportunidades,
+    };
   }
 
   async getStats(params = {}) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      return {
-        totalCustomers: mockCustomers.length,
-        totalLeads: mockLeads.length,
-        totalOpportunities: mockOpportunities.length,
-        totalActivities: mockActivities.length,
-      };
-    }
-    const response = await axiosInstance.get(API_ENDPOINTS.crm.stats, { params });
-    return response.data;
+    const dashboard = await this.getDashboardData(params);
+    return {
+      totalCustomers: dashboard.resumen.totalClientes,
+      totalLeads: dashboard.resumen.totalLeads,
+      totalOpportunities: dashboard.resumen.totalOportunidades,
+      totalActivities: dashboard.actividadesRecientes.length,
+    };
   }
 }
 
 export default new CRMService();
-

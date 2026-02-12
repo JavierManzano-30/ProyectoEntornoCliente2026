@@ -1,58 +1,58 @@
-// Configuración de la API
+// Configuracion de la API
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api/v1';
 
 export const API_ENDPOINTS = {
-  // Autenticación
+  // Autenticacion
   auth: {
-    login: '/auth/login',
-    logout: '/auth/logout',
-    refresh: '/auth/refresh',
-    me: '/auth/me',
+    login: '/core/auth/login',
+    register: '/core/auth/register',
   },
-  // Módulo Soporte
+
+  // Modulo Core
+  core: {
+    companies: '/core/companies',
+    companyById: (id) => `/core/companies/${id}`,
+  },
+
+  // Modulo Soporte
   soporte: {
     tickets: '/support/tickets',
     ticketById: (id) => `/support/tickets/${id}`,
     conversation: (ticketId) => `/support/tickets/${ticketId}/messages`,
-    attachments: (ticketId) => `/support/tickets/${ticketId}/adjuntos`,
-    audit: (ticketId) => `/support/tickets/${ticketId}/timeline`,
-    sla: '/support/sla',
-    escalation: '/support/escalados',
+    assign: (ticketId) => `/support/tickets/${ticketId}/assign`,
+    close: (ticketId) => `/support/tickets/${ticketId}/close`,
+    timeline: (ticketId) => `/support/tickets/${ticketId}/timeline`,
     dashboard: '/support/dashboard',
     stats: '/support/stats',
     reports: '/support/reportes',
-    tablones: '/support/tablones',
+    sla: '/support/sla',
     categorias: '/support/categorias',
     prioridades: '/support/prioridades',
     notificaciones: '/support/notificaciones',
-    config: '/support/config',
   },
-  // Módulo CRM
+
+  // Modulo CRM
   crm: {
     customers: '/crm/customers',
     customerById: (id) => `/crm/customers/${id}`,
-    leads: '/crm/leads',
-    leadById: (id) => `/crm/leads/${id}`,
+    contacts: '/crm/contacts',
+    contactById: (id) => `/crm/contacts/${id}`,
     opportunities: '/crm/opportunities',
     opportunityById: (id) => `/crm/opportunities/${id}`,
     activities: '/crm/activities',
     activityById: (id) => `/crm/activities/${id}`,
-    dashboard: '/crm/dashboard',
-    stats: '/crm/stats',
-    contacts: '/crm/contacts',
-    contactById: (id) => `/crm/contacts/${id}`,
+    pipelines: '/crm/config/pipelines',
   },
-  // Módulo BI
+
+  // Modulo BI
   bi: {
     kpis: '/bi/kpis',
     dashboard: '/bi/dashboard',
     reports: '/bi/reports',
     reportById: (id) => `/bi/reports/${id}`,
     runReport: (id) => `/bi/reports/${id}/run`,
-    datasets: '/bi/datasets',
-    datasetById: (id) => `/bi/datasets/${id}`,
     alerts: '/bi/alertas',
-    metrics: '/bi/metricas',
-    metricById: (id) => `/bi/metricas/${id}`,
+    datasets: '/bi/datasets',
+    metricById: (id) => `/bi/metrics/${id}`,
   },
 };

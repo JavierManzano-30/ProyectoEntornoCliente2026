@@ -1,242 +1,125 @@
 import api from '../../../lib/axios';
-import { mockUsers, mockCompanies, mockRoles, mockDashboardStats } from '../data/mockData';
+import { API_ENDPOINTS } from '../../../config/api';
 
-// Variable para activar/desactivar modo mock (desarrollo)
-const USE_MOCK_DATA = false;
+const notImplementedPayload = [];
 
-// Función helper para simular delay de API
-const mockDelay = (data) => new Promise(resolve => setTimeout(() => resolve(data), 300));
+const safeUnimplemented = async () => notImplementedPayload;
 
-// Endpoints base
-const ENDPOINTS = {
-  USERS: '/core/usuarios',
-  COMPANIES: '/core/empresas',
-  ROLES: '/core/roles',
-  AUTH: '/core/auth',
-  DASHBOARD: '/core/dashboard',
+export const getUsers = safeUnimplemented;
+export const getUser = async () => null;
+export const createUser = async () => {
+  throw new Error('Endpoint de usuarios no implementado en backend');
+};
+export const updateUser = async () => {
+  throw new Error('Endpoint de usuarios no implementado en backend');
+};
+export const deleteUser = async () => {
+  throw new Error('Endpoint de usuarios no implementado en backend');
+};
+export const activateUser = async () => {
+  throw new Error('Endpoint de usuarios no implementado en backend');
+};
+export const deactivateUser = async () => {
+  throw new Error('Endpoint de usuarios no implementado en backend');
+};
+export const resetPassword = async () => {
+  throw new Error('Endpoint de usuarios no implementado en backend');
 };
 
-// ========== USUARIOS ==========
-
-export const getUsers = async (params = {}) => {
-  if (USE_MOCK_DATA) {
-    return mockDelay(mockUsers);
-  }
-  const response = await api.get(ENDPOINTS.USERS, { params });
-  return response.data;
-};
-
-export const getUser = async (id) => {
-  if (USE_MOCK_DATA) {
-    const user = mockUsers.find(u => u.id === parseInt(id));
-    return mockDelay(user);
-  }
-  const response = await api.get(`${ENDPOINTS.USERS}/${id}`);
-  return response.data;
-};
-
-export const createUser = async (data) => {
-  if (USE_MOCK_DATA) {
-    const newUser = { ...data, id: mockUsers.length + 1, createdAt: new Date().toISOString() };
-    return mockDelay(newUser);
-  }
-  const response = await api.post(ENDPOINTS.USERS, data);
-  return response.data;
-};
-
-export const updateUser = async (id, data) => {
-  if (USE_MOCK_DATA) {
-    const user = mockUsers.find(u => u.id === parseInt(id));
-    return mockDelay({ ...user, ...data });
-  }
-  const response = await api.patch(`${ENDPOINTS.USERS}/${id}`, data);
-  return response.data;
-};
-
-export const deleteUser = async (id) => {
-  if (USE_MOCK_DATA) {
-    return mockDelay({ success: true });
-  }
-  const response = await api.delete(`${ENDPOINTS.USERS}/${id}`);
-  return response.data;
-};
-
-export const activateUser = async (id) => {
-  if (USE_MOCK_DATA) {
-    return mockDelay({ success: true });
-  }
-  const response = await api.patch(`${ENDPOINTS.USERS}/${id}/activate`);
-  return response.data;
-};
-
-export const deactivateUser = async (id) => {
-  if (USE_MOCK_DATA) {
-    return mockDelay({ success: true });
-  }
-  const response = await api.patch(`${ENDPOINTS.USERS}/${id}/deactivate`);
-  return response.data;
-};
-
-export const resetPassword = async (id) => {
-  if (USE_MOCK_DATA) {
-    return mockDelay({ temporaryPassword: 'Temp123456' });
-  }
-  const response = await api.post(`${ENDPOINTS.USERS}/${id}/reset-password`);
-  return response.data;
-};
-
-// ========== EMPRESAS ==========
-
-export const getCompanies = async (params = {}) => {
-  if (USE_MOCK_DATA) {
-    return mockDelay(mockCompanies);
-  }
-  const response = await api.get(ENDPOINTS.COMPANIES, { params });
-  return response.data;
+export const getCompanies = async () => {
+  const response = await api.get(API_ENDPOINTS.core.companies);
+  return Array.isArray(response.data) ? response.data : [];
 };
 
 export const getCompany = async (id) => {
-  if (USE_MOCK_DATA) {
-    const company = mockCompanies.find(c => c.id === id);
-    return mockDelay(company);
-  }
-  const response = await api.get(`${ENDPOINTS.COMPANIES}/${id}`);
+  const response = await api.get(API_ENDPOINTS.core.companyById(id));
   return response.data;
 };
 
 export const createCompany = async (data) => {
-  if (USE_MOCK_DATA) {
-    const newCompany = { ...data, id: `emp_${mockCompanies.length + 1}`, createdAt: new Date().toISOString() };
-    return mockDelay(newCompany);
-  }
-  const response = await api.post(ENDPOINTS.COMPANIES, data);
+  const response = await api.post(API_ENDPOINTS.core.companies, data);
   return response.data;
 };
 
 export const updateCompany = async (id, data) => {
-  if (USE_MOCK_DATA) {
-    const company = mockCompanies.find(c => c.id === id);
-    return mockDelay({ ...company, ...data });
-  }
-  const response = await api.patch(`${ENDPOINTS.COMPANIES}/${id}`, data);
+  const response = await api.put(API_ENDPOINTS.core.companyById(id), data);
   return response.data;
 };
 
 export const deleteCompany = async (id) => {
-  if (USE_MOCK_DATA) {
-    return mockDelay({ success: true });
-  }
-  const response = await api.delete(`${ENDPOINTS.COMPANIES}/${id}`);
-  return response.data;
+  await api.delete(API_ENDPOINTS.core.companyById(id));
+  return { success: true };
 };
 
-export const getCompanyUsers = async (id) => {
-  if (USE_MOCK_DATA) {
-    const users = mockUsers.filter(u => u.empresaId === id);
-    return mockDelay(users);
-  }
-  const response = await api.get(`${ENDPOINTS.COMPANIES}/${id}/usuarios`);
-  return response.data;
+export const getCompanyUsers = safeUnimplemented;
+
+export const getRoles = safeUnimplemented;
+export const getRole = async () => null;
+export const createRole = async () => {
+  throw new Error('Endpoint de roles no implementado en backend');
+};
+export const updateRole = async () => {
+  throw new Error('Endpoint de roles no implementado en backend');
+};
+export const deleteRole = async () => {
+  throw new Error('Endpoint de roles no implementado en backend');
 };
 
-// ========== ROLES ==========
+export const login = async (email, password, companyId = null) => {
+  const response = await api.post(API_ENDPOINTS.auth.login, { email, password, companyId });
+  const data = response.data || {};
 
-export const getRoles = async (params = {}) => {
-  if (USE_MOCK_DATA) {
-    return mockDelay(mockRoles);
-  }
-  const response = await api.get(ENDPOINTS.ROLES, { params });
-  return response.data;
-};
-
-export const getRole = async (id) => {
-  if (USE_MOCK_DATA) {
-    const role = mockRoles.find(r => r.id === parseInt(id));
-    return mockDelay(role);
-  }
-  const response = await api.get(`${ENDPOINTS.ROLES}/${id}`);
-  return response.data;
-};
-
-export const createRole = async (data) => {
-  if (USE_MOCK_DATA) {
-    const newRole = { ...data, id: mockRoles.length + 1, createdAt: new Date().toISOString() };
-    return mockDelay(newRole);
-  }
-  const response = await api.post(ENDPOINTS.ROLES, data);
-  return response.data;
-};
-
-export const updateRole = async (id, data) => {
-  if (USE_MOCK_DATA) {
-    const role = mockRoles.find(r => r.id === parseInt(id));
-    return mockDelay({ ...role, ...data });
-  }
-  const response = await api.patch(`${ENDPOINTS.ROLES}/${id}`, data);
-  return response.data;
-};
-
-export const deleteRole = async (id) => {
-  if (USE_MOCK_DATA) {
-    return mockDelay({ success: true });
-  }
-  const response = await api.delete(`${ENDPOINTS.ROLES}/${id}`);
-  return response.data;
-};
-
-// ========== AUTENTICACIÓN ==========
-
-export const login = async (email, password) => {
-  if (USE_MOCK_DATA) {
-    const user = mockUsers.find(u => u.email === email);
-    if (user) {
-      return mockDelay({ 
-        token: 'mock-jwt-token',
-        user,
-      });
-    }
-    throw new Error('Credenciales inválidas');
-  }
-  const response = await api.post(`${ENDPOINTS.AUTH}/login`, { email, password });
-  return response.data;
+  return {
+    token: data.token,
+    userId: data.userId,
+    companyId: data.companyId,
+    roleId: data.roleId,
+    user: {
+      id: data.userId,
+      companyId: data.companyId,
+      roleId: data.roleId,
+      email,
+    },
+  };
 };
 
 export const logout = async () => {
-  if (USE_MOCK_DATA) {
-    return mockDelay({ success: true });
-  }
-  const response = await api.post(`${ENDPOINTS.AUTH}/logout`);
-  return response.data;
+  localStorage.removeItem('token');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('userId');
+  localStorage.removeItem('companyId');
+  localStorage.removeItem('roleId');
+  localStorage.removeItem('user');
+  return { success: true };
 };
 
 export const getCurrentUser = async () => {
-  if (USE_MOCK_DATA) {
-    return mockDelay(mockUsers[0]); // Retorna admin
-  }
-  const response = await api.get(`${ENDPOINTS.AUTH}/me`);
-  return response.data;
+  const userId = localStorage.getItem('userId');
+  const companyId = localStorage.getItem('companyId');
+  const roleId = localStorage.getItem('roleId');
+
+  return {
+    id: userId,
+    companyId,
+    roleId,
+  };
 };
 
-export const changePassword = async (oldPassword, newPassword) => {
-  if (USE_MOCK_DATA) {
-    return mockDelay({ success: true });
-  }
-  const response = await api.post(`${ENDPOINTS.AUTH}/change-password`, { oldPassword, newPassword });
-  return response.data;
+export const changePassword = async () => {
+  throw new Error('Cambio de contrasena no implementado en backend');
 };
-
-// ========== DASHBOARD ==========
 
 export const getDashboardStats = async () => {
-  if (USE_MOCK_DATA) {
-    return mockDelay(mockDashboardStats);
-  }
-  const response = await api.get(ENDPOINTS.DASHBOARD);
-  return response.data;
+  const companies = await getCompanies();
+  return {
+    totalUsuarios: 0,
+    usuariosActivos: 0,
+    totalEmpresas: companies.length,
+    empresasActivas: companies.filter((c) => c.is_active).length,
+  };
 };
 
 export default {
-  // Usuarios
   getUsers,
   getUser,
   createUser,
@@ -245,28 +128,20 @@ export default {
   activateUser,
   deactivateUser,
   resetPassword,
-  
-  // Empresas
   getCompanies,
   getCompany,
   createCompany,
   updateCompany,
   deleteCompany,
   getCompanyUsers,
-  
-  // Roles
   getRoles,
   getRole,
   createRole,
   updateRole,
   deleteRole,
-  
-  // Autenticación
   login,
   logout,
   getCurrentUser,
   changePassword,
-  
-  // Dashboard
   getDashboardStats,
 };

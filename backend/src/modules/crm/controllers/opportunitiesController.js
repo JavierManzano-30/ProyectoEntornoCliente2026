@@ -15,8 +15,9 @@ function handleServiceError(err, res, next) {
 
 async function listOpportunities(req, res, next) {
   try {
+    const companyId = getAuthCompanyId(req);
     const { page, limit, offset } = getPaginationParams(req.query);
-    const { rows, totalItems } = await opportunitiesService.listOpportunities(req.query, { limit, offset });
+    const { rows, totalItems } = await opportunitiesService.listOpportunities(req.query, { limit, offset }, companyId);
     return res.json(envelopeSuccess(rows, buildPaginationMeta(page, limit, totalItems)));
   } catch (err) {
     return handleServiceError(err, res, next);
@@ -25,7 +26,8 @@ async function listOpportunities(req, res, next) {
 
 async function getOpportunity(req, res, next) {
   try {
-    const data = await opportunitiesService.getOpportunity(req.params.id);
+    const companyId = getAuthCompanyId(req);
+    const data = await opportunitiesService.getOpportunity(req.params.id, companyId);
     return res.json(envelopeSuccess(data));
   } catch (err) {
     return handleServiceError(err, res, next);
@@ -44,7 +46,8 @@ async function createOpportunity(req, res, next) {
 
 async function updateOpportunity(req, res, next) {
   try {
-    const data = await opportunitiesService.updateOpportunity(req.params.id, req.body);
+    const companyId = getAuthCompanyId(req);
+    const data = await opportunitiesService.updateOpportunity(req.params.id, req.body, companyId);
     return res.json(envelopeSuccess(data));
   } catch (err) {
     return handleServiceError(err, res, next);
@@ -53,7 +56,8 @@ async function updateOpportunity(req, res, next) {
 
 async function deleteOpportunity(req, res, next) {
   try {
-    await opportunitiesService.deleteOpportunity(req.params.id);
+    const companyId = getAuthCompanyId(req);
+    await opportunitiesService.deleteOpportunity(req.params.id, companyId);
     return res.status(204).send();
   } catch (err) {
     return handleServiceError(err, res, next);
@@ -62,7 +66,8 @@ async function deleteOpportunity(req, res, next) {
 
 async function updateStage(req, res, next) {
   try {
-    const data = await opportunitiesService.updateStage(req.params.id, req.body);
+    const companyId = getAuthCompanyId(req);
+    const data = await opportunitiesService.updateStage(req.params.id, req.body, companyId);
     return res.json(envelopeSuccess(data));
   } catch (err) {
     return handleServiceError(err, res, next);

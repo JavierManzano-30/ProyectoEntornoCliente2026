@@ -15,8 +15,9 @@ function handleServiceError(err, res, next) {
 
 async function listContacts(req, res, next) {
   try {
+    const companyId = getAuthCompanyId(req);
     const { page, limit, offset } = getPaginationParams(req.query);
-    const { rows, totalItems } = await contactsService.listContacts(req.query, { limit, offset });
+    const { rows, totalItems } = await contactsService.listContacts(req.query, { limit, offset }, companyId);
     return res.json(envelopeSuccess(rows, buildPaginationMeta(page, limit, totalItems)));
   } catch (err) {
     return handleServiceError(err, res, next);
@@ -25,7 +26,8 @@ async function listContacts(req, res, next) {
 
 async function getContact(req, res, next) {
   try {
-    const data = await contactsService.getContact(req.params.id);
+    const companyId = getAuthCompanyId(req);
+    const data = await contactsService.getContact(req.params.id, companyId);
     return res.json(envelopeSuccess(data));
   } catch (err) {
     return handleServiceError(err, res, next);
@@ -44,7 +46,8 @@ async function createContact(req, res, next) {
 
 async function updateContact(req, res, next) {
   try {
-    const data = await contactsService.updateContact(req.params.id, req.body);
+    const companyId = getAuthCompanyId(req);
+    const data = await contactsService.updateContact(req.params.id, req.body, companyId);
     return res.json(envelopeSuccess(data));
   } catch (err) {
     return handleServiceError(err, res, next);
@@ -53,7 +56,8 @@ async function updateContact(req, res, next) {
 
 async function deleteContact(req, res, next) {
   try {
-    await contactsService.deleteContact(req.params.id);
+    const companyId = getAuthCompanyId(req);
+    await contactsService.deleteContact(req.params.id, companyId);
     return res.status(204).send();
   } catch (err) {
     return handleServiceError(err, res, next);

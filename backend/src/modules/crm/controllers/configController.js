@@ -14,7 +14,8 @@ function handleServiceError(err, res, next) {
 
 async function listPipelines(req, res, next) {
   try {
-    const data = await configService.listPipelines(req.query);
+    const companyId = getAuthCompanyId(req);
+    const data = await configService.listPipelines(req.query, companyId);
     return res.json(envelopeSuccess(data));
   } catch (err) {
     return handleServiceError(err, res, next);
@@ -23,7 +24,8 @@ async function listPipelines(req, res, next) {
 
 async function getPipeline(req, res, next) {
   try {
-    const data = await configService.getPipeline(req.params.id);
+    const companyId = getAuthCompanyId(req);
+    const data = await configService.getPipeline(req.params.id, companyId);
     return res.json(envelopeSuccess(data));
   } catch (err) {
     return handleServiceError(err, res, next);
@@ -42,7 +44,8 @@ async function createPipeline(req, res, next) {
 
 async function updatePipeline(req, res, next) {
   try {
-    const data = await configService.updatePipeline(req.params.id, req.body);
+    const companyId = getAuthCompanyId(req);
+    const data = await configService.updatePipeline(req.params.id, req.body, companyId);
     return res.json(envelopeSuccess(data));
   } catch (err) {
     return handleServiceError(err, res, next);
@@ -51,7 +54,8 @@ async function updatePipeline(req, res, next) {
 
 async function deletePipeline(req, res, next) {
   try {
-    await configService.deletePipeline(req.params.id);
+    const companyId = getAuthCompanyId(req);
+    await configService.deletePipeline(req.params.id, companyId);
     return res.status(204).send();
   } catch (err) {
     return handleServiceError(err, res, next);
@@ -70,7 +74,8 @@ async function createStage(req, res, next) {
 
 async function updateStage(req, res, next) {
   try {
-    const data = await configService.updateStage(req.params.id, req.body);
+    const companyId = getAuthCompanyId(req);
+    const data = await configService.updateStage(req.params.id, req.body, companyId);
     return res.json(envelopeSuccess(data));
   } catch (err) {
     return handleServiceError(err, res, next);
@@ -79,7 +84,8 @@ async function updateStage(req, res, next) {
 
 async function deleteStage(req, res, next) {
   try {
-    await configService.deleteStage(req.params.id);
+    const companyId = getAuthCompanyId(req);
+    await configService.deleteStage(req.params.id, companyId);
     return res.status(204).send();
   } catch (err) {
     return handleServiceError(err, res, next);

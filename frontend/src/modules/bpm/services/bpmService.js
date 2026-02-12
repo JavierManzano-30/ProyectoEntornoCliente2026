@@ -5,6 +5,17 @@
 import apiClient from '../../../lib/axios';
 
 const BASE_URL = '/bpm';
+const buildQueryString = (filters = {}) => {
+  const params = new URLSearchParams();
+
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') return;
+    params.append(key, value);
+  });
+
+  const query = params.toString();
+  return query ? `?${query}` : '';
+};
 
 export const bpmService = {
   // ==================== PROCESOS ====================
@@ -13,8 +24,7 @@ export const bpmService = {
    * Obtener todos los procesos
    */
   getAllProcesses: async (filters = {}) => {
-    const params = new URLSearchParams(filters);
-    const response = await apiClient.get(`${BASE_URL}/procesos?${params}`);
+    const response = await apiClient.get(`${BASE_URL}/procesos${buildQueryString(filters)}`);
     return response.data;
   },
 
@@ -72,8 +82,7 @@ export const bpmService = {
    * Obtener todas las instancias
    */
   getAllInstances: async (filters = {}) => {
-    const params = new URLSearchParams(filters);
-    const response = await apiClient.get(`${BASE_URL}/instancias?${params}`);
+    const response = await apiClient.get(`${BASE_URL}/instancias${buildQueryString(filters)}`);
     return response.data;
   },
 
@@ -142,8 +151,7 @@ export const bpmService = {
    * Obtener bandeja de tareas del usuario actual
    */
   getTaskInbox: async (filters = {}) => {
-    const params = new URLSearchParams(filters);
-    const response = await apiClient.get(`${BASE_URL}/tareas/bandeja?${params}`);
+    const response = await apiClient.get(`${BASE_URL}/tareas/bandeja${buildQueryString(filters)}`);
     return response.data;
   },
 
@@ -268,8 +276,7 @@ export const bpmService = {
    * Obtener métricas del dashboard
    */
   getDashboardMetrics: async (filters = {}) => {
-    const params = new URLSearchParams(filters);
-    const response = await apiClient.get(`${BASE_URL}/metricas?${params}`);
+    const response = await apiClient.get(`${BASE_URL}/metricas${buildQueryString(filters)}`);
     return response.data;
   },
 
@@ -277,8 +284,9 @@ export const bpmService = {
    * Obtener métricas de un proceso específico
    */
   getProcessMetrics: async (processId, filters = {}) => {
-    const params = new URLSearchParams(filters);
-    const response = await apiClient.get(`${BASE_URL}/procesos/${processId}/metricas?${params}`);
+    const response = await apiClient.get(
+      `${BASE_URL}/procesos/${processId}/metricas${buildQueryString(filters)}`
+    );
     return response.data;
   }
 };

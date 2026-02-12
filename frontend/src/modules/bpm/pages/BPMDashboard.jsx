@@ -12,9 +12,9 @@ import './BPMDashboard.css';
 
 const BPMDashboard = () => {
   const { metrics, loading: metricsLoading } = useBPMMetrics();
-  const { processes, loading: processesLoading } = useProcesses({ estado: 'published' });
+  const { processes, loading: processesLoading } = useProcesses({ status: 'published' });
   const { tasks, stats: taskStats } = useTaskInbox();
-  const { instances, loading: instancesLoading } = useInstances({ estado: 'active' });
+  const { instances, loading: instancesLoading } = useInstances({ status: 'active' });
 
   const StatCard = ({ icon: Icon, title, value, subtext, color = 'blue' }) => (
     <div className={`stat-card stat-${color}`}>

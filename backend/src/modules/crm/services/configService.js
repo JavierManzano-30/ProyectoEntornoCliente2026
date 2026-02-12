@@ -27,10 +27,10 @@ function mapStage(row) {
   };
 }
 
-async function listPipelines(query) {
+async function listPipelines(query, companyId) {
   let builder = supabase.from('crm_pipelines').select('*');
 
-  if (query.companyId) builder = builder.eq('company_id', query.companyId);
+  if (companyId) builder = builder.eq('company_id', companyId);
   if (query.isActive !== undefined) builder = builder.eq('is_active', query.isActive === 'true');
 
   const { data, error } = await builder.order('created_at', { ascending: false });
@@ -44,6 +44,7 @@ async function listPipelines(query) {
     const { data: stages, error: stagesError } = await supabase
       .from('crm_stages')
       .select('*')
+      .eq('company_id', companyId)
       .eq('pipeline_id', pipeline.id)
       .order('sort_order', { ascending: true });
 
@@ -53,11 +54,12 @@ async function listPipelines(query) {
   return pipelines;
 }
 
-async function getPipeline(id) {
+async function getPipeline(id, companyId) {
   const { data, error } = await supabase
     .from('crm_pipelines')
     .select('*')
     .eq('id', id)
+    .eq('company_id', companyId)
     .single();
 
   if (error || !data) {
@@ -68,6 +70,7 @@ async function getPipeline(id) {
   const { data: stages, error: stagesError } = await supabase
     .from('crm_stages')
     .select('*')
+    .eq('company_id', companyId)
     .eq('pipeline_id', id)
     .order('sort_order', { ascending: true });
 
@@ -108,7 +111,7 @@ async function createPipeline(companyId, body) {
   return pipeline;
 }
 
-async function updatePipeline(id, body) {
+async function updatePipeline(id, body, companyId) {
   validatePipelineBody(body);
   const now = new Date().toISOString();
 
@@ -121,6 +124,7 @@ async function updatePipeline(id, body) {
       updated_at: now
     })
     .eq('id', id)
+    .eq('company_id', companyId)
     .select()
     .single();
 
@@ -130,11 +134,12 @@ async function updatePipeline(id, body) {
   return mapPipeline(data);
 }
 
-async function deletePipeline(id) {
+async function deletePipeline(id, companyId) {
   const { data, error } = await supabase
     .from('crm_pipelines')
     .delete()
     .eq('id', id)
+    .eq('company_id', companyId)
     .select()
     .single();
 
@@ -153,6 +158,17 @@ function validateStageBody(body, requiredFields = ['pipelineId', 'name', 'sortOr
 async function createStage(companyId, body) {
   validateStageBody(body);
   const now = new Date().toISOString();
+
+  const { data: pipeline, error: pipelineError } = await supabase
+    .from('crm_pipelines')
+    .select('id')
+    .eq('id', body.pipelineId)
+    .eq('company_id', companyId)
+    .single();
+
+  if (pipelineError || !pipeline) {
+    throw createServiceError(404, 'RESOURCE_NOT_FOUND', 'Pipeline not found');
+  }
 
   const { data, error } = await supabase
     .from('crm_stages')
@@ -174,7 +190,7 @@ async function createStage(companyId, body) {
   return mapStage(data);
 }
 
-async function updateStage(id, body) {
+async function updateStage(id, body, companyId) {
   validateStageBody(body, ['name', 'sortOrder']);
   const now = new Date().toISOString();
 
@@ -187,6 +203,7 @@ async function updateStage(id, body) {
       updated_at: now
     })
     .eq('id', id)
+    .eq('company_id', companyId)
     .select()
     .single();
 
@@ -196,11 +213,12 @@ async function updateStage(id, body) {
   return mapStage(data);
 }
 
-async function deleteStage(id) {
+async function deleteStage(id, companyId) {
   const { data, error } = await supabase
     .from('crm_stages')
     .delete()
     .eq('id', id)
+    .eq('company_id', companyId)
     .select()
     .single();
 

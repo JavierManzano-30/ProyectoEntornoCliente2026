@@ -18,12 +18,12 @@ function mapContact(row) {
   };
 }
 
-async function listContacts(query, paging) {
+async function listContacts(query, paging, companyId) {
   const { limit, offset } = paging;
   let builder = supabase.from('crm_contacts').select('*', { count: 'exact' });
 
+  if (companyId) builder = builder.eq('company_id', companyId);
   if (query.clientId) builder = builder.eq('client_id', query.clientId);
-  if (query.companyId) builder = builder.eq('company_id', query.companyId);
 
   const { data, error, count } = await builder
     .order('created_at', { ascending: false })
@@ -33,11 +33,12 @@ async function listContacts(query, paging) {
   return { rows: (data || []).map(mapContact), totalItems: count || 0 };
 }
 
-async function getContact(id) {
+async function getContact(id, companyId) {
   const { data, error } = await supabase
     .from('crm_contacts')
     .select('*')
     .eq('id', id)
+    .eq('company_id', companyId)
     .single();
 
   if (error || !data) {
@@ -78,7 +79,7 @@ async function createContact(companyId, body) {
   return mapContact(data);
 }
 
-async function updateContact(id, body) {
+async function updateContact(id, body, companyId) {
   validateContactBody(body);
   const now = new Date().toISOString();
 
@@ -95,6 +96,7 @@ async function updateContact(id, body) {
       updated_at: now
     })
     .eq('id', id)
+    .eq('company_id', companyId)
     .select()
     .single();
 
@@ -104,11 +106,12 @@ async function updateContact(id, body) {
   return mapContact(data);
 }
 
-async function deleteContact(id) {
+async function deleteContact(id, companyId) {
   const { data, error } = await supabase
     .from('crm_contacts')
     .delete()
     .eq('id', id)
+    .eq('company_id', companyId)
     .select('id')
     .single();
 

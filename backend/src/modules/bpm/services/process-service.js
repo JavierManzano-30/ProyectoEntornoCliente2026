@@ -20,21 +20,28 @@ async function listProcesses(companyId, { limit, offset, status, search }) {
 
   const whereClause = `WHERE ${filters.join(' AND ')}`;
 
-  const countResult = await pool.query(
-    `SELECT COUNT(*)::int AS total FROM bpm_processes ${whereClause}`,
-    values
-  );
-  const totalItems = countResult.rows[0]?.total || 0;
+  try {
+    const countResult = await pool.query(
+      `SELECT COUNT(*)::int AS total FROM bpm_processes ${whereClause}`,
+      values
+    );
+    const totalItems = countResult.rows[0]?.total || 0;
 
-  values.push(limit, offset);
-  const { rows } = await pool.query(
-    `SELECT * FROM bpm_processes ${whereClause}
-     ORDER BY created_at DESC
-     LIMIT $${values.length - 1} OFFSET $${values.length}`,
-    values
-  );
+    values.push(limit, offset);
+    const { rows } = await pool.query(
+      `SELECT * FROM bpm_processes ${whereClause}
+       ORDER BY created_at DESC
+       LIMIT $${values.length - 1} OFFSET $${values.length}`,
+      values
+    );
 
-  return { rows, totalItems };
+    return { rows, totalItems };
+  } catch (error) {
+    if (['42P01', '42703', '22P02'].includes(error?.code)) {
+      return { rows: [], totalItems: 0 };
+    }
+    throw error;
+  }
 }
 
 async function getProcessById(companyId, id) {

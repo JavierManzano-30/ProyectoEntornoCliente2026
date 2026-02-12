@@ -36,12 +36,12 @@ function parseSort(sort) {
   return { field: map[field] || 'activity_at', ascending: !desc };
 }
 
-async function listActivities(query, paging) {
+async function listActivities(query, paging, companyId) {
   const { limit, offset } = paging;
   const { field, ascending } = parseSort(query.sort);
 
   let builder = supabase.from('crm_activities').select('*', { count: 'exact' });
-  if (query.companyId) builder = builder.eq('company_id', query.companyId);
+  if (companyId) builder = builder.eq('company_id', companyId);
   if (query.userId) builder = builder.eq('user_id', query.userId);
   if (query.clientId) builder = builder.eq('client_id', query.clientId);
   if (query.opportunityId) builder = builder.eq('opportunity_id', query.opportunityId);
@@ -72,11 +72,12 @@ async function listActivities(query, paging) {
   return { rows: (data || []).map(mapActivity), totalItems: count || 0 };
 }
 
-async function getActivity(id) {
+async function getActivity(id, companyId) {
   const { data, error } = await supabase
     .from('crm_activities')
     .select('*')
     .eq('id', id)
+    .eq('company_id', companyId)
     .single();
 
   if (error || !data) {
@@ -124,7 +125,7 @@ async function createActivity(companyId, body) {
   return mapActivity(data);
 }
 
-async function updateActivity(id, body) {
+async function updateActivity(id, body, companyId) {
   validateActivityBody(body);
   const now = new Date().toISOString();
 
@@ -143,6 +144,7 @@ async function updateActivity(id, body) {
       updated_at: now
     })
     .eq('id', id)
+    .eq('company_id', companyId)
     .select()
     .single();
 
@@ -152,11 +154,12 @@ async function updateActivity(id, body) {
   return mapActivity(data);
 }
 
-async function deleteActivity(id) {
+async function deleteActivity(id, companyId) {
   const { data, error } = await supabase
     .from('crm_activities')
     .delete()
     .eq('id', id)
+    .eq('company_id', companyId)
     .select()
     .single();
 
@@ -165,7 +168,7 @@ async function deleteActivity(id) {
   }
 }
 
-async function markCompleted(id) {
+async function markCompleted(id, companyId) {
   const { data, error } = await supabase
     .from('crm_activities')
     .update({
@@ -173,6 +176,7 @@ async function markCompleted(id) {
       updated_at: new Date().toISOString()
     })
     .eq('id', id)
+    .eq('company_id', companyId)
     .select()
     .single();
 

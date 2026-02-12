@@ -15,8 +15,9 @@ function handleServiceError(err, res, next) {
 
 async function listActivities(req, res, next) {
   try {
+    const companyId = getAuthCompanyId(req);
     const { page, limit, offset } = getPaginationParams(req.query);
-    const { rows, totalItems } = await activitiesService.listActivities(req.query, { limit, offset });
+    const { rows, totalItems } = await activitiesService.listActivities(req.query, { limit, offset }, companyId);
     return res.json(envelopeSuccess(rows, buildPaginationMeta(page, limit, totalItems)));
   } catch (err) {
     return handleServiceError(err, res, next);
@@ -25,7 +26,8 @@ async function listActivities(req, res, next) {
 
 async function getActivity(req, res, next) {
   try {
-    const data = await activitiesService.getActivity(req.params.id);
+    const companyId = getAuthCompanyId(req);
+    const data = await activitiesService.getActivity(req.params.id, companyId);
     return res.json(envelopeSuccess(data));
   } catch (err) {
     return handleServiceError(err, res, next);
@@ -44,7 +46,8 @@ async function createActivity(req, res, next) {
 
 async function updateActivity(req, res, next) {
   try {
-    const data = await activitiesService.updateActivity(req.params.id, req.body);
+    const companyId = getAuthCompanyId(req);
+    const data = await activitiesService.updateActivity(req.params.id, req.body, companyId);
     return res.json(envelopeSuccess(data));
   } catch (err) {
     return handleServiceError(err, res, next);
@@ -53,7 +56,8 @@ async function updateActivity(req, res, next) {
 
 async function deleteActivity(req, res, next) {
   try {
-    await activitiesService.deleteActivity(req.params.id);
+    const companyId = getAuthCompanyId(req);
+    await activitiesService.deleteActivity(req.params.id, companyId);
     return res.status(204).send();
   } catch (err) {
     return handleServiceError(err, res, next);
@@ -62,7 +66,8 @@ async function deleteActivity(req, res, next) {
 
 async function markCompleted(req, res, next) {
   try {
-    const data = await activitiesService.markCompleted(req.params.id);
+    const companyId = getAuthCompanyId(req);
+    const data = await activitiesService.markCompleted(req.params.id, companyId);
     return res.json(envelopeSuccess(data));
   } catch (err) {
     return handleServiceError(err, res, next);

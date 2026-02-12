@@ -2,12 +2,18 @@ const { randomUUID } = require('crypto');
 const supabase = require('../../../config/supabase');
 const { envelopeSuccess, envelopeError } = require('../../../utils/envelope');
 
-// GET /api/v1/core/companies - List all companies (admin only for now)
+// GET /api/v1/core/companies - List current user's company only
 async function listCompanies(req, res, next) {
   try {
+    const companyId = req.user?.companyId || req.user?.company_id;
+    if (!companyId) {
+      return res.status(403).json(envelopeError('FORBIDDEN', 'Missing company context in token'));
+    }
+
     const { data, error } = await supabase
       .from('core_companies')
       .select('*')
+      .eq('id', companyId)
       .order('created_at', { ascending: false });
 
     if (error) {

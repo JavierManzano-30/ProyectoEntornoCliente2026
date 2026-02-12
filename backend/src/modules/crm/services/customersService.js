@@ -35,11 +35,12 @@ function parseSort(sort) {
   return { field: fieldMap[field] || 'created_at', ascending: !desc };
 }
 
-async function listCustomers(query, paging) {
+async function listCustomers(query, paging, companyId) {
   const { limit, offset } = paging;
   const { field, ascending } = parseSort(query.sort);
 
   let builder = supabase.from('crm_clients').select('*', { count: 'exact' });
+  if (companyId) builder = builder.eq('company_id', companyId);
   if (query.type) builder = builder.eq('type', query.type);
   if (query.responsibleId) builder = builder.eq('responsible_id', query.responsibleId);
   if (query.search) {
@@ -54,11 +55,12 @@ async function listCustomers(query, paging) {
   return { rows: (data || []).map(mapCustomer), totalItems: count || 0 };
 }
 
-async function getCustomer(id) {
+async function getCustomer(id, companyId) {
   const { data: customer, error: customerError } = await supabase
     .from('crm_clients')
     .select('*')
     .eq('id', id)
+    .eq('company_id', companyId)
     .single();
 
   if (customerError || !customer) {
@@ -70,6 +72,7 @@ async function getCustomer(id) {
   const { data: contacts } = await supabase
     .from('crm_contacts')
     .select('*')
+    .eq('company_id', companyId)
     .eq('client_id', id)
     .order('created_at', { ascending: false });
 
@@ -86,6 +89,7 @@ async function getCustomer(id) {
   const { data: closedStages } = await supabase
     .from('crm_stages')
     .select('id')
+    .eq('company_id', companyId)
     .in('name', ['Won', 'Lost']);
   const closedStageIds = (closedStages || []).map((stage) => stage.id);
 
@@ -94,6 +98,7 @@ async function getCustomer(id) {
     const { data } = await supabase
       .from('crm_opportunities')
       .select('id, estimated_value')
+      .eq('company_id', companyId)
       .eq('client_id', id)
       .not('stage_id', 'in', `(${closedStageIds.join(',')})`);
     opportunities = data || [];
@@ -101,6 +106,7 @@ async function getCustomer(id) {
     const { data } = await supabase
       .from('crm_opportunities')
       .select('id, estimated_value')
+      .eq('company_id', companyId)
       .eq('client_id', id);
     opportunities = data || [];
   }
@@ -151,7 +157,7 @@ async function createCustomer(companyId, body) {
   return mapCustomer(data);
 }
 
-async function updateCustomer(id, body) {
+async function updateCustomer(id, body, companyId) {
   validateCustomerBody(body);
   const now = new Date().toISOString();
 
@@ -170,6 +176,7 @@ async function updateCustomer(id, body) {
       updated_at: now
     })
     .eq('id', id)
+    .eq('company_id', companyId)
     .select()
     .single();
 
@@ -179,11 +186,12 @@ async function updateCustomer(id, body) {
   return mapCustomer(data);
 }
 
-async function deleteCustomer(id) {
+async function deleteCustomer(id, companyId) {
   const { data, error } = await supabase
     .from('crm_clients')
     .delete()
     .eq('id', id)
+    .eq('company_id', companyId)
     .select('id')
     .single();
 
@@ -192,7 +200,7 @@ async function deleteCustomer(id) {
   }
 }
 
-async function convertCustomer(id) {
+async function convertCustomer(id, companyId) {
   const now = new Date().toISOString();
   const { data, error } = await supabase
     .from('crm_clients')
@@ -201,6 +209,7 @@ async function convertCustomer(id) {
       updated_at: now
     })
     .eq('id', id)
+    .eq('company_id', companyId)
     .eq('type', 'lead')
     .select()
     .single();

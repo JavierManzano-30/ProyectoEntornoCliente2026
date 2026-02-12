@@ -15,8 +15,9 @@ function handleServiceError(err, res, next) {
 
 async function listCustomers(req, res, next) {
   try {
+    const companyId = getAuthCompanyId(req);
     const { page, limit, offset } = getPaginationParams(req.query);
-    const { rows, totalItems } = await customersService.listCustomers(req.query, { limit, offset });
+    const { rows, totalItems } = await customersService.listCustomers(req.query, { limit, offset }, companyId);
     return res.json(envelopeSuccess(rows, buildPaginationMeta(page, limit, totalItems)));
   } catch (err) {
     return handleServiceError(err, res, next);
@@ -25,7 +26,8 @@ async function listCustomers(req, res, next) {
 
 async function getCustomer(req, res, next) {
   try {
-    const data = await customersService.getCustomer(req.params.id);
+    const companyId = getAuthCompanyId(req);
+    const data = await customersService.getCustomer(req.params.id, companyId);
     return res.json(envelopeSuccess(data));
   } catch (err) {
     return handleServiceError(err, res, next);
@@ -44,7 +46,8 @@ async function createCustomer(req, res, next) {
 
 async function updateCustomer(req, res, next) {
   try {
-    const data = await customersService.updateCustomer(req.params.id, req.body);
+    const companyId = getAuthCompanyId(req);
+    const data = await customersService.updateCustomer(req.params.id, req.body, companyId);
     return res.json(envelopeSuccess(data));
   } catch (err) {
     return handleServiceError(err, res, next);
@@ -53,7 +56,8 @@ async function updateCustomer(req, res, next) {
 
 async function deleteCustomer(req, res, next) {
   try {
-    await customersService.deleteCustomer(req.params.id);
+    const companyId = getAuthCompanyId(req);
+    await customersService.deleteCustomer(req.params.id, companyId);
     return res.status(204).send();
   } catch (err) {
     return handleServiceError(err, res, next);
@@ -62,7 +66,8 @@ async function deleteCustomer(req, res, next) {
 
 async function convertCustomer(req, res, next) {
   try {
-    const data = await customersService.convertCustomer(req.params.id);
+    const companyId = getAuthCompanyId(req);
+    const data = await customersService.convertCustomer(req.params.id, companyId);
     return res.json(envelopeSuccess(data));
   } catch (err) {
     return handleServiceError(err, res, next);

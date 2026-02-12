@@ -36,12 +36,12 @@ function parseSort(sort) {
   return { field: map[field] || 'created_at', ascending: !desc };
 }
 
-async function listOpportunities(query, paging) {
+async function listOpportunities(query, paging, companyId) {
   const { limit, offset } = paging;
   const { field, ascending } = parseSort(query.sort);
 
   let builder = supabase.from('crm_opportunities').select('*', { count: 'exact' });
-  if (query.companyId) builder = builder.eq('company_id', query.companyId);
+  if (companyId) builder = builder.eq('company_id', companyId);
   if (query.pipelineId) builder = builder.eq('pipeline_id', query.pipelineId);
   if (query.stageId) builder = builder.eq('stage_id', query.stageId);
   if (query.responsibleId) builder = builder.eq('responsible_id', query.responsibleId);
@@ -58,11 +58,12 @@ async function listOpportunities(query, paging) {
   return { rows: (data || []).map(mapOpportunity), totalItems: count || 0 };
 }
 
-async function getOpportunity(id) {
+async function getOpportunity(id, companyId) {
   const { data, error } = await supabase
     .from('crm_opportunities')
     .select('*')
     .eq('id', id)
+    .eq('company_id', companyId)
     .single();
 
   if (error || !data) {
@@ -109,7 +110,7 @@ async function createOpportunity(companyId, body) {
   return mapOpportunity(data);
 }
 
-async function updateOpportunity(id, body) {
+async function updateOpportunity(id, body, companyId) {
   validateOpportunityBody(body);
   const now = new Date().toISOString();
 
@@ -130,6 +131,7 @@ async function updateOpportunity(id, body) {
       updated_at: now
     })
     .eq('id', id)
+    .eq('company_id', companyId)
     .select()
     .single();
 
@@ -139,11 +141,12 @@ async function updateOpportunity(id, body) {
   return mapOpportunity(data);
 }
 
-async function deleteOpportunity(id) {
+async function deleteOpportunity(id, companyId) {
   const { data, error } = await supabase
     .from('crm_opportunities')
     .delete()
     .eq('id', id)
+    .eq('company_id', companyId)
     .select()
     .single();
 
@@ -152,7 +155,7 @@ async function deleteOpportunity(id) {
   }
 }
 
-async function updateStage(id, body) {
+async function updateStage(id, body, companyId) {
   const requiredErrors = validateRequiredFields(body, ['stageId']);
   if (requiredErrors.length) {
     throw createServiceError(400, 'VALIDATION_ERROR', 'Invalid data', requiredErrors);
@@ -167,6 +170,7 @@ async function updateStage(id, body) {
       updated_at: now
     })
     .eq('id', id)
+    .eq('company_id', companyId)
     .select()
     .single();
 

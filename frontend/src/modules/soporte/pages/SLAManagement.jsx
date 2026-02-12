@@ -16,6 +16,7 @@ import {
   X,
 } from 'lucide-react';
 import { useSoporteContext } from '../context/SoporteContext';
+import soporteService from '../services/soporteService';
 import './SLAManagement.css';
 
 const SLAManagement = () => {
@@ -48,13 +49,21 @@ const SLAManagement = () => {
     loadStats();
   }, [usuario.empresaId]);
 
+  const normalizeSLAList = (data) => {
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.data)) return data.data;
+    if (Array.isArray(data?.items)) return data.items;
+    return [];
+  };
+
   const loadSLAs = async () => {
     try {
       setLoading(true);
       const data = await getSLAs();
-      setSlas(data);
+      setSlas(normalizeSLAList(data));
     } catch (error) {
       console.error('Error al cargar SLAs:', error);
+      setSlas([]);
     } finally {
       setLoading(false);
     }
@@ -151,6 +160,8 @@ const SLAManagement = () => {
     return `priority-${priority}`;
   };
 
+  const safeSlas = Array.isArray(slas) ? slas : [];
+
   if (loading) {
     return (
       <div className="sla-management">
@@ -213,7 +224,7 @@ const SLAManagement = () => {
 
       {/* Lista de SLAs */}
       <div className="sla-list">
-        {slas.length === 0 ? (
+        {safeSlas.length === 0 ? (
           <div className="empty-state">
             <Clock size={48} />
             <h3>No hay SLAs configurados</h3>
@@ -225,7 +236,7 @@ const SLAManagement = () => {
           </div>
         ) : (
           <div className="sla-grid">
-            {slas.map((sla) => (
+            {safeSlas.map((sla) => (
               <div key={sla.id} className={`sla-card ${!sla.activo ? 'inactive' : ''}`}>
                 <div className="sla-card-header">
                   <div className="sla-title">

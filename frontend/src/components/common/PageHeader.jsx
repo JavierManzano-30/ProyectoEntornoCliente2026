@@ -7,6 +7,8 @@ const PageHeader = ({
   actions,
   breadcrumbs,
 }) => {
+  const isPlainSubtitle = typeof subtitle === 'string' || typeof subtitle === 'number';
+
   return (
     <div className="page-header">
       {breadcrumbs && (
@@ -28,7 +30,13 @@ const PageHeader = ({
       <div className="page-header-content">
         <div className="page-header-text">
           <h1 className="page-title">{title}</h1>
-          {subtitle && <p className="page-subtitle">{subtitle}</p>}
+          {subtitle && (
+            isPlainSubtitle ? (
+              <p className="page-subtitle">{subtitle}</p>
+            ) : (
+              <div className="page-subtitle">{subtitle}</div>
+            )
+          )}
         </div>
         {actions && <div className="page-actions">{actions}</div>}
       </div>
