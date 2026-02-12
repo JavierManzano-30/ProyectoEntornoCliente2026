@@ -15,6 +15,7 @@ function mapProcess(row) {
     description: row.description,
     version: row.version,
     status: row.status,
+    activeInstances: row.active_instances ?? 0,
     flowJson: row.flow_json,
     createdBy: row.created_by,
     createdAt: row.created_at,

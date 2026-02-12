@@ -12,6 +12,7 @@ function mapInstance(row) {
     id: row.id,
     companyId: row.company_id,
     processId: row.process_id,
+    processName: row.process_name,
     referenceId: row.reference_id,
     referenceType: row.reference_type,
     almProjectId: row.alm_project_id,

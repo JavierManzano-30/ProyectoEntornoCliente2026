@@ -130,7 +130,11 @@ const DatasetsPage = () => {
               <div className="metric">
                 <Activity size={16} />
                 <span className="metric-label">Registros</span>
-                <span className="metric-value">{dataset.registros?.toLocaleString('es-ES')}</span>
+                <span className="metric-value">
+                  {dataset.registros !== null && dataset.registros !== undefined
+                    ? dataset.registros.toLocaleString('es-ES')
+                    : 'N/D'}
+                </span>
               </div>
             </div>
 

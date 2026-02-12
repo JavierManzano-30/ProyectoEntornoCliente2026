@@ -6,30 +6,47 @@ async function listInstances(companyId, { limit, offset, processId, status }) {
   const values = [];
 
   values.push(companyId);
-  filters.push(`company_id = $${values.length}`);
+  filters.push(`i.company_id = $${values.length}`);
 
   if (processId) {
     values.push(processId);
-    filters.push(`process_id = $${values.length}`);
+    filters.push(`i.process_id = $${values.length}`);
   }
   if (status) {
-    values.push(status);
-    filters.push(`status = $${values.length}`);
+    if (status === 'active') {
+      values.push(['started', 'in_progress']);
+      filters.push(`i.status = ANY($${values.length})`);
+    } else if (status === 'cancelled') {
+      values.push('canceled');
+      filters.push(`i.status = $${values.length}`);
+    } else if (status === 'pending') {
+      values.push('started');
+      filters.push(`i.status = $${values.length}`);
+    } else {
+      values.push(status);
+      filters.push(`i.status = $${values.length}`);
+    }
   }
 
   const whereClause = `WHERE ${filters.join(' AND ')}`;
 
   try {
     const countResult = await pool.query(
-      `SELECT COUNT(*)::int AS total FROM bpm_process_instances ${whereClause}`,
+      `SELECT COUNT(*)::int AS total FROM bpm_process_instances i ${whereClause}`,
       values
     );
     const totalItems = countResult.rows[0]?.total || 0;
 
     values.push(limit, offset);
     const { rows } = await pool.query(
-      `SELECT * FROM bpm_process_instances ${whereClause}
-       ORDER BY created_at DESC
+      `SELECT
+         i.*,
+         p.name AS process_name
+       FROM bpm_process_instances i
+       LEFT JOIN bpm_processes p
+         ON p.id = i.process_id AND p.company_id = i.company_id
+       ${whereClause}
+       ORDER BY i.created_at DESC
        LIMIT $${values.length - 1} OFFSET $${values.length}`,
       values
     );
@@ -45,7 +62,13 @@ async function listInstances(companyId, { limit, offset, processId, status }) {
 
 async function getInstanceById(companyId, id) {
   const { rows } = await pool.query(
-    'SELECT * FROM bpm_process_instances WHERE id = $1 AND company_id = $2',
+    `SELECT
+       i.*,
+       p.name AS process_name
+     FROM bpm_process_instances i
+     LEFT JOIN bpm_processes p
+       ON p.id = i.process_id AND p.company_id = i.company_id
+     WHERE i.id = $1 AND i.company_id = $2`,
     [id, companyId]
   );
   return rows[0] || null;

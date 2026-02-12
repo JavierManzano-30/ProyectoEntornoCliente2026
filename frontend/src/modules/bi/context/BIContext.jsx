@@ -78,14 +78,31 @@ export const BIProvider = ({ children }) => {
     return await biService.getReports(filters);
   };
 
+  const runReport = async (reportId) => {
+    return await biService.runReport(reportId);
+  };
+
+  const exportReport = async (reportId, format) => {
+    return await biService.exportReport(reportId, format);
+  };
+
   // Obtener datasets
   const getDatasets = async () => {
     return await biService.getDatasets();
   };
 
+  const syncDataset = async (datasetId) => {
+    return await biService.syncDataset(datasetId);
+  };
+
   // Obtener alertas
   const getAlerts = async () => {
     return await biService.getAlerts();
+  };
+
+  // Marcar alerta como leída (persistencia local)
+  const markAlertAsRead = async (alertId) => {
+    return await biService.markAlertAsRead(alertId);
   };
 
   const value = {
@@ -95,8 +112,12 @@ export const BIProvider = ({ children }) => {
     getKPIs,
     getDashboardData,
     getReports,
+    runReport,
+    exportReport,
     getDatasets,
+    syncDataset,
     getAlerts,
+    markAlertAsRead,
   };
 
   return <BIContext.Provider value={value}>{children}</BIContext.Provider>;

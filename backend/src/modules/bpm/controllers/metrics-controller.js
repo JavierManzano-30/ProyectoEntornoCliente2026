@@ -28,14 +28,14 @@ async function getMetrics(req, res, next) {
       safeCount(
         `SELECT COUNT(*)::int AS total
          FROM bpm_processes
-         WHERE company_id = $1 AND status = 'published'`,
+         WHERE company_id = $1 AND status = 'active'`,
         [companyId],
         'processes'
       ),
       safeCount(
         `SELECT COUNT(*)::int AS total
          FROM bpm_process_instances
-         WHERE company_id = $1 AND status = 'active'`,
+         WHERE company_id = $1 AND status IN ('started', 'in_progress')`,
         [companyId],
         'instances'
       ),

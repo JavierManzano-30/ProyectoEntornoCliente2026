@@ -40,7 +40,8 @@ async function getKPIs(req, res, next) {
   try {
     const auth = requireAuthContext(req, res);
     if (!auth) return;
-    const data = await biService.getKPIs(auth.companyId);
+    const period = req.query?.periodo || req.query?.period || 'mes';
+    const data = await biService.getKPIs(auth.companyId, period);
     return res.json(envelopeSuccess(data));
   } catch (err) {
     return next(err);
@@ -107,7 +108,8 @@ async function getDashboard(req, res, next) {
   try {
     const auth = requireAuthContext(req, res);
     if (!auth) return;
-    const data = await biService.getDashboard(auth.companyId);
+    const period = req.query?.periodo || req.query?.period || 'mes';
+    const data = await biService.getDashboard(auth.companyId, period);
     return res.json(envelopeSuccess(data));
   } catch (err) {
     return next(err);

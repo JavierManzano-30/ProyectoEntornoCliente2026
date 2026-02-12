@@ -1,36 +1,55 @@
 const { pool } = require('../../../config/db');
 const { generateId } = require('../../../utils/id');
 
+const STATUS_FILTER_MAP = {
+  published: 'active',
+  draft: 'inactive',
+  inactive: 'inactive',
+  active: 'active',
+  archived: 'archived'
+};
+
 async function listProcesses(companyId, { limit, offset, status, search }) {
   const filters = [];
   const values = [];
 
   values.push(companyId);
-  filters.push(`company_id = $${values.length}`);
+  filters.push(`p.company_id = $${values.length}`);
 
   if (status) {
-    values.push(status);
-    filters.push(`status = $${values.length}`);
+    const normalizedStatus = STATUS_FILTER_MAP[status] || status;
+    values.push(normalizedStatus);
+    filters.push(`p.status = $${values.length}`);
   }
 
   if (search) {
     values.push(`%${search}%`);
-    filters.push(`name ILIKE $${values.length}`);
+    filters.push(`p.name ILIKE $${values.length}`);
   }
 
   const whereClause = `WHERE ${filters.join(' AND ')}`;
 
   try {
     const countResult = await pool.query(
-      `SELECT COUNT(*)::int AS total FROM bpm_processes ${whereClause}`,
+      `SELECT COUNT(*)::int AS total FROM bpm_processes p ${whereClause}`,
       values
     );
     const totalItems = countResult.rows[0]?.total || 0;
 
     values.push(limit, offset);
     const { rows } = await pool.query(
-      `SELECT * FROM bpm_processes ${whereClause}
-       ORDER BY created_at DESC
+      `SELECT
+         p.*,
+         COALESCE(ai.active_instances, 0) AS active_instances
+       FROM bpm_processes p
+       LEFT JOIN (
+         SELECT process_id, COUNT(*)::int AS active_instances
+         FROM bpm_process_instances
+         WHERE company_id = $1 AND status IN ('started', 'in_progress')
+         GROUP BY process_id
+       ) ai ON ai.process_id = p.id
+       ${whereClause}
+       ORDER BY p.created_at DESC
        LIMIT $${values.length - 1} OFFSET $${values.length}`,
       values
     );
