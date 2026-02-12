@@ -3,6 +3,7 @@ export { default as CustomerList } from './pages/CustomerList';
 export { default as LeadList } from './pages/LeadList';
 export { default as LeadForm } from './pages/LeadForm';
 export { default as OpportunityBoard } from './pages/OpportunityBoard';
+export { default as OpportunityForm } from './pages/OpportunityForm';
 export { default as CRMDashboard } from './pages/CRMDashboard';
 export { default as ActivityList } from './pages/ActivityList';
 export { default as CustomerForm } from './pages/CustomerForm';

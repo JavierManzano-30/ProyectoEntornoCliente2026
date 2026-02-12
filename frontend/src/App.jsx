@@ -45,6 +45,7 @@ import CustomerForm from "./modules/crm/pages/CustomerForm";
 import LeadList from "./modules/crm/pages/LeadList";
 import LeadForm from "./modules/crm/pages/LeadForm";
 import OpportunityBoard from "./modules/crm/pages/OpportunityBoard";
+import OpportunityForm from "./modules/crm/pages/OpportunityForm";
 import ActivityList from "./modules/crm/pages/ActivityList";
 
 // Páginas del módulo ALM
@@ -158,6 +159,9 @@ function App() {
               <Route path="leads/:id" element={<LeadForm />} />
               <Route path="leads/:id/editar" element={<LeadForm />} />
               <Route path="oportunidades" element={<OpportunityBoard />} />
+              <Route path="oportunidades/nueva" element={<OpportunityForm />} />
+              <Route path="oportunidades/:id" element={<OpportunityForm />} />
+              <Route path="oportunidades/:id/editar" element={<OpportunityForm />} />
               <Route path="actividades" element={<ActivityList />} />
             </Route>
 

@@ -258,6 +258,11 @@ class CRMService {
     return response.data;
   }
 
+  async getPipelines(params = {}) {
+    const response = await axiosInstance.get(API_ENDPOINTS.crm.pipelines, { params });
+    return Array.isArray(response.data) ? response.data : [];
+  }
+
   async getOpportunities(params = {}) {
     await ensureStageMap();
     const response = await axiosInstance.get(API_ENDPOINTS.crm.opportunities, { params });
