@@ -122,10 +122,15 @@ export const calculateRoleStats = (roles) => {
   const total = roles.length;
   const editable = roles.filter(r => r.editable).length;
   const totalAssignments = roles.reduce((sum, r) => sum + (r.usuariosAsignados || 0), 0);
+  const totalPermissions = roles.reduce((sum, r) => sum + (r.permisos?.length || 0), 0);
   
   return {
     total,
     editable,
     totalAssignments,
+    totalRoles: total,
+    rolesEditables: editable,
+    totalUsuarios: totalAssignments,
+    permisosTotales: totalPermissions,
   };
 };

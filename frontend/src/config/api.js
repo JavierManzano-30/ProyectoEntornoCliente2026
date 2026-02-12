@@ -12,6 +12,11 @@ export const API_ENDPOINTS = {
   core: {
     companies: '/core/companies',
     companyById: (id) => `/core/companies/${id}`,
+    users: '/core/usuarios',
+    userById: (id) => `/core/usuarios/${id}`,
+    roles: '/core/roles',
+    roleById: (id) => `/core/roles/${id}`,
+    dashboard: '/core/dashboard',
   },
 
   // Modulo Soporte
