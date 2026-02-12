@@ -1,24 +1,39 @@
 import React, { useState } from 'react';
 import './Login.css';
 import { useNavigate } from 'react-router-dom';
+import authService from './services/authService';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Aquí iría la lógica de autenticación
+        
         if (!email || !password) {
             setError('Por favor, completa todos los campos.');
             return;
         }
+        
         setError('');
-        // Simulación de login exitoso
-        alert('Login exitoso');
-        navigate('/main'); // Redirige al centro de modulos
+        setLoading(true);
+
+        try {
+            const result = await authService.login(email, password);
+            
+            if (result.success) {
+                navigate('/main');
+            } else {
+                setError(result.error || 'Error al iniciar sesión');
+            }
+        } catch (err) {
+            setError('Error de conexión. Por favor, intenta de nuevo.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -48,7 +63,9 @@ const Login = () => {
                         onChange={e => setPassword(e.target.value)}
                     />
                     {error && <div className="login-error">{error}</div>}
-                    <button type="submit">Enter</button>
+                    <button type="submit" disabled={loading}>
+                        {loading ? 'Iniciando sesión...' : 'Enter'}
+                    </button>
                 </form>
                 <hr className="login-divider" />
                 <div className="login-links">

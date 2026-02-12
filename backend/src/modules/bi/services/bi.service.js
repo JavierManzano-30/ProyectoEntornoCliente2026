@@ -1,42 +1,22 @@
 const supabase = require('../../../config/supabase');
 
 async function getKPIs(companyId) {
-  const [
-    { count: openTicketsCount, error: openTicketsError },
-    { data: closedTickets, error: closedTicketsError }
-  ] = await Promise.all([
-    supabase
-      .from('support_tickets')
-      .select('id', { count: 'exact', head: true })
-      .eq('company_id', companyId)
-      .neq('status', 'closed'),
-    supabase
-      .from('support_tickets')
-      .select('created_at, closed_at')
-      .eq('company_id', companyId)
-      .eq('status', 'closed')
-      .not('closed_at', 'is', null)
+  // Calcular KPIs desde datos reales o retornar demo con 0s
+  // En producción real, estos cálculos vendrían de tablas de métricas agregadas
+  
+  const [{ count: totalClients }, { count: totalEmployees }] = await Promise.all([
+    supabase.from('crm_clients').select('*', { count: 'exact', head: true }).eq('company_id', companyId),
+    supabase.from('hr_employees').select('*', { count: 'exact', head: true }).eq('company_id', companyId)
   ]);
 
-  if (openTicketsError) throw openTicketsError;
-  if (closedTicketsError) throw closedTicketsError;
-
-  const durationsInMinutes = (closedTickets || [])
-    .map((ticket) => {
-      const createdAt = new Date(ticket.created_at).getTime();
-      const closedAt = new Date(ticket.closed_at).getTime();
-      if (Number.isNaN(createdAt) || Number.isNaN(closedAt) || closedAt < createdAt) return null;
-      return (closedAt - createdAt) / (1000 * 60);
-    })
-    .filter((value) => value !== null);
-
-  const avgResolutionMinutes = durationsInMinutes.length
-    ? durationsInMinutes.reduce((acc, value) => acc + value, 0) / durationsInMinutes.length
-    : 0;
-
+  // Retornar estructura esperada por el frontend
   return {
-    openTickets: openTicketsCount || 0,
-    avgResolutionMinutes
+    ingresosTotales: { value: 0, change: 0, trend: 'up' },
+    costesOperativos: { value: 0, change: 0, trend: 'down' },
+    beneficioNeto: { value: 0, change: 0, trend: 'up' },
+    clientesActivos: { value: totalClients || 0, change: 0, trend: 'up' },
+    tasaConversion: { value: 0, change: 0, trend: 'up' },
+    ticketMedio: { value: 0, change: 0, trend: 'up' }
   };
 }
 
@@ -105,9 +85,59 @@ async function runReport(companyId, reportId) {
   };
 }
 
+async function getDashboard(companyId) {
+  // Retornar estructura esperada por el frontend con datos de ejemplo
+  // En producción real, estos datos vendrían de agregaciones en la BD
+  
+  return {
+    ingresosPorMes: [
+      { mes: 'Ago', ingresos: 0, costes: 0 },
+      { mes: 'Sep', ingresos: 0, costes: 0 },
+      { mes: 'Oct', ingresos: 0, costes: 0 },
+      { mes: 'Nov', ingresos: 0, costes: 0 },
+      { mes: 'Dic', ingresos: 0, costes: 0 },
+      { mes: 'Ene', ingresos: 0, costes: 0 }
+    ],
+    ventasPorCategoria: [],
+    clientesPorRegion: [],
+    topProductos: []
+  };
+}
+
+async function listAlerts(companyId) {
+  const { data, error } = await supabase
+    .from('bi_alerts')
+    .select('*')
+    .eq('company_id', companyId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('[BI Alerts] Database error:', error);
+    return [];
+  }
+  return data || [];
+}
+
+async function listDatasets(companyId) {
+  const { data, error } = await supabase
+    .from('bi_datasets')
+    .select('*')
+    .eq('company_id', companyId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('[BI Datasets] Database error:', error);
+    return [];
+  }
+  return data || [];
+}
+
 module.exports = {
   getKPIs,
   listReports,
   createReport,
-  runReport
+  runReport,
+  getDashboard,
+  listAlerts,
+  listDatasets
 };

@@ -3,6 +3,7 @@ import { API_ENDPOINTS } from '../../../config/api';
 import { mockTickets, mockMessages, mockDashboardData, mockStats, mockReports } from '../data/mockData';
 
 // Modo de demostración (cambiar a false cuando el backend esté listo)
+// TODO: Implementar endpoints faltantes en backend: /dashboard, /stats, /reports
 const DEMO_MODE = true;
 
 class SoporteService {
@@ -213,24 +214,21 @@ class SoporteService {
 
   // ============ DASHBOARD ============
   
-  async getDashboardData(empresaId = 1) {
+  async getDashboardData() {
     if (DEMO_MODE) {
       await new Promise(resolve => setTimeout(resolve, 500));
-      return mockDashboardData[empresaId] || mockDashboardData[1];
+      return mockDashboardData[1];
     }
-    const response = await axiosInstance.get(API_ENDPOINTS.soporte.dashboard, {
-      params: { empresaId }
-    });
+    const response = await axiosInstance.get(API_ENDPOINTS.soporte.dashboard);
     return response.data;
   }
 
   async getStats(params = {}) {
     if (DEMO_MODE) {
       await new Promise(resolve => setTimeout(resolve, 500));
-      const empresaId = params.empresaId || 1;
-      return mockStats[empresaId] || mockStats[1];
+      return mockStats[1];
     }
-    const response = await axiosInstance.get(API_ENDPOINTS.soporte.stats, { params });
+    const response = await axiosInstance.get(API_ENDPOINTS.soporte.stats);
     return response.data;
   }
 
@@ -342,51 +340,47 @@ class SoporteService {
   // ============ CONFIGURACIÓN - TABLONES ============
   
   async getTablenes(empresaId = null) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 400));
-      const tablones = [
-        {
-          id: 1,
-          nombre: 'Soporte TI',
-          descripcion: 'Tickets de soporte técnico e infraestructura',
-          empresaId: 1,
-          empresaNombre: 'Empresa A',
-          departamentoId: 1,
-          departamentoNombre: 'TI',
-          color: '#3b82f6',
-          icono: '💻',
-          activo: true,
-        },
-        {
-          id: 2,
-          nombre: 'RRHH',
-          descripcion: 'Consultas y solicitudes de recursos humanos',
-          empresaId: 1,
-          empresaNombre: 'Empresa A',
-          departamentoId: 2,
-          departamentoNombre: 'Recursos Humanos',
-          color: '#10b981',
-          icono: '👥',
-          activo: true,
-        },
-        {
-          id: 3,
-          nombre: 'Finanzas',
-          descripcion: 'Tickets relacionados con facturación y pagos',
-          empresaId: 1,
-          empresaNombre: 'Empresa A',
-          departamentoId: 3,
-          departamentoNombre: 'Finanzas',
-          color: '#f59e0b',
-          icono: '💰',
-          activo: true,
-        },
-      ];
-      return empresaId ? tablones.filter(t => t.empresaId === empresaId) : tablones;
-    }
-    const params = empresaId ? { empresaId } : {};
-    const response = await axiosInstance.get(API_ENDPOINTS.soporte.tablones, { params });
-    return response.data;
+    // Por ahora devolver datos mock - endpoint no implementado en backend
+    await new Promise(resolve => setTimeout(resolve, 300));
+    const tablones = [
+      {
+        id: 1,
+        nombre: 'Soporte TI',
+        descripcion: 'Tickets de soporte técnico e infraestructura',
+        empresaId: 1,
+        empresaNombre: 'Acme Corp',
+        departamentoId: 1,
+        departamentoNombre: 'TI',
+        color: '#3b82f6',
+        icono: '💻',
+        activo: true,
+      },
+      {
+        id: 2,
+        nombre: 'RRHH',
+        descripcion: 'Consultas y solicitudes de recursos humanos',
+        empresaId: 1,
+        empresaNombre: 'Acme Corp',
+        departamentoId: 2,
+        departamentoNombre: 'Recursos Humanos',
+        color: '#10b981',
+        icono: '👥',
+        activo: true,
+      },
+      {
+        id: 3,
+        nombre: 'Finanzas',
+        descripcion: 'Tickets relacionados con facturación y pagos',
+        empresaId: 1,
+        empresaNombre: 'Acme Corp',
+        departamentoId: 3,
+        departamentoNombre: 'Finanzas',
+        color: '#f59e0b',
+        icono: '💰',
+        activo: true,
+      },
+    ];
+    return tablones;
   }
 
   async createTablon(tablonData) {
@@ -497,33 +491,31 @@ class SoporteService {
   // ============ CONFIGURACIÓN DE EMPRESA ============
   
   async getEmpresaConfig(empresaId) {
-    if (DEMO_MODE) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      return {
-        tablones: await this.getTablenes(empresaId),
-        categorias: await this.getCategorias(),
-        prioridades: await this.getPrioridades(),
-        estados: [
-          { id: 1, nombre: 'Nuevo', color: '#3b82f6', orden: 1, tipo: 'inicial' },
-          { id: 2, nombre: 'Asignado', color: '#8b5cf6', orden: 2, tipo: 'proceso' },
-          { id: 3, nombre: 'En Proceso', color: '#f59e0b', orden: 3, tipo: 'proceso' },
-          { id: 4, nombre: 'Resuelto', color: '#10b981', orden: 4, tipo: 'final' },
-          { id: 5, nombre: 'Cerrado', color: '#6b7280', orden: 5, tipo: 'final' },
-        ],
-        campos: [],
-        notificaciones: await this.getNotificaciones(),
-        tema: {
-          primary: '#3b82f6',
-          secondary: '#10b981',
-          success: '#10b981',
-          warning: '#f59e0b',
-          danger: '#ef4444',
-          info: '#0ea5e9',
-        },
-      };
-    }
-    const response = await axiosInstance.get(`${API_ENDPOINTS.soporte.config}/${empresaId}`);
-    return response.data;
+    // Por ahora devolver configuración mock ya que el endpoint no está implementado
+    // La info de la empresa viene del token JWT
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return {
+      tablones: await this.getTablenes(empresaId),
+      categorias: await this.getCategorias(),
+      prioridades: await this.getPrioridades(),
+      estados: [
+        { id: 1, nombre: 'Nuevo', color: '#3b82f6', orden: 1, tipo: 'inicial' },
+        { id: 2, nombre: 'Asignado', color: '#8b5cf6', orden: 2, tipo: 'proceso' },
+        { id: 3, nombre: 'En Proceso', color: '#f59e0b', orden: 3, tipo: 'proceso' },
+        { id: 4, nombre: 'Resuelto', color: '#10b981', orden: 4, tipo: 'final' },
+        { id: 5, nombre: 'Cerrado', color: '#6b7280', orden: 5, tipo: 'final' },
+      ],
+      campos: [],
+      notificaciones: await this.getNotificaciones(),
+      tema: {
+        primary: '#3b82f6',
+        secondary: '#10b981',
+        success: '#10b981',
+        warning: '#f59e0b',
+        danger: '#ef4444',
+        info: '#0ea5e9',
+      },
+    };
   }
 }
 

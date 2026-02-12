@@ -9,12 +9,12 @@ const mockDelay = (data) => new Promise(resolve => setTimeout(() => resolve(data
 
 // Endpoints base
 const ENDPOINTS = {
-  EMPLOYEES: '/api/v1/employees',
-  ABSENCES: '/api/v1/absences',
-  PAYROLLS: '/api/v1/payrolls',
-  CONTRACTS: '/api/v1/contracts',
-  DEPARTMENTS: '/api/v1/departments',
-  EVALUATIONS: '/api/v1/evaluations',
+  EMPLOYEES: '/hr/empleados',
+  ABSENCES: '/hr/absences',
+  PAYROLLS: '/hr/payrolls',
+  CONTRACTS: '/hr/contracts',
+  DEPARTMENTS: '/hr/departamentos',
+  EVALUATIONS: '/hr/evaluations',
 };
 
 // ========== EMPLEADOS ==========

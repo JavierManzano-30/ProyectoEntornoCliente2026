@@ -1,6 +1,7 @@
 const express = require('express');
 const { requireAuth } = require('../../../middlewares/auth');
 
+const accounting = require('../controllers/accounting-controller');
 const products = require('../controllers/product-controller');
 const inventory = require('../controllers/inventory-controller');
 const purchases = require('../controllers/purchase-controller');
@@ -14,6 +15,14 @@ router.get('/health', (req, res) => {
 
 router.use(requireAuth);
 
+// Rutas de Contabilidad
+router.get('/accounting/chart-of-accounts', accounting.getChartOfAccounts);
+router.get('/accounting/journal-entries', accounting.getJournalEntries);
+router.get('/accounting/accounts/:id', accounting.getAccountById);
+router.post('/accounting/accounts', accounting.createAccount);
+router.put('/accounting/accounts/:id', accounting.updateAccount);
+
+// Rutas de Productos
 router.get('/products', products.listProducts);
 router.post('/products', products.createProduct);
 router.get('/products/:id', products.getProduct);
