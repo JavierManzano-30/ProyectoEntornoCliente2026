@@ -8,8 +8,7 @@ import {
   Clock,
   CheckCircle,
   AlertCircle,
-  FileSpreadsheet,
-  Building2
+  FileSpreadsheet
 } from "lucide-react";
 import { useBIContext } from "../context/BIContext";
 import PageHeader from "../../../components/common/PageHeader";
@@ -17,7 +16,7 @@ import Card from "../../../components/common/Card";
 import "./ReportsPage.css";
 
 const ReportsPage = () => {
-  const { usuario, cambiarEmpresa, getReports, runReport, exportReport } = useBIContext();
+  const { usuario, getReports, runReport, exportReport } = useBIContext();
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('todos');
@@ -109,22 +108,7 @@ const ReportsPage = () => {
       <PageHeader
         title="Informes"
         subtitle="Consulta, ejecuta y exporta informes predefinidos o personalizados"
-        actions={
-          <>
-            <div className="empresa-selector-demo">
-              <Building2 size={18} />
-              <select 
-                value={usuario.empresaId} 
-                onChange={(e) => cambiarEmpresa(parseInt(e.target.value))}
-                className="empresa-select"
-              >
-                <option value={1}>TechCorp Solutions</option>
-                <option value={2}>InnovaDigital S.A.</option>
-                <option value={3}>GlobalServices Ltd</option>
-              </select>
-            </div>
-          </>
-        }
+        actions={null}
       />
 
       <Card style={{ marginBottom: '2rem', padding: '1rem 1.5rem' }}>

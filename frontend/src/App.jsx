@@ -5,6 +5,7 @@ import MainLayout from "./components/layout/MainLayout";
 // Páginas del módulo de soporte
 import SupportDashboard from "./modules/soporte/pages/SupportDashboard";
 import TicketList from "./modules/soporte/pages/TicketList";
+import TicketCreate from "./modules/soporte/pages/TicketCreate";
 import TicketDetail from "./modules/soporte/pages/TicketDetail";
 import SLAManagement from "./modules/soporte/pages/SLAManagement";
 import Reports from "./modules/soporte/pages/Reports";
@@ -14,7 +15,9 @@ import { SoporteProvider } from "./modules/soporte/context/SoporteContext";
 // Páginas del módulo RRHH
 import EmployeeList from "./modules/rrhh/pages/EmployeeList";
 import EmployeeDetail from "./modules/rrhh/pages/EmployeeDetail";
+import EmployeeForm from "./modules/rrhh/pages/EmployeeForm";
 import AbsenceManagement from "./modules/rrhh/pages/AbsenceManagement";
+import AbsenceForm from "./modules/rrhh/pages/AbsenceForm";
 import PayrollList from "./modules/rrhh/pages/PayrollList";
 import DepartmentManagement from "./modules/rrhh/pages/DepartmentManagement";
 
@@ -106,6 +109,7 @@ function App() {
                   <Route path="/soporte" element={<MainLayout module="soporte" />}>
                 <Route index element={<SupportDashboard />} />
                 <Route path="tickets" element={<TicketList />} />
+                <Route path="tickets/nuevo" element={<TicketCreate />} />
                 <Route path="tickets/:id" element={<TicketDetail />} />
                 <Route path="sla" element={<SLAManagement />} />
                 <Route path="reportes" element={<Reports />} />
@@ -114,10 +118,13 @@ function App() {
 
             {/* Rutas del módulo RRHH */}
             <Route path="/rrhh" element={<MainLayout module="rrhh" />}>
-              <Route index element={<EmployeeList />} />
+              <Route index element={<Navigate to="/rrhh/empleados" replace />} />
               <Route path="empleados" element={<EmployeeList />} />
+              <Route path="empleados/nuevo" element={<EmployeeForm />} />
               <Route path="empleados/:id" element={<EmployeeDetail />} />
+              <Route path="empleados/:id/editar" element={<EmployeeForm />} />
               <Route path="ausencias" element={<AbsenceManagement />} />
+              <Route path="ausencias/nueva" element={<AbsenceForm />} />
               <Route path="nominas" element={<PayrollList />} />
               <Route path="departamentos" element={<DepartmentManagement />} />
             </Route>

@@ -16,6 +16,14 @@ export const useBIContext = () => {
 };
 
 export const BIProvider = ({ children }) => {
+  const readStoredUser = () => {
+    try {
+      return JSON.parse(localStorage.getItem('user') || '{}');
+    } catch (error) {
+      return {};
+    }
+  };
+
   // Obtener datos de autenticación desde localStorage
   const getUserFromStorage = () => {
     const userId = localStorage.getItem('userId');
@@ -34,13 +42,18 @@ export const BIProvider = ({ children }) => {
 
   const [usuario, setUsuario] = useState(() => {
     const user = getUserFromStorage();
+    const storedUser = readStoredUser();
+    const userName = storedUser?.nombre || storedUser?.name || storedUser?.email || '';
+    const userRole = storedUser?.rol || storedUser?.role || '';
+    const companyName = localStorage.getItem('companyName') || '';
+
     return {
       id: user?.id || null,
-      nombre: 'Usuario',
-      email: '',
-      rol: 'analista',
+      nombre: userName,
+      email: storedUser?.email || '',
+      rol: userRole,
       empresaId: user?.companyId || null,
-      empresaNombre: 'EMPRESA DEMO',
+      empresaNombre: companyName || '',
     };
   });
 
@@ -58,9 +71,9 @@ export const BIProvider = ({ children }) => {
     }
   }, []);
 
-  // Cambiar empresa (deshabilitado en producción)
+  // Cambio de empresa controlado por la sesión del usuario en backend.
   const cambiarEmpresa = (empresaId) => {
-    console.log('Cambio de empresa deshabilitado en modo producción');
+    console.warn('Cambio de empresa no soportado desde frontend', empresaId);
   };
 
   // Obtener KPIs (companyId viene del token JWT en backend)

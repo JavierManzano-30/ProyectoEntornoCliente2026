@@ -22,7 +22,7 @@ router.post('/tickets', controller.createTicket);
 router.post('/tickets/:id/messages', controller.addMessage);
 router.patch('/tickets/:id/assign', controller.assignTicket);
 router.patch('/tickets/:id/close', controller.closeTicket);
+router.patch('/tickets/:id/status', controller.updateTicketStatus);
 router.get('/tickets/:id/timeline', controller.getTimeline);
 
 module.exports = router;
-

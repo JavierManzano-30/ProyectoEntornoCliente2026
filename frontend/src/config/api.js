@@ -26,6 +26,7 @@ export const API_ENDPOINTS = {
     conversation: (ticketId) => `/support/tickets/${ticketId}/messages`,
     assign: (ticketId) => `/support/tickets/${ticketId}/assign`,
     close: (ticketId) => `/support/tickets/${ticketId}/close`,
+    status: (ticketId) => `/support/tickets/${ticketId}/status`,
     timeline: (ticketId) => `/support/tickets/${ticketId}/timeline`,
     dashboard: '/support/dashboard',
     stats: '/support/stats',

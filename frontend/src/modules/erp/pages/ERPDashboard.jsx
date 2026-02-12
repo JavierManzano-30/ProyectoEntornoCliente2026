@@ -1,5 +1,5 @@
-import { useCallback, useState } from 'react';
-import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, Package, AlertCircle } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, AlertCircle } from 'lucide-react';
 import { useReporting } from '../hooks';
 import { formatCurrency, formatPercentage } from '../utils';
 import './ERPDashboard.css';
@@ -21,7 +21,11 @@ const ERPDashboard = () => {
     }
   }, [getKPIs]);
 
-  if (loading) {
+  useEffect(() => {
+    loadDashboardData();
+  }, [loadDashboardData]);
+
+  if (loading && !kpis) {
     return (
       <div className="erp-dashboard">
         <div className="dashboard-loading">
@@ -32,7 +36,7 @@ const ERPDashboard = () => {
     );
   }
 
-  if (error) {
+  if (error && !kpis) {
     return (
       <div className="erp-dashboard">
         <div className="dashboard-error">
@@ -45,16 +49,18 @@ const ERPDashboard = () => {
     );
   }
 
-  const metrics = kpis || {
-    revenue: { current: 250000, previous: 230000, change: 8.7 },
-    expenses: { current: 180000, previous: 175000, change: 2.9 },
-    profit: { current: 70000, previous: 55000, change: 27.3 },
-    cash: { current: 450000, previous: 420000, change: 7.1 },
-    receivables: { current: 120000, overdue: 15000 },
-    payables: { current: 85000, overdue: 5000 },
-    inventory: { value: 320000, turnover: 4.2 },
-    orders: { pending: 24, completed: 156 }
-  };
+  if (!kpis) {
+    return (
+      <div className="erp-dashboard">
+        <div className="dashboard-loading">
+          <div className="spinner"></div>
+          <p>Cargando datos financieros...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const metrics = kpis;
 
   return (
     <div className="erp-dashboard">

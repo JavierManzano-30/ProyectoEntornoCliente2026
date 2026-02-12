@@ -4,14 +4,31 @@ import { useInventory } from '../hooks';
 import { formatCurrency, formatNumber } from '../utils';
 import './InventoryControl.css';
 
+const toNumber = (value) => {
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
 /**
  * Página de Control de Inventario
  * Gestión de productos y stock
  */
 const InventoryControl = () => {
-  const { products, loading, loadProducts, loadStockLevels } = useInventory();
+  const { products, stockLevels, loading, loadProducts, loadStockLevels } = useInventory();
   const [searchTerm, setSearchTerm] = useState('');
   const [stockFilter, setStockFilter] = useState('all');
+
+  const stockByProductId = stockLevels.reduce((acc, stock) => {
+    const productId = stock.productId || stock.product_id;
+    if (!productId) return acc;
+    const previous = acc[productId] || { current: 0, min: 0, max: 0 };
+    acc[productId] = {
+      current: previous.current + toNumber(stock.quantityAvailable ?? stock.quantity_available),
+      min: previous.min + toNumber(stock.minimumQuantity ?? stock.minimum_quantity),
+      max: previous.max + toNumber(stock.maximumQuantity ?? stock.maximum_quantity)
+    };
+    return acc;
+  }, {});
 
   useEffect(() => {
     loadProducts();
@@ -20,26 +37,50 @@ const InventoryControl = () => {
 
   const getStockStatus = (current, min, max) => {
     if (current <= min) return 'low';
-    if (current >= max) return 'high';
+    if (max > 0 && current >= max) return 'high';
     return 'normal';
   };
 
+  const getProductInventory = (product) => {
+    const stockData = stockByProductId[product.id] || {};
+    const current = toNumber(stockData.current ?? product.stock);
+    const min = toNumber(stockData.min ?? product.minStock);
+    const max = toNumber(stockData.max ?? product.maxStock);
+    return { current, min, max };
+  };
+
   const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.sku?.toLowerCase().includes(searchTerm.toLowerCase());
+    const inventory = getProductInventory(product);
+    const productName = product.name || '';
+    const productSku = product.sku || product.productCode || '';
+    const matchesSearch = productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         productSku.toLowerCase().includes(searchTerm.toLowerCase());
     
     if (stockFilter === 'low') {
-      return matchesSearch && product.stock <= product.minStock;
+      return matchesSearch && inventory.current <= inventory.min;
     }
     if (stockFilter === 'out') {
-      return matchesSearch && product.stock === 0;
+      return matchesSearch && inventory.current === 0;
     }
     
     return matchesSearch;
   });
 
-  const lowStockCount = products.filter(p => p.stock <= p.minStock).length;
-  const outOfStockCount = products.filter(p => p.stock === 0).length;
+  const lowStockCount = products.filter((product) => {
+    const inventory = getProductInventory(product);
+    return inventory.current <= inventory.min;
+  }).length;
+
+  const outOfStockCount = products.filter((product) => {
+    const inventory = getProductInventory(product);
+    return inventory.current === 0;
+  }).length;
+
+  const totalStockValue = products.reduce((sum, product) => {
+    const inventory = getProductInventory(product);
+    const unitCost = toNumber(product.cost ?? product.costPrice);
+    return sum + (inventory.current * unitCost);
+  }, 0);
 
   return (
     <div className="inventory-control">
@@ -80,7 +121,7 @@ const InventoryControl = () => {
           <Package size={24} className="stat-icon" />
           <div className="stat-content">
             <span className="stat-label">Valor Total</span>
-            <h3 className="stat-value">{formatCurrency(320000)}</h3>
+            <h3 className="stat-value">{formatCurrency(totalStockValue)}</h3>
           </div>
         </div>
       </div>
@@ -138,22 +179,25 @@ const InventoryControl = () => {
             </thead>
             <tbody>
               {filteredProducts.map(product => {
-                const stockStatus = getStockStatus(product.stock, product.minStock, product.maxStock);
-                const stockValue = (product.stock || 0) * (product.cost || 0);
+                const inventory = getProductInventory(product);
+                const unitCost = toNumber(product.cost ?? product.costPrice);
+                const unitPrice = toNumber(product.price ?? product.salePrice);
+                const stockStatus = getStockStatus(inventory.current, inventory.min, inventory.max);
+                const stockValue = inventory.current * unitCost;
                 
                 return (
                   <tr key={product.id}>
-                    <td className="product-sku">{product.sku || '-'}</td>
+                    <td className="product-sku">{product.sku || product.productCode || '-'}</td>
                     <td className="product-name">{product.name}</td>
-                    <td>{product.category || '-'}</td>
+                    <td>{product.category || product.categoryId || '-'}</td>
                     <td className="text-right">
                       <span className={`stock-value stock-${stockStatus}`}>
-                        {formatNumber(product.stock || 0, 0)}
+                        {formatNumber(inventory.current, 0)}
                       </span>
                     </td>
-                    <td className="text-right">{formatNumber(product.minStock || 0, 0)}</td>
-                    <td className="text-right">{formatCurrency(product.cost || 0)}</td>
-                    <td className="text-right">{formatCurrency(product.price || 0)}</td>
+                    <td className="text-right">{formatNumber(inventory.min, 0)}</td>
+                    <td className="text-right">{formatCurrency(unitCost)}</td>
+                    <td className="text-right">{formatCurrency(unitPrice)}</td>
                     <td className="text-right">{formatCurrency(stockValue)}</td>
                     <td>
                       <span className={`status-badge stock-${stockStatus}`}>

@@ -134,6 +134,82 @@ async function closeTicket(ticketId, userId) {
   return true;
 }
 
+async function updateTicketWorkflow(ticketId, actorUserId, companyId, updates = {}) {
+  const { status, assignedTo } = updates;
+
+  const { data: existing, error: existingError } = await supabase
+    .from('support_tickets')
+    .select('id, status, assigned_to, closed_at')
+    .eq('id', ticketId)
+    .eq('company_id', companyId)
+    .single();
+
+  if (existingError) {
+    if (existingError.code === 'PGRST116') return null;
+    throw existingError;
+  }
+
+  const payload = {
+    updated_at: new Date().toISOString()
+  };
+
+  if (status) {
+    payload.status = status;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(updates, 'assignedTo')) {
+    payload.assigned_to = assignedTo || null;
+  }
+
+  if (status === 'closed') {
+    payload.closed_at = new Date().toISOString();
+  } else if (status && existing.closed_at) {
+    payload.closed_at = null;
+  }
+
+  const { data: updated, error: updateError } = await supabase
+    .from('support_tickets')
+    .update(payload)
+    .eq('id', ticketId)
+    .eq('company_id', companyId)
+    .select('*')
+    .single();
+
+  if (updateError) throw updateError;
+
+  const auditRows = [];
+
+  if (status && status !== existing.status) {
+    auditRows.push({
+      ticket_id: ticketId,
+      user_id: actorUserId,
+      action: 'STATUS_CHANGE',
+      old_value: existing.status,
+      new_value: status
+    });
+  }
+
+  if (
+    Object.prototype.hasOwnProperty.call(updates, 'assignedTo') &&
+    (existing.assigned_to || null) !== (payload.assigned_to || null)
+  ) {
+    auditRows.push({
+      ticket_id: ticketId,
+      user_id: actorUserId,
+      action: payload.assigned_to ? 'ASSIGN' : 'UNASSIGN',
+      old_value: existing.assigned_to ? String(existing.assigned_to) : null,
+      new_value: payload.assigned_to ? String(payload.assigned_to) : null
+    });
+  }
+
+  if (auditRows.length) {
+    const { error: auditError } = await supabase.from('support_audit_log').insert(auditRows);
+    if (auditError) throw auditError;
+  }
+
+  return updated;
+}
+
 async function getTimeline(ticketId) {
   const [{ data: messageRows, error: messagesError }, { data: auditRows, error: auditError }] =
     await Promise.all([
@@ -318,6 +394,7 @@ module.exports = {
   addMessage,
   assignTicket,
   closeTicket,
+  updateTicketWorkflow,
   getTimeline,
   getDashboardStats,
   getStats,

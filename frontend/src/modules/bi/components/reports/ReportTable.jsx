@@ -1,37 +1,6 @@
 import React from "react";
 
-const reports = [
-  {
-    id: 1,
-    name: "Informe de Ventas Mensual",
-    date: "28/01/2026",
-    status: "Completado",
-    type: "PDF",
-  },
-  {
-    id: 2,
-    name: "Análisis de Costes",
-    date: "25/01/2026",
-    status: "Completado",
-    type: "Excel",
-  },
-  {
-    id: 3,
-    name: "Informe de Clientes",
-    date: "20/01/2026",
-    status: "Pendiente",
-    type: "CSV",
-  },
-  {
-    id: 4,
-    name: "Informe de Proyectos",
-    date: "15/01/2026",
-    status: "Completado",
-    type: "PDF",
-  },
-];
-
-const ReportTable = () => (
+const ReportTable = ({ reports = [], onView, onExport }) => (
   <div
     className="report-table"
     style={{
@@ -52,21 +21,29 @@ const ReportTable = () => (
         </tr>
       </thead>
       <tbody>
-        {reports.map((report) => (
-          <tr key={report.id} style={{ borderBottom: "1px solid #f3f4f6" }}>
-            <td style={{ padding: "0.7rem" }}>{report.name}</td>
-            <td style={{ padding: "0.7rem" }}>{report.date}</td>
+        {reports.map((report) => {
+          const id = report.id || report.reportId;
+          const name = report.nombre || report.name || "Informe";
+          const date = report.ultimaEjecucion || report.date || "Sin ejecuciones";
+          const status = report.estado || report.status || "pendiente";
+          const type = report.formato || report.type || "CSV";
+
+          return (
+          <tr key={id} style={{ borderBottom: "1px solid #f3f4f6" }}>
+            <td style={{ padding: "0.7rem" }}>{name}</td>
+            <td style={{ padding: "0.7rem" }}>{date}</td>
             <td
               style={{
                 padding: "0.7rem",
-                color: report.status === "Completado" ? "#10b981" : "#f59e42",
+                color: status === "completado" || status === "Completado" ? "#10b981" : "#f59e42",
                 fontWeight: 500,
               }}
             >
-              {report.status}
+              {status}
             </td>
             <td style={{ padding: "0.7rem" }}>
               <button
+                onClick={() => onView && onView(report)}
                 style={{
                   marginRight: 8,
                   background: "#2563eb",
@@ -80,6 +57,7 @@ const ReportTable = () => (
                 Ver
               </button>
               <button
+                onClick={() => onExport && onExport(id, type)}
                 style={{
                   background: "#f3f4f6",
                   color: "#2563eb",
@@ -89,13 +67,19 @@ const ReportTable = () => (
                   cursor: "pointer",
                 }}
               >
-                Exportar {report.type}
+                Exportar {type}
               </button>
             </td>
           </tr>
-        ))}
+          );
+        })}
       </tbody>
     </table>
+    {reports.length === 0 && (
+      <div style={{ marginTop: "1rem", color: "#64748b" }}>
+        No hay informes para mostrar.
+      </div>
+    )}
   </div>
 );
 

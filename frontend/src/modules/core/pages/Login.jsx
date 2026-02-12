@@ -8,7 +8,7 @@ import './Login.css';
 const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    email: 'admin@bizhub.com',
+    email: '',
     password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -37,6 +37,9 @@ const Login = () => {
       
       // Guardar token en localStorage
       localStorage.setItem('token', response.token);
+      if (response.userId) localStorage.setItem('userId', response.userId);
+      if (response.companyId) localStorage.setItem('companyId', response.companyId);
+      if (response.roleId) localStorage.setItem('roleId', response.roleId);
       localStorage.setItem('user', JSON.stringify(response.user));
       
       // Redirigir al dashboard
@@ -122,14 +125,6 @@ const Login = () => {
               {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
             </Button>
           </form>
-
-          <div className="login-footer">
-            <p className="demo-credentials">
-              <strong>Credenciales de prueba:</strong><br />
-              Email: admin@bizhub.com<br />
-              Contraseña: (cualquiera)
-            </p>
-          </div>
         </div>
       </div>
     </div>

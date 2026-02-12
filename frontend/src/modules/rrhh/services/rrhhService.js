@@ -119,6 +119,35 @@ const mapEvaluation = (row = {}) => ({
   createdAt: row.created_at,
 });
 
+const buildEmployeePayload = (data = {}) => {
+  const companyId = data.company_id || data.companyId || localStorage.getItem('companyId') || null;
+
+  return {
+    company_id: companyId,
+    first_name: data.first_name || data.firstName || '',
+    last_name: data.last_name || data.lastName || '',
+    email: data.email || '',
+    status: data.status || 'active',
+    hire_date: data.hire_date || data.hireDate || '',
+    department_id: data.department_id || data.departmentId || null,
+    user_id: data.user_id || data.userId || null,
+  };
+};
+
+const buildAbsencePayload = (data = {}) => {
+  const companyId = data.company_id || data.companyId || localStorage.getItem('companyId') || null;
+
+  return {
+    company_id: companyId,
+    employee_id: data.employee_id || data.employeeId || null,
+    type: data.type || '',
+    start_date: data.start_date || data.startDate || '',
+    end_date: data.end_date || data.endDate || '',
+    status: data.status || 'pending',
+    notes: data.notes || data.reason || null,
+  };
+};
+
 export const getEmployees = async (params = {}) => {
   const [employeesResponse, departmentsResponse, contractsResponse] = await Promise.all([
     api.get(ENDPOINTS.EMPLOYEES, { params }),
@@ -190,12 +219,12 @@ export const getEmployee = async (id) => {
 };
 
 export const createEmployee = async (data) => {
-  const response = await api.post(ENDPOINTS.EMPLOYEES, data);
+  const response = await api.post(ENDPOINTS.EMPLOYEES, buildEmployeePayload(data));
   return mapEmployee(response.data);
 };
 
 export const updateEmployee = async (id, data) => {
-  const response = await api.put(`${ENDPOINTS.EMPLOYEES}/${id}`, data);
+  const response = await api.put(`${ENDPOINTS.EMPLOYEES}/${id}`, buildEmployeePayload(data));
   return mapEmployee(response.data);
 };
 
@@ -240,12 +269,12 @@ export const getAbsence = async (id) => {
 };
 
 export const createAbsence = async (data) => {
-  const response = await api.post(ENDPOINTS.ABSENCES, data);
+  const response = await api.post(ENDPOINTS.ABSENCES, buildAbsencePayload(data));
   return mapAbsence(response.data);
 };
 
 export const updateAbsence = async (id, data) => {
-  const response = await api.put(`${ENDPOINTS.ABSENCES}/${id}`, data);
+  const response = await api.put(`${ENDPOINTS.ABSENCES}/${id}`, buildAbsencePayload(data));
   return mapAbsence(response.data);
 };
 

@@ -5,7 +5,6 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  Building2,
   Check,
   Info
 } from "lucide-react";
@@ -15,7 +14,7 @@ import Card from "../../../components/common/Card";
 import "./AlertsPage.css";
 
 const AlertsPage = () => {
-  const { usuario, cambiarEmpresa, getAlerts, markAlertAsRead } = useBIContext();
+  const { usuario, getAlerts, markAlertAsRead } = useBIContext();
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('todas');
@@ -98,22 +97,7 @@ const AlertsPage = () => {
       <PageHeader
         title="Alertas y Umbrales"
         subtitle="Configura alertas automáticas y umbrales para monitorizar KPIs y eventos clave"
-        actions={
-          <>
-            <div className="empresa-selector-demo">
-              <Building2 size={18} />
-              <select 
-                value={usuario.empresaId} 
-                onChange={(e) => cambiarEmpresa(parseInt(e.target.value))}
-                className="empresa-select"
-              >
-                <option value={1}>TechCorp Solutions</option>
-                <option value={2}>InnovaDigital S.A.</option>
-                <option value={3}>GlobalServices Ltd</option>
-              </select>
-            </div>
-          </>
-        }
+        actions={null}
       />
 
       <div className="alerts-summary">

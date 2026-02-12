@@ -1,17 +1,21 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Clock, AlertCircle, User, Calendar } from 'lucide-react';
-import TicketStatusBadge from '../tickets/TicketStatusBadge';
+import { Clock, AlertCircle, User } from 'lucide-react';
 import TicketPriorityBadge from '../tickets/TicketPriorityBadge';
 import { formatTicketId, calculateTicketAge } from '../../utils/ticketHelpers';
 import { calculateSLAStatus } from '../../utils/slaHelpers';
 import './TicketCard.css';
 
-const TicketCard = ({ ticket, onClick }) => {
+const TicketCard = ({ ticket, onClick, draggable = false, onDragStart, onDragEnd, isDragging = false, isUpdating = false }) => {
   const navigate = useNavigate();
   const slaStatus = ticket.nivelSLA ? calculateSLAStatus(ticket) : null;
+  const assignedLabel = typeof ticket.asignadoA === 'string'
+    ? ticket.asignadoA
+    : ticket.asignadoA?.nombre;
   
   const handleClick = () => {
+    if (isDragging || isUpdating) return;
+
     if (onClick) {
       onClick(ticket);
     } else {
@@ -36,10 +40,13 @@ const TicketCard = ({ ticket, onClick }) => {
 
   return (
     <div 
-      className={`ticket-card ${getPriorityClass()}`}
+      className={`ticket-card ${getPriorityClass()} ${isDragging ? 'dragging' : ''} ${isUpdating ? 'updating' : ''}`}
       onClick={handleClick}
       role="button"
       tabIndex={0}
+      draggable={draggable}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
     >
       <div className="ticket-card-header">
         <span className="ticket-card-id">{formatTicketId(ticket.id)}</span>
@@ -65,10 +72,10 @@ const TicketCard = ({ ticket, onClick }) => {
             </div>
           )}
           
-          {ticket.asignadoA && (
+          {assignedLabel && (
             <div className="ticket-card-meta-item" title="Asignado a">
               <User size={14} />
-              <span>{ticket.asignadoA.nombre}</span>
+              <span>{assignedLabel}</span>
             </div>
           )}
           

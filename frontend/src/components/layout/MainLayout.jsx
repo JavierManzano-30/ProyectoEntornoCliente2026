@@ -23,12 +23,66 @@ import {
   FileText,
   Calculator,
 } from "lucide-react";
+import api from "../../lib/axios";
+import { API_ENDPOINTS } from "../../config/api";
 import "./MainLayout.css";
 
 const MainLayout = ({ module = "soporte" }) => {
   const navigate = useNavigate();
+  const [companyName, setCompanyName] = React.useState("Empresa");
+
+  React.useEffect(() => {
+    let cancelled = false;
+
+    const readStoredCompanyName = () => {
+      const storedName = localStorage.getItem("companyName");
+      if (storedName) return storedName;
+
+      try {
+        const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+        return storedUser.companyName || storedUser.empresaNombre || "";
+      } catch (error) {
+        return "";
+      }
+    };
+
+    const loadCompanyName = async () => {
+      const cachedName = readStoredCompanyName();
+      if (cachedName && !cancelled) {
+        setCompanyName(cachedName);
+      }
+
+      const companyId = localStorage.getItem("companyId");
+      if (!companyId) return;
+
+      try {
+        const response = await api.get(API_ENDPOINTS.core.companyById(companyId));
+        const realName = response?.data?.name;
+        if (realName && !cancelled) {
+          setCompanyName(realName);
+          localStorage.setItem("companyName", realName);
+        }
+      } catch (error) {
+        if (!cachedName && !cancelled) {
+          setCompanyName("Empresa");
+        }
+      }
+    };
+
+    loadCompanyName();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const handleLogout = () => {
-    // Aquí podrías limpiar el estado de sesión si lo hubiera
+    localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("companyId");
+    localStorage.removeItem("companyName");
+    localStorage.removeItem("roleId");
+    localStorage.removeItem("user");
     navigate('/');
   };
 
@@ -139,7 +193,7 @@ const MainLayout = ({ module = "soporte" }) => {
     <div className={`main-layout${darkMode ? ' dark-mode' : ''}`}>
       <aside className="main-sidebar">
         <div className="sidebar-header">
-          <h1 className="sidebar-logo company-name">EMPRESA DEMO</h1>
+          <h1 className="sidebar-logo company-name">{companyName}</h1>
           <p className="sidebar-subtitle">Sistema de Gestión</p>
         </div>
 

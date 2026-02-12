@@ -4,32 +4,6 @@
   padding: 2rem;
 }
 
-/* Selector de empresa (DEMO) */
-.empresa-selector-demo {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1rem;
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  border: 1px solid #fbbf24;
-  border-radius: 6px;
-  color: #92400e;
-}
-
-.empresa-select {
-  border: none;
-  background: transparent;
-  font-size: 0.875rem;
-  color: #92400e;
-  font-weight: 600;
-  cursor: pointer;
-  min-width: 180px;
-}
-
-.empresa-select:focus {
-  outline: none;
-}
-
 /* Selector de tablón */
 .dashboard-subtitle {
   display: flex;

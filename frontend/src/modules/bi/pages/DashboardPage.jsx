@@ -13,7 +13,6 @@ import {
   Target,
   BarChart3,
   PieChart,
-  Building2,
   Calendar,
   Download,
   RefreshCw
@@ -24,7 +23,7 @@ import Card from '../../../components/common/Card';
 import './DashboardPage.css';
 
 const DashboardPage = () => {
-  const { usuario, cambiarEmpresa, getKPIs, getDashboardData } = useBIContext();
+  const { usuario, getKPIs, getDashboardData } = useBIContext();
   const [loading, setLoading] = useState(true);
   const [kpis, setKPIs] = useState({});
   const [dashboardData, setDashboardData] = useState({});
@@ -63,6 +62,11 @@ const DashboardPage = () => {
     return new Intl.NumberFormat('es-ES').format(value);
   };
 
+  const maxChartValue = Math.max(
+    ...(dashboardData.ingresosPorMes || []).flatMap((item) => [item.ingresos || 0, item.costes || 0]),
+    1
+  );
+
   if (loading) {
     return (
       <div className="bi-dashboard-loading">
@@ -76,23 +80,9 @@ const DashboardPage = () => {
     <div className="bi-dashboard-page">
       <PageHeader
         title="Business Intelligence"
-        subtitle={`Dashboard ejecutivo - ${usuario.empresaNombre}`}
+        subtitle={usuario.empresaNombre ? `Dashboard ejecutivo - ${usuario.empresaNombre}` : 'Dashboard ejecutivo'}
         actions={
           <>
-            {/* Selector de empresa (DEMO) */}
-            <div className="empresa-selector-demo">
-              <Building2 size={16} />
-              <select
-                value={usuario.empresaId}
-                onChange={(e) => cambiarEmpresa(Number(e.target.value))}
-                className="empresa-select"
-              >
-                <option value={1}>TechCorp Solutions</option>
-                <option value={2}>InnovaDigital S.A.</option>
-                <option value={3}>GlobalServices Ltd</option>
-              </select>
-            </div>
-
             <div className="periodo-selector">
               <Calendar size={16} />
               <select
@@ -225,12 +215,12 @@ const DashboardPage = () => {
                   <div className="bars">
                     <div 
                       className="bar ingresos"
-                      style={{ height: `${(item.ingresos / 250000) * 100}%` }}
+                      style={{ height: `${((item.ingresos || 0) / maxChartValue) * 100}%` }}
                       title={`Ingresos: ${formatCurrency(item.ingresos)}`}
                     />
                     <div 
                       className="bar costes"
-                      style={{ height: `${(item.costes / 250000) * 100}%` }}
+                      style={{ height: `${((item.costes || 0) / maxChartValue) * 100}%` }}
                       title={`Costes: ${formatCurrency(item.costes)}`}
                     />
                   </div>

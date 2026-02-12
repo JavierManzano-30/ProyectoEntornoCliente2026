@@ -8,6 +8,234 @@ import axios from '../../../lib/axios';
 
 const BASE_URL = '/erp';
 
+const DEFAULT_LIST_PARAMS = { page: 1, limit: 100 };
+const CANCELED_ORDER_STATUS = new Set(['canceled', 'cancelled']);
+
+const toArray = (value) => {
+  if (Array.isArray(value)) return value;
+  if (Array.isArray(value?.rows)) return value.rows;
+  if (Array.isArray(value?.items)) return value.items;
+  return [];
+};
+
+const toNumber = (value) => {
+  if (value === null || value === undefined || value === '') return 0;
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const toMonthKey = (value) => {
+  if (!value) return null;
+  const normalized = String(value);
+  const match = normalized.match(/^(\d{4})-(\d{2})/);
+  if (match) return `${match[1]}-${match[2]}`;
+
+  const date = new Date(normalized);
+  if (Number.isNaN(date.getTime())) return null;
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
+};
+
+const toDateOnly = (value) => {
+  if (!value) return null;
+  const normalized = String(value);
+  const match = normalized.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (match) {
+    return new Date(`${match[1]}-${match[2]}-${match[3]}T00:00:00`);
+  }
+  const parsed = new Date(normalized);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const calculateChange = (current, previous) => {
+  if (previous === 0) return current === 0 ? 0 : 100;
+  return ((current - previous) / Math.abs(previous)) * 100;
+};
+
+const round = (value, decimals = 2) => {
+  const factor = 10 ** decimals;
+  return Math.round((value + Number.EPSILON) * factor) / factor;
+};
+
+const shouldIgnoreCollectionError = (status) => [404, 405, 500, 501].includes(status);
+
+const fetchCollection = async (path, params = {}) => {
+  try {
+    const response = await axios.get(`${BASE_URL}${path}`, {
+      params: { ...DEFAULT_LIST_PARAMS, ...params }
+    });
+    return toArray(response.data);
+  } catch (error) {
+    const status = error?.response?.status;
+    if (status && shouldIgnoreCollectionError(status)) {
+      // Permite seguir calculando KPIs con el resto de datasets disponibles.
+      return [];
+    }
+    throw error;
+  }
+};
+
+const buildKPIsFromOperationalData = async (params = {}) => {
+  const [salesOrders, invoices, purchaseInvoices, inventory, products] = await Promise.all([
+    fetchCollection('/sales-orders', params),
+    fetchCollection('/invoices', params),
+    fetchCollection('/purchase-invoices', params),
+    fetchCollection('/inventory', params),
+    fetchCollection('/products', params)
+  ]);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const currentYear = today.getFullYear();
+  const currentMonth = String(today.getMonth() + 1).padStart(2, '0');
+  const currentMonthKey = `${currentYear}-${currentMonth}`;
+  const previousDate = new Date(currentYear, today.getMonth() - 1, 1);
+  const previousMonthKey = `${previousDate.getFullYear()}-${String(previousDate.getMonth() + 1).padStart(2, '0')}`;
+  const currentMonthStart = new Date(currentYear, today.getMonth(), 1);
+
+  const sumByMonth = (items, dateField, amountField, monthKey, predicate = () => true) =>
+    items.reduce((sum, item) => {
+      if (!predicate(item)) return sum;
+      if (toMonthKey(item?.[dateField]) !== monthKey) return sum;
+      return sum + toNumber(item?.[amountField]);
+    }, 0);
+
+  const includeSalesInvoiceInRevenue = (invoice) => {
+    const status = String(invoice?.status || '').toLowerCase();
+    return status !== 'voided' && status !== 'draft';
+  };
+
+  const includePurchaseInvoiceInExpenses = (invoice) => {
+    const status = String(invoice?.status || '').toLowerCase();
+    return status !== 'voided';
+  };
+
+  const currentRevenue = sumByMonth(invoices, 'issueDate', 'total', currentMonthKey, includeSalesInvoiceInRevenue);
+  const previousRevenue = sumByMonth(invoices, 'issueDate', 'total', previousMonthKey, includeSalesInvoiceInRevenue);
+  const currentExpenses = sumByMonth(purchaseInvoices, 'receivedDate', 'total', currentMonthKey, includePurchaseInvoiceInExpenses);
+  const previousExpenses = sumByMonth(purchaseInvoices, 'receivedDate', 'total', previousMonthKey, includePurchaseInvoiceInExpenses);
+
+  const currentProfit = currentRevenue - currentExpenses;
+  const previousProfit = previousRevenue - previousExpenses;
+
+  const paidSalesCash = invoices.reduce((sum, invoice) => {
+    if (String(invoice?.status || '').toLowerCase() !== 'paid') return sum;
+    return sum + toNumber(invoice?.total);
+  }, 0);
+
+  const paidPurchaseCash = purchaseInvoices.reduce((sum, invoice) => {
+    if (String(invoice?.status || '').toLowerCase() !== 'paid') return sum;
+    return sum + toNumber(invoice?.total);
+  }, 0);
+
+  const currentCash = paidSalesCash - paidPurchaseCash;
+
+  const previousPaidSalesCash = invoices.reduce((sum, invoice) => {
+    if (String(invoice?.status || '').toLowerCase() !== 'paid') return sum;
+    const paidDate = toDateOnly(invoice?.paidDate);
+    if (!paidDate || paidDate >= currentMonthStart) return sum;
+    return sum + toNumber(invoice?.total);
+  }, 0);
+
+  const previousPaidPurchaseCash = purchaseInvoices.reduce((sum, invoice) => {
+    if (String(invoice?.status || '').toLowerCase() !== 'paid') return sum;
+    const paidDate = toDateOnly(invoice?.paidDate);
+    if (!paidDate || paidDate >= currentMonthStart) return sum;
+    return sum + toNumber(invoice?.total);
+  }, 0);
+
+  const previousCash = previousPaidSalesCash - previousPaidPurchaseCash;
+
+  const receivables = invoices.reduce((acc, invoice) => {
+    const status = String(invoice?.status || '').toLowerCase();
+    if (status === 'paid' || status === 'voided') return acc;
+
+    const total = toNumber(invoice?.total);
+    acc.current += total;
+
+    const dueDate = toDateOnly(invoice?.dueDate);
+    if (dueDate && dueDate < today) {
+      acc.overdue += total;
+    }
+    return acc;
+  }, { current: 0, overdue: 0 });
+
+  const payables = purchaseInvoices.reduce((acc, invoice) => {
+    const status = String(invoice?.status || '').toLowerCase();
+    if (status === 'paid' || status === 'voided') return acc;
+
+    const total = toNumber(invoice?.total);
+    acc.current += total;
+
+    const dueDate = toDateOnly(invoice?.dueDate);
+    if (dueDate && dueDate < today) {
+      acc.overdue += total;
+    }
+    return acc;
+  }, { current: 0, overdue: 0 });
+
+  const productCostById = products.reduce((acc, product) => {
+    acc[product.id] = toNumber(product?.costPrice ?? product?.cost_price);
+    return acc;
+  }, {});
+
+  const inventoryValue = inventory.reduce((sum, item) => {
+    const quantity = toNumber(item?.quantityAvailable ?? item?.quantity_available);
+    const cost = toNumber(productCostById[item?.productId ?? item?.product_id]);
+    return sum + (quantity * cost);
+  }, 0);
+
+  const inventoryTurnover = inventoryValue > 0 ? (currentRevenue * 12) / inventoryValue : 0;
+
+  const orders = salesOrders.reduce((acc, order) => {
+    const status = String(order?.status || '').toLowerCase();
+    if (status === 'delivered') {
+      acc.completed += 1;
+    } else if (!CANCELED_ORDER_STATUS.has(status)) {
+      acc.pending += 1;
+    }
+    return acc;
+  }, { pending: 0, completed: 0 });
+
+  return {
+    revenue: {
+      current: round(currentRevenue),
+      previous: round(previousRevenue),
+      change: round(calculateChange(currentRevenue, previousRevenue))
+    },
+    expenses: {
+      current: round(currentExpenses),
+      previous: round(previousExpenses),
+      change: round(calculateChange(currentExpenses, previousExpenses))
+    },
+    profit: {
+      current: round(currentProfit),
+      previous: round(previousProfit),
+      change: round(calculateChange(currentProfit, previousProfit))
+    },
+    cash: {
+      current: round(currentCash),
+      previous: round(previousCash),
+      change: round(calculateChange(currentCash, previousCash))
+    },
+    receivables: {
+      current: round(receivables.current),
+      overdue: round(receivables.overdue)
+    },
+    payables: {
+      current: round(payables.current),
+      overdue: round(payables.overdue)
+    },
+    inventory: {
+      value: round(inventoryValue),
+      turnover: round(inventoryTurnover, 1)
+    },
+    orders
+  };
+};
+
 // ==================== CONTABILIDAD ====================
 
 /**
@@ -588,8 +816,17 @@ export const getCostAnalysis = async (params) => {
  * Obtener KPIs financieros
  */
 export const getFinancialKPIs = async (params) => {
-  const response = await axios.get(`${BASE_URL}/reports/financial-kpis`, { params });
-  return response.data;
+  try {
+    const response = await axios.get(`${BASE_URL}/reports/financial-kpis`, { params });
+    return response.data;
+  } catch (error) {
+    const status = error?.response?.status;
+    if (status && [401, 403].includes(status)) {
+      throw error;
+    }
+    if (!status) throw error;
+    return buildKPIsFromOperationalData(params);
+  }
 };
 
 /**

@@ -147,6 +147,55 @@ async function closeTicket(req, res, next) {
   }
 }
 
+async function updateTicketStatus(req, res, next) {
+  try {
+    const auth = requireAuthContext(req, res);
+    if (!auth) return;
+    const ticketId = requireTicketId(req, res);
+    if (!ticketId) return;
+
+    const allowedStatuses = ['open', 'in_progress', 'resolved', 'closed'];
+    const status = req.body?.status;
+    const hasAssignedTo = Object.prototype.hasOwnProperty.call(req.body || {}, 'assignedTo');
+    const assignedTo = hasAssignedTo ? req.body.assignedTo : undefined;
+
+    if (!status && !hasAssignedTo) {
+      return res
+        .status(400)
+        .json(envelopeError('VALIDATION_ERROR', 'At least one field is required', [{ field: 'status|assignedTo' }]));
+    }
+
+    if (status && !allowedStatuses.includes(status)) {
+      return res.status(400).json(
+        envelopeError('VALIDATION_ERROR', 'Invalid status value', [
+          { field: 'status', message: `Allowed values: ${allowedStatuses.join(', ')}` }
+        ])
+      );
+    }
+
+    if (hasAssignedTo && assignedTo && !isUuid(assignedTo)) {
+      return res.status(400).json(
+        envelopeError('VALIDATION_ERROR', 'Invalid assignedTo value', [
+          { field: 'assignedTo', message: 'Must be a valid UUID or null' }
+        ])
+      );
+    }
+
+    const updated = await supportService.updateTicketWorkflow(ticketId, auth.userId, auth.companyId, {
+      status,
+      ...(hasAssignedTo ? { assignedTo: assignedTo || null } : {})
+    });
+
+    if (!updated) {
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', 'Ticket not found'));
+    }
+
+    return res.json(envelopeSuccess(updated));
+  } catch (err) {
+    return next(err);
+  }
+}
+
 async function getTimeline(req, res, next) {
   try {
     const auth = requireAuthContext(req, res);
@@ -262,6 +311,7 @@ module.exports = {
   addMessage,
   assignTicket,
   closeTicket,
+  updateTicketStatus,
   getTimeline,
   getDashboard,
   getStats,

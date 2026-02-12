@@ -1,49 +1,5 @@
 import React from "react";
-import DashboardGrid from "./DashboardGrid";
 import DashboardFilters from "./DashboardFilters";
-
-const kpis = [
-  {
-    label: "Ingresos Totales",
-    value: "1.200.000 €",
-    trend: "+8%",
-    color: "#2563eb",
-  },
-  {
-    label: "Costes Operativos",
-    value: "450.000 €",
-    trend: "-2%",
-    color: "#f59e42",
-  },
-  {
-    label: "Beneficio Neto",
-    value: "750.000 €",
-    trend: "+12%",
-    color: "#10b981",
-  },
-  { label: "Clientes Activos", value: "320", trend: "+5%", color: "#a855f7" },
-];
-
-const widgets = [
-  {
-    title: "Ingresos por Región",
-    type: "bar",
-    data: [
-      { region: "Europa", value: 700000 },
-      { region: "Latam", value: 300000 },
-      { region: "USA", value: 200000 },
-    ],
-  },
-  {
-    title: "Distribución de Clientes",
-    type: "pie",
-    data: [
-      { label: "Grandes", value: 120 },
-      { label: "Medianas", value: 140 },
-      { label: "Pequeñas", value: 60 },
-    ],
-  },
-];
 
 const cardStyle = {
   background: "#fff",
@@ -70,7 +26,7 @@ const widgetGridStyle = {
   gap: "2rem",
 };
 
-const ModuleDashboard = () => (
+const ModuleDashboard = ({ kpis = [], widgets = [] }) => (
   <div style={{ padding: "2rem" }}>
     <h1 style={{ fontSize: "2rem", fontWeight: 700, marginBottom: "0.5rem" }}>
       Business Intelligence - Dashboard
@@ -86,8 +42,8 @@ const ModuleDashboard = () => (
     <div style={kpiGridStyle}>
       {kpis.map((kpi) => (
         <div
-          key={kpi.label}
-          style={{ ...cardStyle, borderTop: `4px solid ${kpi.color}` }}
+          key={kpi.id || kpi.label}
+          style={{ ...cardStyle, borderTop: `4px solid ${kpi.color || "#2563eb"}` }}
         >
           <span
             style={{ color: "#6b7280", fontSize: "0.95rem", marginBottom: 4 }}
@@ -97,9 +53,10 @@ const ModuleDashboard = () => (
           <span style={{ fontSize: "1.7rem", fontWeight: 600 }}>
             {kpi.value}
           </span>
+          {kpi.trend && (
           <span
             style={{
-              color: kpi.trend.startsWith("+") ? "#10b981" : "#ef4444",
+              color: String(kpi.trend).startsWith("+") ? "#10b981" : "#ef4444",
               fontWeight: 500,
               fontSize: "1rem",
               marginTop: 6,
@@ -107,8 +64,14 @@ const ModuleDashboard = () => (
           >
             {kpi.trend}
           </span>
+          )}
         </div>
       ))}
+      {kpis.length === 0 && (
+        <div style={cardStyle}>
+          <span style={{ color: "#6b7280" }}>No hay KPIs disponibles.</span>
+        </div>
+      )}
     </div>
     {/* Widgets */}
     <div style={widgetGridStyle}>
@@ -119,10 +82,10 @@ const ModuleDashboard = () => (
           >
             {widget.title}
           </span>
-          {/* Simulación de gráfico */}
+          {/* Renderizado básico del gráfico */}
           {widget.type === "bar" ? (
             <div style={{ width: "100%", marginTop: 12 }}>
-              {widget.data.map((d) => (
+              {(widget.data || []).map((d) => (
                 <div key={d.region} style={{ marginBottom: 8 }}>
                   <span style={{ display: "inline-block", width: 80 }}>
                     {d.region}
@@ -162,6 +125,11 @@ const ModuleDashboard = () => (
           )}
         </div>
       ))}
+      {widgets.length === 0 && (
+        <div style={cardStyle}>
+          <span style={{ color: "#6b7280" }}>No hay widgets disponibles.</span>
+        </div>
+      )}
     </div>
   </div>
 );

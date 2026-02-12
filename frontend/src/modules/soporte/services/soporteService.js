@@ -3,6 +3,18 @@ import { API_ENDPOINTS } from '../../../config/api';
 
 const normalizeValue = (value) => (value == null ? '' : String(value).trim().toLowerCase());
 
+const FRONTEND_TO_BACKEND_STATUS = {
+  pendiente: 'open',
+  asignado: 'open',
+  en_progreso: 'in_progress',
+  resuelto: 'resolved',
+  cerrado: 'closed',
+  open: 'open',
+  in_progress: 'in_progress',
+  resolved: 'resolved',
+  closed: 'closed',
+};
+
 const normalizeStatus = (status) => {
   const normalized = normalizeValue(status).replace(/\s+/g, '_');
 
@@ -36,6 +48,7 @@ const normalizePriority = (priority) => {
     low: 'baja',
     medium: 'media',
     high: 'alta',
+    urgent: 'critica',
     critical: 'critica',
   };
 
@@ -48,6 +61,7 @@ const normalizeCategory = (category) => {
   const map = {
     technical: 'incidencia',
     billing: 'consulta',
+    other: 'peticion',
     request: 'peticion',
     bug: 'error',
     improvement: 'mejora',
@@ -56,20 +70,25 @@ const normalizeCategory = (category) => {
   return map[normalized] || normalized;
 };
 
-const mapTicket = (ticket = {}) => ({
-  id: ticket.id,
-  titulo: ticket.title,
-  descripcion: ticket.description,
-  categoria: normalizeCategory(ticket.category),
-  prioridad: normalizePriority(ticket.priority),
-  estado: normalizeStatus(ticket.status),
-  empresaId: ticket.company_id,
-  creadorId: ticket.creator_id,
-  asignadoA: ticket.assigned_to,
-  fechaCreacion: ticket.created_at,
-  fechaActualizacion: ticket.updated_at,
-  fechaCierre: ticket.closed_at,
-});
+const mapTicket = (ticket = {}) => {
+  const assignedTo = ticket.assigned_to ?? ticket.asignadoA ?? null;
+  const normalizedStatus = normalizeStatus(ticket.status ?? ticket.estado);
+
+  return {
+    id: ticket.id,
+    titulo: ticket.title ?? ticket.titulo,
+    descripcion: ticket.description ?? ticket.descripcion,
+    categoria: normalizeCategory(ticket.category ?? ticket.categoria),
+    prioridad: normalizePriority(ticket.priority ?? ticket.prioridad),
+    estado: normalizedStatus,
+    empresaId: ticket.company_id ?? ticket.empresaId,
+    creadorId: ticket.creator_id ?? ticket.creadorId,
+    asignadoA: assignedTo,
+    fechaCreacion: ticket.created_at ?? ticket.fechaCreacion,
+    fechaActualizacion: ticket.updated_at ?? ticket.fechaActualizacion,
+    fechaCierre: ticket.closed_at ?? ticket.fechaCierre,
+  };
+};
 
 const mapTimelineItem = (item = {}) => {
   if (item.type === 'message') {
@@ -122,8 +141,10 @@ class SoporteService {
   }
 
   async updateTicket(id, ticketData) {
-    if (ticketData.estado) {
-      return this.changeTicketStatus(id, ticketData.estado);
+    if (ticketData.estado || Object.prototype.hasOwnProperty.call(ticketData, 'asignadoA')) {
+      return this.moveTicketToStatus(id, ticketData.estado, {
+        assignedTo: ticketData.asignadoA,
+      });
     }
     throw new Error('Actualizacion de ticket no implementada en backend');
   }
@@ -133,18 +154,52 @@ class SoporteService {
   }
 
   async assignTicket(id, usuarioId) {
-    const response = await axiosInstance.patch(API_ENDPOINTS.soporte.assign(id), {
-      assignedTo: usuarioId,
+    const response = await axiosInstance.patch(API_ENDPOINTS.soporte.status(id), {
+      assignedTo: usuarioId || null,
     });
-    return response.data;
+    return mapTicket(response.data);
   }
 
   async changeTicketStatus(id, status) {
-    if (status === 'cerrado' || status === 'closed') {
-      const response = await axiosInstance.patch(API_ENDPOINTS.soporte.close(id));
-      return response.data;
+    return this.moveTicketToStatus(id, status);
+  }
+
+  async moveTicketToStatus(id, status, options = {}) {
+    const normalizedStatus = normalizeStatus(status);
+    const backendStatus = FRONTEND_TO_BACKEND_STATUS[normalizedStatus];
+
+    if (!backendStatus && !Object.prototype.hasOwnProperty.call(options, 'assignedTo')) {
+      throw new Error(`Estado no soportado: ${status}`);
     }
-    throw new Error('Cambio de estado solo soporta cierre en backend actual');
+
+    const payload = {};
+
+    if (backendStatus) {
+      payload.status = backendStatus;
+    }
+
+    if (normalizedStatus === 'pendiente') {
+      payload.assignedTo = null;
+    }
+
+    if (normalizedStatus === 'asignado') {
+      const currentUserId = localStorage.getItem('userId');
+      if (!currentUserId) {
+        throw new Error('No se puede asignar el ticket sin usuario autenticado');
+      }
+      payload.assignedTo = currentUserId;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(options, 'assignedTo')) {
+      payload.assignedTo = options.assignedTo || null;
+    }
+
+    if (Object.keys(payload).length === 0) {
+      throw new Error('No hay cambios para aplicar');
+    }
+
+    const response = await axiosInstance.patch(API_ENDPOINTS.soporte.status(id), payload);
+    return mapTicket(response.data);
   }
 
   async escalateTicket() {

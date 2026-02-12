@@ -6,7 +6,6 @@ import {
   Activity,
   AlertCircle,
   CheckCircle,
-  Building2,
   Eye
 } from "lucide-react";
 import { useBIContext } from "../context/BIContext";
@@ -15,7 +14,7 @@ import Card from "../../../components/common/Card";
 import "./DatasetsPage.css";
 
 const DatasetsPage = () => {
-  const { usuario, cambiarEmpresa, getDatasets, syncDataset } = useBIContext();
+  const { usuario, getDatasets, syncDataset } = useBIContext();
   const [datasets, setDatasets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState({});
@@ -81,22 +80,7 @@ const DatasetsPage = () => {
       <PageHeader
         title="Datasets"
         subtitle="Gestiona las fuentes de datos, refrescos y calidad de los datasets utilizados en BI"
-        actions={
-          <>
-            <div className="empresa-selector-demo">
-              <Building2 size={18} />
-              <select 
-                value={usuario.empresaId} 
-                onChange={(e) => cambiarEmpresa(parseInt(e.target.value))}
-                className="empresa-select"
-              >
-                <option value={1}>TechCorp Solutions</option>
-                <option value={2}>InnovaDigital S.A.</option>
-                <option value={3}>GlobalServices Ltd</option>
-              </select>
-            </div>
-          </>
-        }
+        actions={null}
       />
 
       <div className="datasets-grid">
