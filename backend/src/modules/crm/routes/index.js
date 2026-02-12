@@ -5,6 +5,7 @@ const contacts = require('../controllers/contactsController');
 const opportunities = require('../controllers/opportunitiesController');
 const activities = require('../controllers/activitiesController');
 const config = require('../controllers/configController');
+const dashboard = require('../controllers/dashboardController');
 
 const router = express.Router();
 
@@ -15,13 +16,23 @@ router.get('/health', (req, res) => {
 // Apply auth to all CRM routes
 router.use(requireAuth);
 
-// Customers
+// Dashboard
+router.get('/dashboard', dashboard.getDashboard);
+
+// Customers (English + Spanish alias)
 router.get('/customers', customers.listCustomers);
 router.post('/customers', customers.createCustomer);
 router.get('/customers/:id', customers.getCustomer);
 router.put('/customers/:id', customers.updateCustomer);
 router.delete('/customers/:id', customers.deleteCustomer);
 router.post('/customers/:id/convert', customers.convertCustomer);
+
+// Alias en español para customers
+router.get('/clientes', customers.listCustomers);
+router.post('/clientes', customers.createCustomer);
+router.get('/clientes/:id', customers.getCustomer);
+router.put('/clientes/:id', customers.updateCustomer);
+router.delete('/clientes/:id', customers.deleteCustomer);
 
 // Contacts
 router.get('/contacts', contacts.listContacts);

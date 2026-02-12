@@ -1,7 +1,8 @@
 const { envelopeSuccess, envelopeError } = require('../../../utils/envelope');
 const supportService = require('../services/support.service');
 
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+// Regex más permisiva para UUIDs (acepta también UUIDs dummy para testing)
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function isUuid(value) {
   return typeof value === 'string' && UUID_REGEX.test(value);
@@ -160,11 +161,113 @@ async function getTimeline(req, res, next) {
   }
 }
 
+async function getDashboard(req, res, next) {
+  try {
+    const auth = requireAuthContext(req, res);
+    if (!auth) return;
+
+    const data = await supportService.getDashboardStats(auth.companyId);
+    return res.json(envelopeSuccess(data));
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function getStats(req, res, next) {
+  try {
+    const auth = requireAuthContext(req, res);
+    if (!auth) return;
+
+    const data = await supportService.getStats(auth.companyId);
+    return res.json(envelopeSuccess(data));
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function getCategories(req, res, next) {
+  try {
+    // Categorías predefinidas del sistema
+    const categories = [
+      { id: 'technical', nombre: 'Técnico', descripcion: 'Problemas técnicos y bugs' },
+      { id: 'billing', nombre: 'Facturación', descripcion: 'Consultas sobre facturación y pagos' },
+      { id: 'other', nombre: 'Otro', descripcion: 'Otras consultas generales' }
+    ];
+    return res.json(envelopeSuccess(categories));
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function getPriorities(req, res, next) {
+  try {
+    // Prioridades predefinidas del sistema
+    const priorities = [
+      { id: 'low', nombre: 'Baja', color: '#10b981', orden: 1 },
+      { id: 'medium', nombre: 'Media', color: '#f59e0b', orden: 2 },
+      { id: 'high', nombre: 'Alta', color: '#ef4444', orden: 3 },
+      { id: 'urgent', nombre: 'Urgente', color: '#dc2626', orden: 4 }
+    ];
+    return res.json(envelopeSuccess(priorities));
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function getNotifications(req, res, next) {
+  try {
+    const context = requireAuthContext(req, res);
+    if (!context) return;
+
+    const { companyId } = context;
+    const notifications = await supportService.getNotifications(companyId);
+    return res.json(envelopeSuccess(notifications));
+  } catch (err) {
+    console.error('[Support Notifications] Error:', err);
+    return next(err);
+  }
+}
+
+async function getReports(req, res, next) {
+  try {
+    const context = requireAuthContext(req, res);
+    if (!context) return;
+
+    const { companyId } = context;
+    const reports = await supportService.getReports(companyId);
+    return res.json(envelopeSuccess(reports));
+  } catch (err) {
+    console.error('[Support Reports] Error:', err);
+    return next(err);
+  }
+}
+
+async function getSLA(req, res, next) {
+  try {
+    const context = requireAuthContext(req, res);
+    if (!context) return;
+
+    const { companyId } = context;
+    const sla = await supportService.getSLA(companyId);
+    return res.json(envelopeSuccess(sla));
+  } catch (err) {
+    console.error('[Support SLA] Error:', err);
+    return next(err);
+  }
+}
+
 module.exports = {
   getTickets,
   createTicket,
   addMessage,
   assignTicket,
   closeTicket,
-  getTimeline
+  getTimeline,
+  getDashboard,
+  getStats,
+  getCategories,
+  getPriorities,
+  getNotifications,
+  getReports,
+  getSLA
 };

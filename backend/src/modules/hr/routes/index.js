@@ -16,19 +16,35 @@ router.get('/health', (req, res) => {
 
 router.use(requireAuth);
 
-// Canonical (English)
+// Departments (English)
 router.get('/departments', departments.listDepartments);
 router.post('/departments', departments.createDepartment);
 router.get('/departments/:id', departments.getDepartment);
 router.put('/departments/:id', departments.updateDepartment);
 router.delete('/departments/:id', departments.deleteDepartment);
 
+// Alias en español para departments
+router.get('/departamentos', departments.listDepartments);
+router.post('/departamentos', departments.createDepartment);
+router.get('/departamentos/:id', departments.getDepartment);
+router.put('/departamentos/:id', departments.updateDepartment);
+router.delete('/departamentos/:id', departments.deleteDepartment);
+
+// Employees (English)
 router.get('/employees', employees.listEmployees);
 router.post('/employees', employees.createEmployee);
 router.get('/employees/:id', employees.getEmployee);
 router.get('/employees/:id/summary', employees.getEmployeeSummary);
 router.put('/employees/:id', employees.updateEmployee);
 router.delete('/employees/:id', employees.deleteEmployee);
+
+// Alias en español para employees
+router.get('/empleados', employees.listEmployees);
+router.post('/empleados', employees.createEmployee);
+router.get('/empleados/:id', employees.getEmployee);
+router.get('/empleados/:id/summary', employees.getEmployeeSummary);
+router.put('/empleados/:id', employees.updateEmployee);
+router.delete('/empleados/:id', employees.deleteEmployee);
 
 router.get('/contracts', contracts.listContracts);
 router.post('/contracts', contracts.createContract);

@@ -14,7 +14,7 @@ class BIService {
       const empresaId = params.empresaId || 1;
       return mockKPIs[empresaId] || mockKPIs[1];
     }
-    const response = await axiosInstance.get(`${API_ENDPOINTS.bi}/kpis`, { params });
+    const response = await axiosInstance.get(API_ENDPOINTS.bi.kpis, { params });
     return response.data;
   }
 
@@ -26,7 +26,7 @@ class BIService {
       const empresaId = params.empresaId || 1;
       return mockDashboardData[empresaId] || mockDashboardData[1];
     }
-    const response = await axiosInstance.get(`${API_ENDPOINTS.bi}/dashboard`, { params });
+    const response = await axiosInstance.get(API_ENDPOINTS.bi.dashboard, { params });
     return response.data;
   }
 
@@ -39,7 +39,7 @@ class BIService {
       // Filtrar reportes: mostrar compartidos (empresaId: null) y específicos de la empresa
       return mockReports.filter(r => r.empresaId === null || r.empresaId === empresaId);
     }
-    const response = await axiosInstance.get(`${API_ENDPOINTS.bi}/reports`, { params });
+    const response = await axiosInstance.get(API_ENDPOINTS.bi.reports, { params });
     return response.data;
   }
 
@@ -48,7 +48,7 @@ class BIService {
       await new Promise(resolve => setTimeout(resolve, 300));
       return mockReports.find(r => r.id === id);
     }
-    const response = await axiosInstance.get(`${API_ENDPOINTS.bi}/reports/${id}`);
+    const response = await axiosInstance.get(API_ENDPOINTS.bi.reportById(id));
     return response.data;
   }
 
@@ -57,7 +57,7 @@ class BIService {
       await new Promise(resolve => setTimeout(resolve, 1500));
       return { success: true, message: 'Reporte ejecutado correctamente' };
     }
-    const response = await axiosInstance.post(`${API_ENDPOINTS.bi}/reports/${id}/run`);
+    const response = await axiosInstance.post(API_ENDPOINTS.bi.runReport(id));
     return response.data;
   }
 
@@ -67,7 +67,7 @@ class BIService {
       return { success: true, message: `Reporte exportado en ${format}` };
     }
     const response = await axiosInstance.post(
-      `${API_ENDPOINTS.bi}/reports/${id}/export`,
+      API_ENDPOINTS.bi.runReport(id),
       { format },
       { responseType: 'blob' }
     );
@@ -82,7 +82,7 @@ class BIService {
       return mockDatasets[empresaId] || mockDatasets[1];
     }
     const params = empresaId ? { empresaId } : {};
-    const response = await axiosInstance.get(`${API_ENDPOINTS.bi}/datasets`, { params });
+    const response = await axiosInstance.get(API_ENDPOINTS.bi.datasets, { params });
     return response.data;
   }
 
@@ -91,7 +91,7 @@ class BIService {
       await new Promise(resolve => setTimeout(resolve, 2000));
       return { success: true, message: 'Dataset sincronizado correctamente' };
     }
-    const response = await axiosInstance.post(`${API_ENDPOINTS.bi}/datasets/${id}/sync`);
+    const response = await axiosInstance.post(API_ENDPOINTS.bi.datasetById(id) + '/sync');
     return response.data;
   }
 
@@ -103,7 +103,7 @@ class BIService {
       return mockAlerts[empresaId] || mockAlerts[1];
     }
     const params = empresaId ? { empresaId } : {};
-    const response = await axiosInstance.get(`${API_ENDPOINTS.bi}/alerts`, { params });
+    const response = await axiosInstance.get(API_ENDPOINTS.bi.alerts, { params });
     return response.data;
   }
 
@@ -112,7 +112,7 @@ class BIService {
       await new Promise(resolve => setTimeout(resolve, 200));
       return { success: true };
     }
-    const response = await axiosInstance.put(`${API_ENDPOINTS.bi}/alerts/${id}/read`);
+    const response = await axiosInstance.put(API_ENDPOINTS.bi.alerts + `/${id}/read`);
     return response.data;
   }
 
@@ -123,7 +123,7 @@ class BIService {
       await new Promise(resolve => setTimeout(resolve, 400));
       return { id: metricId, data: [] };
     }
-    const response = await axiosInstance.get(`${API_ENDPOINTS.bi}/metrics/${metricId}`, { params });
+    const response = await axiosInstance.get(API_ENDPOINTS.bi.metricById(metricId), { params });
     return response.data;
   }
 }

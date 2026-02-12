@@ -3,6 +3,7 @@ import { API_ENDPOINTS } from '../../../config/api';
 import { mockCustomers, mockLeads, mockOpportunities, mockActivities, mockDashboardData } from '../data/mockData';
 
 // Modo de demostración (cambiar a false cuando el backend esté listo)
+// TODO: Implementar endpoint /dashboard en backend
 const DEMO_MODE = true;
 
 class CRMService {

@@ -16,67 +16,76 @@ export const useBIContext = () => {
 };
 
 export const BIProvider = ({ children }) => {
-  // Usuario y empresa actual (en producción vendría del contexto de auth)
-  const [usuario, setUsuario] = useState({
-    id: 1,
-    nombre: 'Juan Pérez',
-    email: 'juan.perez@techcorp.com',
-    rol: 'analista',
-    empresaId: 1,
-    empresaNombre: 'TechCorp Solutions',
+  // Obtener datos de autenticación desde localStorage
+  const getUserFromStorage = () => {
+    const userId = localStorage.getItem('userId');
+    const companyId = localStorage.getItem('companyId');
+    const token = localStorage.getItem('token');
+    
+    if (!token || !userId || !companyId) {
+      return null;
+    }
+    
+    return {
+      id: userId,
+      companyId: companyId
+    };
+  };
+
+  const [usuario, setUsuario] = useState(() => {
+    const user = getUserFromStorage();
+    return {
+      id: user?.id || null,
+      nombre: 'Usuario',
+      email: '',
+      rol: 'analista',
+      empresaId: user?.companyId || null,
+      empresaNombre: 'EMPRESA DEMO',
+    };
   });
 
   const [loading, setLoading] = useState(false);
 
-  // Cambiar empresa (solo para demo)
-  const cambiarEmpresa = (empresaId) => {
-    const empresas = {
-      1: { nombre: 'TechCorp Solutions' },
-      2: { nombre: 'InnovaDigital S.A.' },
-      3: { nombre: 'GlobalServices Ltd' },
-    };
-    const empresa = empresas[empresaId];
-    if (empresa) {
-      setUsuario({
-        ...usuario,
-        empresaId,
-        empresaNombre: empresa.nombre,
-      });
+  // Actualizar usuario cuando cambia localStorage
+  useEffect(() => {
+    const user = getUserFromStorage();
+    if (user) {
+      setUsuario(prev => ({
+        ...prev,
+        id: user.id,
+        empresaId: user.companyId,
+      }));
     }
+  }, []);
+
+  // Cambiar empresa (deshabilitado en producción)
+  const cambiarEmpresa = (empresaId) => {
+    console.log('Cambio de empresa deshabilitado en modo producción');
   };
 
-  // Obtener KPIs filtrados por empresa
+  // Obtener KPIs (companyId viene del token JWT en backend)
   const getKPIs = async (filters = {}) => {
-    return await biService.getKPIs({
-      ...filters,
-      empresaId: usuario.empresaId,
-    });
+    return await biService.getKPIs(filters);
   };
 
-  // Obtener datos del dashboard filtrados por empresa
+  // Obtener datos del dashboard
   const getDashboardData = async (filters = {}) => {
-    return await biService.getDashboardData({
-      ...filters,
-      empresaId: usuario.empresaId,
-    });
+    return await biService.getDashboardData(filters);
   };
 
   // Obtener reportes
   const getReports = async (filters = {}) => {
-    return await biService.getReports({
-      ...filters,
-      empresaId: usuario.empresaId,
-    });
+    return await biService.getReports(filters);
   };
 
   // Obtener datasets
   const getDatasets = async () => {
-    return await biService.getDatasets(usuario.empresaId);
+    return await biService.getDatasets();
   };
 
   // Obtener alertas
   const getAlerts = async () => {
-    return await biService.getAlerts(usuario.empresaId);
+    return await biService.getAlerts();
   };
 
   const value = {

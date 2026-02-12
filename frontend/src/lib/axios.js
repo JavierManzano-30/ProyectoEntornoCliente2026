@@ -26,31 +26,27 @@ axiosInstance.interceptors.request.use(
 
 // Interceptor para manejar respuestas y errores
 axiosInstance.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Desempaquetar envelope pattern del backend
+    // Si la respuesta tiene { success: true, data: {...} }, extraer solo data
+    if (response.data && response.data.success === true && 'data' in response.data) {
+      response.data = response.data.data;
+    }
+    return response;
+  },
   async (error) => {
-    const originalRequest = error.config;
-
-    // Si el token ha expirado, intentar refrescarlo
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-          refreshToken,
-        });
-
-        const { token } = response.data;
-        localStorage.setItem('token', token);
-
-        originalRequest.headers.Authorization = `Bearer ${token}`;
-        return axiosInstance(originalRequest);
-      } catch (refreshError) {
-        // Si falla el refresh, limpiar tokens y redirigir al login
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
+    // Si el token ha expirado o es inválido, limpiar y redirigir al login
+    if (error.response?.status === 401) {
+      // Limpiar tokens y datos de sesión
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('userId');
+      localStorage.removeItem('companyId');
+      localStorage.removeItem('roleId');
+      
+      // Redirigir al login solo si no estamos ya en login
+      if (!window.location.pathname.includes('/login')) {
         window.location.href = '/login';
-        return Promise.reject(refreshError);
       }
     }
 

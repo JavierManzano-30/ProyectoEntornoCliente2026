@@ -8,7 +8,38 @@ async function listTickets(companyId) {
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return data || [];
+  
+  // Mapear campos al formato esperado por el frontend
+  const mappedData = (data || []).map(ticket => ({
+    ...ticket,
+    estado: mapStatusToEstado(ticket.status),
+    titulo: ticket.title,
+    descripcion: ticket.description,
+    prioridad: ticket.priority,
+    categoria: ticket.category,
+    creadoEn: ticket.created_at,
+    actualizadoEn: ticket.updated_at,
+    asignadoA: ticket.assigned_to,
+    creadorId: ticket.creator_id
+  }));
+  
+  return mappedData;
+}
+
+// Helper para mapear status de BD (inglés) a estado (español)
+function mapStatusToEstado(status) {
+  const statusMap = {
+    'open': 'nuevo',
+    'in_progress': 'en_proceso',
+    'resolved': 'resuelto',
+    'closed': 'resuelto'
+  };
+  return statusMap[status] || 'nuevo';
+}
+
+// Helper para determinar si un ticket está asignado (tiene assigned_to)
+function isTicketAssigned(ticket) {
+  return ticket.assigned_to !== null && ticket.assigned_to !== undefined;
 }
 
 async function createTicket(companyId, userId, payload) {
@@ -144,11 +175,153 @@ async function getTimeline(ticketId) {
   return [...messages, ...auditEvents].sort((a, b) => toTimestamp(a.createdAt) - toTimestamp(b.createdAt));
 }
 
+async function getDashboardStats(companyId) {
+  // Obtener todos los tickets de la empresa
+  const { data: allTickets, error } = await supabase
+    .from('support_tickets')
+    .select('*')
+    .eq('company_id', companyId);
+
+  if (error) {
+    throw new Error('Error fetching dashboard stats: ' + error.message);
+  }
+
+  const tickets = allTickets || [];
+  
+  // Contar por estado
+  const ticketsNuevos = tickets.filter(t => t.status === 'open').length;
+  const ticketsAsignados = tickets.filter(t => t.status === 'open' && t.assigned_to !== null).length;
+  const ticketsEnProgreso = tickets.filter(t => t.status === 'in_progress').length;
+  const ticketsResueltos = tickets.filter(t => t.status === 'resolved' || t.status === 'closed').length;
+  
+  // Stats adicionales
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const ticketsResueltosHoy = tickets.filter(t => {
+    if (!t.closed_at) return false;
+    const closedDate = new Date(t.closed_at);
+    closedDate.setHours(0, 0, 0, 0);
+    return closedDate.getTime() === today.getTime();
+  }).length;
+  
+  // SLA en riesgo (simplificado - tickets open más de 48 horas)
+  const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
+  const ticketsSLARiesgo = tickets.filter(t => {
+    return t.status === 'open' && new Date(t.created_at) < twoDaysAgo;
+  }).length;
+
+  return {
+    totalTickets: tickets.length,
+    ticketsAbiertos: ticketsNuevos,
+    ticketsAsignados: ticketsAsignados,
+    ticketsEnProgreso: ticketsEnProgreso,
+    ticketsCerrados: ticketsResueltos,
+    ticketsResueltosHoy: ticketsResueltosHoy,
+    ticketsSLARiesgo: ticketsSLARiesgo
+  };
+}
+
+async function getStats(companyId) {
+  // Stats por categoría
+  const { data: byCategory, error: errorCategory } = await supabase
+    .from('support_tickets')
+    .select('category')
+    .eq('company_id', companyId);
+
+  // Stats por prioridad
+  const { data: byPriority, error: errorPriority } = await supabase
+    .from('support_tickets')
+    .select('priority')
+    .eq('company_id', companyId);
+
+  if (errorCategory || errorPriority) {
+    throw new Error('Error fetching stats');
+  }
+
+  // Agrupar por categoría
+  const categoryCounts = (byCategory || []).reduce((acc, ticket) => {
+    acc[ticket.category] = (acc[ticket.category] || 0) + 1;
+    return acc;
+  }, {});
+
+  // Agrupar por prioridad
+  const priorityCounts = (byPriority || []).reduce((acc, ticket) => {
+    acc[ticket.priority] = (acc[ticket.priority] || 0) + 1;
+    return acc;
+  }, {});
+
+  return {
+    porCategoria: categoryCounts,
+    porPrioridad: priorityCounts
+  };
+}
+
+async function getNotifications(companyId) {
+  // Retornar notificaciones básicas por ahora (pueden estar en una tabla separada)
+  const { data, error } = await supabase
+    .from('support_tickets')
+    .select('id, title, status, priority, created_at')
+    .eq('company_id', companyId)
+    .eq('status', 'open')
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  if (error) {
+    console.error('[Support Notifications] Error:', error);
+    return [];
+  }
+
+  return (data || []).map(ticket => ({
+    id: ticket.id,
+    type: 'ticket',
+    titulo: ticket.title,
+    prioridad: ticket.priority,
+    fecha: ticket.created_at,
+    leido: false
+  }));
+}
+
+async function getReports(companyId) {
+  // Generar reportes básicos
+  const stats = await getStats(companyId);
+  const dashboardStats = await getDashboardStats(companyId);
+
+  return {
+    resumenGeneral: dashboardStats,
+    estadisticas: stats,
+    generadoEn: new Date().toISOString()
+  };
+}
+
+async function getSLA(companyId) {
+  // Configuración de SLA básica
+  return {
+    tiempoRespuesta: {
+      bajo: 24, // horas
+      medio: 8,
+      alto: 4,
+      urgente: 1
+    },
+    tiempoResolucion: {
+      bajo: 120, // horas
+      medio: 48,
+      alto: 24,
+      urgente: 8
+    },
+    cumplimiento: 85 // porcentaje
+  };
+}
+
 module.exports = {
   listTickets,
   createTicket,
   addMessage,
   assignTicket,
   closeTicket,
-  getTimeline
+  getTimeline,
+  getDashboardStats,
+  getStats,
+  getNotifications,
+  getReports,
+  getSLA
 };

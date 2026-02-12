@@ -6,7 +6,7 @@ import axios from '../../../lib/axios';
  * Producción, Proyectos, Tesorería y Reporting
  */
 
-const BASE_URL = '/api/erp';
+const BASE_URL = '/erp';
 
 // ==================== CONTABILIDAD ====================
 

@@ -16,17 +16,18 @@ export const useSoporteContext = () => {
 };
 
 export const SoporteProvider = ({ children }) => {
-  // Datos del usuario autenticado (normalmente vendrían del contexto de auth)
-  // En DEMO MODE: se puede cambiar la empresa para probar el filtrado
-  const [usuario, setUsuario] = useState({
-    id: 1,
-    nombre: 'Juan Pérez',
-    email: 'juan.perez@techcorp.com',
-    rol: 'agente',
-    empresaId: 1,
-    empresaNombre: 'TechCorp Solutions',
-    departamentoId: 1,
-    departamentoNombre: 'TI e Infraestructura',
+  // Datos del usuario autenticado desde localStorage
+  const [usuario, setUsuario] = useState(() => {
+    const userId = localStorage.getItem('userId');
+    const companyId = localStorage.getItem('companyId');
+    const roleId = localStorage.getItem('roleId');
+    
+    return {
+      id: userId || null,
+      empresaId: companyId || null,
+      rolId: roleId || null,
+      rol: 'agente', // Por defecto, se puede obtener del backend
+    };
   });
 
   // Configuración de la empresa

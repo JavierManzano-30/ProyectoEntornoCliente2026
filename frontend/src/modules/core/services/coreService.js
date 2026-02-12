@@ -2,18 +2,18 @@ import api from '../../../lib/axios';
 import { mockUsers, mockCompanies, mockRoles, mockDashboardStats } from '../data/mockData';
 
 // Variable para activar/desactivar modo mock (desarrollo)
-const USE_MOCK_DATA = true;
+const USE_MOCK_DATA = false;
 
 // Función helper para simular delay de API
 const mockDelay = (data) => new Promise(resolve => setTimeout(() => resolve(data), 300));
 
 // Endpoints base
 const ENDPOINTS = {
-  USERS: '/api/v1/core/usuarios',
-  COMPANIES: '/api/v1/core/empresas',
-  ROLES: '/api/v1/core/roles',
-  AUTH: '/api/v1/core/auth',
-  DASHBOARD: '/api/v1/core/dashboard',
+  USERS: '/core/usuarios',
+  COMPANIES: '/core/empresas',
+  ROLES: '/core/roles',
+  AUTH: '/core/auth',
+  DASHBOARD: '/core/dashboard',
 };
 
 // ========== USUARIOS ==========

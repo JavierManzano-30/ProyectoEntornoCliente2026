@@ -1,11 +1,33 @@
 const { randomUUID } = require('crypto');
 const supabase = require('../../../config/supabase');
+const { envelopeSuccess, envelopeError } = require('../../../utils/envelope');
 
-async function createCompany(req, res) {
+// GET /api/v1/core/companies - List all companies (admin only for now)
+async function listCompanies(req, res, next) {
+  try {
+    const { data, error } = await supabase
+      .from('core_companies')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      return res.status(500).json(envelopeError('DATABASE_ERROR', 'Error fetching companies', error.message));
+    }
+
+    return res.json(envelopeSuccess(data || []));
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function createCompany(req, res, next) {
   const { name, tax_id: taxId, domain, settings, is_active: isActive } = req.body || {};
 
   if (!name || !taxId) {
-    return res.status(400).json({ error: 'Missing required fields (name, tax_id)' });
+    return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Missing required fields', [
+      { field: 'name' },
+      { field: 'tax_id' }
+    ]));
   }
 
   const companyId = randomUUID();
@@ -26,18 +48,18 @@ async function createCompany(req, res) {
     .single();
 
   if (error) {
-    return res.status(500).json({ error: 'Company creation failed', details: error.message || error });
+    return res.status(500).json(envelopeError('DATABASE_ERROR', 'Company creation failed', error.message));
   }
 
-  return res.status(201).json(data);
+  return res.status(201).json(envelopeSuccess(data));
 }
 
-async function getCompany(req, res) {
+async function getCompany(req, res, next) {
   const requestedId = req.params.id;
   const companyId = requestedId || req.user.companyId;
 
   if (requestedId && requestedId !== req.user.companyId) {
-    return res.status(403).json({ error: 'Forbidden' });
+    return res.status(403).json(envelopeError('FORBIDDEN', 'Access denied'));
   }
 
   const { data, error } = await supabase
@@ -47,18 +69,18 @@ async function getCompany(req, res) {
     .single();
 
   if (error) {
-    return res.status(404).json({ error: 'Company not found' });
+    return res.status(404).json(envelopeError('NOT_FOUND', 'Company not found'));
   }
 
-  return res.status(200).json(data);
+  return res.status(200).json(envelopeSuccess(data));
 }
 
-async function updateCompany(req, res) {
+async function updateCompany(req, res, next) {
   const requestedId = req.params.id;
   const companyId = requestedId || req.user.companyId;
 
   if (requestedId && requestedId !== req.user.companyId) {
-    return res.status(403).json({ error: 'Forbidden' });
+    return res.status(403).json(envelopeError('FORBIDDEN', 'Access denied'));
   }
 
   const updates = { ...req.body };
@@ -72,18 +94,18 @@ async function updateCompany(req, res) {
     .single();
 
   if (error) {
-    return res.status(500).json({ error: 'Company update failed', details: error.message || error });
+    return res.status(500).json(envelopeError('DATABASE_ERROR', 'Company update failed', error.message));
   }
 
-  return res.status(200).json(data);
+  return res.status(200).json(envelopeSuccess(data));
 }
 
-async function deleteCompany(req, res) {
+async function deleteCompany(req, res, next) {
   const requestedId = req.params.id;
   const companyId = requestedId || req.user.companyId;
 
   if (requestedId && requestedId !== req.user.companyId) {
-    return res.status(403).json({ error: 'Forbidden' });
+    return res.status(403).json(envelopeError('FORBIDDEN', 'Access denied'));
   }
 
   const { error } = await supabase
@@ -92,13 +114,14 @@ async function deleteCompany(req, res) {
     .eq('id', companyId);
 
   if (error) {
-    return res.status(500).json({ error: 'Company deletion failed', details: error.message || error });
+    return res.status(500).json(envelopeError('DATABASE_ERROR', 'Company deletion failed', error.message));
   }
 
   return res.status(204).send();
 }
 
 module.exports = {
+  listCompanies,
   createCompany,
   getCompany,
   updateCompany,
