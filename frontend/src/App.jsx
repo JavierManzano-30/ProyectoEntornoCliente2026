@@ -70,6 +70,7 @@ import {
 // Páginas del módulo BPM
 import {
   BPMDashboard,
+  ProcessForm,
   ProcessList,
   ProcessDesigner,
   ProcessStartForm,
@@ -192,7 +193,7 @@ function App() {
               <Route index element={<BPMDashboard />} />
               <Route path="dashboard" element={<BPMDashboard />} />
               <Route path="procesos" element={<ProcessList />} />
-              <Route path="procesos/nuevo" element={<ProcessStartForm />} />
+              <Route path="procesos/nuevo" element={<ProcessForm />} />
               <Route path="procesos/:id/diseñar" element={<ProcessDesigner />} />
               <Route path="procesos/:id/iniciar" element={<ProcessStartForm />} />
               <Route path="tareas" element={<TaskInbox />} />

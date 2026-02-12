@@ -3,6 +3,7 @@
  */
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useProcesses } from '../hooks/useProcesses';
 import ProcessCard from '../components/processes/ProcessCard';
 import ProcessTable from '../components/processes/ProcessTable';
@@ -11,6 +12,7 @@ import { Plus, Grid3X3, List } from 'lucide-react';
 import './ProcessList.css';
 
 const ProcessList = () => {
+  const navigate = useNavigate();
   const { processes, loading, filters, setFilters } = useProcesses();
   const [viewType, setViewType] = useState('grid'); // grid o table
 
@@ -21,7 +23,10 @@ const ProcessList = () => {
           <h1>Procesos BPM</h1>
           <p className="subtitle">Gestiona tus procesos de negocio</p>
         </div>
-        <button className="btn-primary">
+        <button
+          className="btn-primary"
+          onClick={() => navigate('/bpm/procesos/nuevo')}
+        >
           <Plus size={20} />
           Nuevo Proceso
         </button>

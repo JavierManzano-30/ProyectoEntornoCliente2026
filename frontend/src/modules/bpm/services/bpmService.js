@@ -59,6 +59,14 @@ const normalizeInstanceStatus = (status) =>
 const normalizeTaskStatus = (status) =>
   TASK_STATUS_FROM_API[status] || status || 'pending';
 
+const normalizeProcessPayload = (processData = {}) => {
+  const payload = { ...processData };
+  if (payload.status !== undefined) {
+    payload.status = PROCESS_STATUS_TO_API[payload.status] || payload.status;
+  }
+  return payload;
+};
+
 const normalizeProcessFilters = (filters = {}) => {
   const normalized = { ...filters };
   if (normalized.busqueda !== undefined) {
@@ -237,7 +245,10 @@ export const bpmService = {
    * Crear un nuevo proceso
    */
   createProcess: async (processData) => {
-    const response = await apiClient.post(`${BASE_URL}/procesos`, processData);
+    const response = await apiClient.post(
+      `${BASE_URL}/procesos`,
+      normalizeProcessPayload(processData)
+    );
     const payload = unwrapResponse(response);
     return normalizeProcess(payload);
   },
@@ -246,7 +257,10 @@ export const bpmService = {
    * Actualizar un proceso
    */
   updateProcess: async (id, processData) => {
-    const response = await apiClient.put(`${BASE_URL}/procesos/${id}`, processData);
+    const response = await apiClient.put(
+      `${BASE_URL}/procesos/${id}`,
+      normalizeProcessPayload(processData)
+    );
     const payload = unwrapResponse(response);
     return normalizeProcess(payload);
   },

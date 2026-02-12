@@ -5,6 +5,7 @@
 
 // Páginas
 export { default as BPMDashboard } from './pages/BPMDashboard';
+export { default as ProcessForm } from './pages/ProcessForm';
 export { default as ProcessList } from './pages/ProcessList';
 export { default as ProcessStartForm } from './pages/ProcessStartForm';
 export { default as ProcessDesigner } from './pages/ProcessDesigner';

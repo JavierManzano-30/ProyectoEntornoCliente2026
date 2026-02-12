@@ -3,14 +3,18 @@
  */
 
 import React, { useState } from 'react';
-import { useProcesses } from '../hooks/useProcesses';
-import DynamicFormBuilder from '../components/forms/DynamicFormBuilder';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useProcess } from '../hooks/useProcess';
 import { bpmService } from '../services/bpmService';
+import DynamicFormBuilder from '../components/forms/DynamicFormBuilder';
 import { AlertCircle } from 'lucide-react';
 import './ProcessStartForm.css';
 
 const ProcessStartForm = ({ processId, onSuccess, onCancel }) => {
-  const { process, loading: processLoading } = useProcesses(processId);
+  const navigate = useNavigate();
+  const params = useParams();
+  const resolvedProcessId = processId || params.id;
+  const { process, loading: processLoading } = useProcess(resolvedProcessId);
   const [formData] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -20,8 +24,14 @@ const ProcessStartForm = ({ processId, onSuccess, onCancel }) => {
     setError('');
 
     try {
-      const instance = await bpmService.startInstance(processId, data);
-      onSuccess && onSuccess(instance);
+      const instance = await bpmService.startInstance(resolvedProcessId, data);
+      if (onSuccess) {
+        onSuccess(instance);
+      } else if (instance?.id) {
+        navigate(`/bpm/instancias/${instance.id}`);
+      } else {
+        navigate('/bpm/procesos');
+      }
     } catch (err) {
       setError('Error al iniciar el proceso. Por favor, intente nuevamente.');
       console.error('Error:', err);
@@ -73,7 +83,7 @@ const ProcessStartForm = ({ processId, onSuccess, onCancel }) => {
             formDefinition={formDefinition}
             initialValues={formData}
             onSubmit={handleSubmit}
-            onCancel={onCancel}
+            onCancel={onCancel || (() => navigate('/bpm/procesos'))}
             submitButtonText="Iniciar Proceso"
             loading={loading}
           />

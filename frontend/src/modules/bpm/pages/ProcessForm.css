@@ -1,0 +1,136 @@
+.process-form-page {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.process-form-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: #1f2937;
+}
+
+.process-form-header p {
+  margin: 0.5rem 0 0;
+  color: #6b7280;
+}
+
+.process-form-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #fecaca;
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.process-form-card {
+  margin-top: 1.5rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+}
+
+.process-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.process-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.process-form-field span {
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 600;
+}
+
+.process-form-field input,
+.process-form-field select,
+.process-form-field textarea {
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  padding: 0.7rem 0.85rem;
+  font-size: 0.95rem;
+  color: #111827;
+  background: #ffffff;
+}
+
+.process-form-field input:focus,
+.process-form-field select:focus,
+.process-form-field textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.process-form-field--full {
+  grid-column: 1 / -1;
+}
+
+.process-form-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.process-form-actions .btn-secondary,
+.process-form-actions .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+@media (max-width: 760px) {
+  .process-form-page {
+    padding: 1rem;
+  }
+
+  .process-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .process-form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .process-form-actions .btn-secondary,
+  .process-form-actions .btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+body.dark-mode .process-form-header h1 {
+  color: #f3f4f6;
+}
+
+body.dark-mode .process-form-header p {
+  color: #9ca3af;
+}
+
+body.dark-mode .process-form-card {
+  background: #111827;
+  border-color: #374151;
+}
+
+body.dark-mode .process-form-field span {
+  color: #d1d5db;
+}
+
+body.dark-mode .process-form-field input,
+body.dark-mode .process-form-field select,
+body.dark-mode .process-form-field textarea {
+  color: #f9fafb;
+  background: #1f2937;
+  border-color: #4b5563;
+}
