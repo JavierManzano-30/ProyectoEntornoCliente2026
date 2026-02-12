@@ -6,6 +6,23 @@ const STAGE_FALLBACK_BY_SORT = ['prospecto', 'calificacion', 'propuesta', 'negoc
 let stageMapCache = null;
 
 const normalizeNumber = (value) => Number(value || 0);
+const ACTIVITY_TYPE_BACKEND_TO_UI = {
+  call: 'llamada',
+  email: 'email',
+  meeting: 'reunion',
+  note: 'nota',
+  task: 'tarea',
+  appointment: 'cita',
+};
+
+const ACTIVITY_TYPE_UI_TO_BACKEND = {
+  llamada: 'call',
+  email: 'email',
+  reunion: 'meeting',
+  nota: 'note',
+  tarea: 'task',
+  cita: 'appointment',
+};
 
 const resolveStageById = (stageId) => {
   if (!stageMapCache || !stageId) return 'prospecto';
@@ -19,7 +36,7 @@ const mapCustomer = (item = {}) => ({
   estado: item.type === 'customer' ? 'activo' : 'inactivo',
   responsableId: item.responsibleId,
   responsable: item.responsibleId ? { id: item.responsibleId, nombre: 'Responsable' } : null,
-  valorTotal: normalizeNumber(item.totalPipelineValue),
+  valorTotal: normalizeNumber(item.valorTotal ?? item.totalPipelineValue),
   email: item.email,
   telefono: item.phone,
   tipo: item.type,
@@ -38,7 +55,7 @@ const mapLeadFromCustomer = (item = {}) => ({
   estado: item.type === 'lead' ? 'nuevo' : 'calificado',
   responsableId: item.responsibleId,
   responsable: item.responsibleId ? { id: item.responsibleId, nombre: 'Responsable' } : null,
-  valorEstimado: normalizeNumber(item.totalPipelineValue),
+  valorEstimado: normalizeNumber(item.valorEstimado ?? item.totalPipelineValue),
   email: item.email,
   telefono: item.phone,
   fechaCreacion: item.createdAt,
@@ -67,14 +84,14 @@ const mapOpportunity = (item = {}) => ({
 
 const mapActivity = (item = {}) => ({
   id: item.id,
-  titulo: item.title,
+  titulo: item.title || item.subject || '',
   descripcion: item.description,
-  tipo: item.type,
-  estado: item.isCompleted ? 'completada' : 'pendiente',
-  responsableId: item.responsibleId,
-  responsable: item.responsibleId ? { id: item.responsibleId, nombre: 'Responsable' } : null,
-  fechaProgramada: item.scheduledAt,
-  fechaCompletado: item.completedAt,
+  tipo: ACTIVITY_TYPE_BACKEND_TO_UI[item.type] || item.type || 'nota',
+  estado: item.isCompleted || item.completed ? 'completada' : 'pendiente',
+  responsableId: item.responsibleId || item.userId,
+  responsable: item.responsibleId || item.userId ? { id: item.responsibleId || item.userId, nombre: 'Responsable' } : null,
+  fechaProgramada: item.scheduledAt || item.activityAt,
+  fechaCompletado: item.completedAt || null,
   clienteId: item.clientId,
   oportunidadId: item.opportunityId,
   createdAt: item.createdAt,
@@ -110,9 +127,26 @@ async function ensureStageMap() {
 
 class CRMService {
   async getCustomers(params = {}) {
-    const response = await axiosInstance.get(API_ENDPOINTS.crm.customers, { params });
-    const items = Array.isArray(response.data) ? response.data : [];
-    return items.map(mapCustomer);
+    const [customersResponse, opportunitiesResponse] = await Promise.all([
+      axiosInstance.get(API_ENDPOINTS.crm.customers, { params }),
+      axiosInstance.get(API_ENDPOINTS.crm.opportunities),
+    ]);
+
+    const items = Array.isArray(customersResponse.data) ? customersResponse.data : [];
+    const opportunities = Array.isArray(opportunitiesResponse.data) ? opportunitiesResponse.data : [];
+
+    const valueByClientId = opportunities.reduce((acc, opportunity) => {
+      const clientId = opportunity.clientId;
+      if (!clientId) return acc;
+      const currentValue = acc.get(String(clientId)) || 0;
+      acc.set(String(clientId), currentValue + normalizeNumber(opportunity.estimatedValue));
+      return acc;
+    }, new Map());
+
+    return items.map((item) => mapCustomer({
+      ...item,
+      valorTotal: valueByClientId.get(String(item.id)) || 0,
+    }));
   }
 
   async getCustomerById(id) {
@@ -158,9 +192,26 @@ class CRMService {
   }
 
   async getLeads(params = {}) {
-    const response = await axiosInstance.get(API_ENDPOINTS.crm.customers, { params: { ...params, type: 'lead' } });
-    const items = Array.isArray(response.data) ? response.data : [];
-    return items.map(mapLeadFromCustomer);
+    const [leadsResponse, opportunitiesResponse] = await Promise.all([
+      axiosInstance.get(API_ENDPOINTS.crm.customers, { params: { ...params, type: 'lead' } }),
+      axiosInstance.get(API_ENDPOINTS.crm.opportunities),
+    ]);
+
+    const items = Array.isArray(leadsResponse.data) ? leadsResponse.data : [];
+    const opportunities = Array.isArray(opportunitiesResponse.data) ? opportunitiesResponse.data : [];
+
+    const valueByClientId = opportunities.reduce((acc, opportunity) => {
+      const clientId = opportunity.clientId;
+      if (!clientId) return acc;
+      const currentValue = acc.get(String(clientId)) || 0;
+      acc.set(String(clientId), currentValue + normalizeNumber(opportunity.estimatedValue));
+      return acc;
+    }, new Map());
+
+    return items.map((item) => mapLeadFromCustomer({
+      ...item,
+      valorEstimado: valueByClientId.get(String(item.id)) || 0,
+    }));
   }
 
   async getLeadById(id) {
@@ -268,7 +319,25 @@ class CRMService {
   async getActivities(params = {}) {
     const response = await axiosInstance.get(API_ENDPOINTS.crm.activities, { params });
     const items = Array.isArray(response.data) ? response.data : [];
-    return items.map(mapActivity);
+    const [customers, opportunities] = await Promise.all([
+      this.getCustomers(),
+      this.getOpportunities(),
+    ]);
+
+    const customerMap = new Map(customers.map((customer) => [String(customer.id), customer]));
+    const opportunityMap = new Map(opportunities.map((opportunity) => [String(opportunity.id), opportunity]));
+
+    return items.map((item) => {
+      const mapped = mapActivity(item);
+      const customer = mapped.clienteId ? customerMap.get(String(mapped.clienteId)) : null;
+      const opportunity = mapped.oportunidadId ? opportunityMap.get(String(mapped.oportunidadId)) : null;
+
+      return {
+        ...mapped,
+        cliente: customer ? { id: customer.id, nombre: customer.nombre } : null,
+        oportunidad: opportunity ? { id: opportunity.id, nombre: opportunity.nombre } : null,
+      };
+    });
   }
 
   async getActivityById(id) {
@@ -278,14 +347,14 @@ class CRMService {
 
   async createActivity(activityData) {
     const payload = {
-      type: activityData.tipo,
-      title: activityData.titulo,
+      type: ACTIVITY_TYPE_UI_TO_BACKEND[activityData.tipo] || activityData.tipo,
+      subject: activityData.titulo,
       description: activityData.descripcion,
-      scheduledAt: activityData.fechaProgramada,
-      responsibleId: activityData.responsableId,
-      clientId: activityData.clienteId,
-      opportunityId: activityData.oportunidadId,
-      isCompleted: activityData.estado === 'completada',
+      activityAt: activityData.fechaProgramada,
+      userId: activityData.responsableId,
+      clientId: activityData.clienteId || null,
+      opportunityId: activityData.oportunidadId || null,
+      completed: activityData.estado === 'completada',
     };
     const response = await axiosInstance.post(API_ENDPOINTS.crm.activities, payload);
     return mapActivity(response.data);
@@ -293,14 +362,14 @@ class CRMService {
 
   async updateActivity(id, activityData) {
     const payload = {
-      type: activityData.tipo,
-      title: activityData.titulo,
+      type: ACTIVITY_TYPE_UI_TO_BACKEND[activityData.tipo] || activityData.tipo,
+      subject: activityData.titulo,
       description: activityData.descripcion,
-      scheduledAt: activityData.fechaProgramada,
-      responsibleId: activityData.responsableId,
-      clientId: activityData.clienteId,
-      opportunityId: activityData.oportunidadId,
-      isCompleted: activityData.estado === 'completada',
+      activityAt: activityData.fechaProgramada,
+      userId: activityData.responsableId,
+      clientId: activityData.clienteId || null,
+      opportunityId: activityData.oportunidadId || null,
+      completed: activityData.estado === 'completada',
     };
     const response = await axiosInstance.put(API_ENDPOINTS.crm.activityById(id), payload);
     return mapActivity(response.data);

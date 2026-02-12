@@ -40,6 +40,7 @@ import CRMDashboard from "./modules/crm/pages/CRMDashboard";
 import CustomerList from "./modules/crm/pages/CustomerList";
 import LeadList from "./modules/crm/pages/LeadList";
 import OpportunityBoard from "./modules/crm/pages/OpportunityBoard";
+import ActivityList from "./modules/crm/pages/ActivityList";
 
 // Páginas del módulo ALM
 import {
@@ -142,6 +143,7 @@ function App() {
               <Route path="clientes" element={<CustomerList />} />
               <Route path="leads" element={<LeadList />} />
               <Route path="oportunidades" element={<OpportunityBoard />} />
+              <Route path="actividades" element={<ActivityList />} />
             </Route>
 
             {/* Rutas del módulo BI */}

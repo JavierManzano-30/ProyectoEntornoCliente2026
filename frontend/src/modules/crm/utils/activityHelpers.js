@@ -1,4 +1,10 @@
 export const filterActivities = (activities, filters) => {
+  const typeFilter = filters.tipo || filters.type || '';
+  const statusFilter = filters.estado || filters.status || '';
+  const clientFilter = filters.clienteId || filters.clientId || '';
+  const opportunityFilter = filters.oportunidadId || filters.opportunityId || '';
+  const ownerFilter = filters.responsableId || filters.userId || '';
+
   return activities.filter((activity) => {
     // Filtro por búsqueda de texto
     if (filters.search) {
@@ -10,27 +16,27 @@ export const filterActivities = (activities, filters) => {
     }
 
     // Filtro por tipo
-    if (filters.tipo && activity.tipo !== filters.tipo) {
+    if (typeFilter && activity.tipo !== typeFilter) {
       return false;
     }
 
     // Filtro por estado
-    if (filters.estado && activity.estado !== filters.estado) {
+    if (statusFilter && activity.estado !== statusFilter) {
       return false;
     }
 
     // Filtro por cliente
-    if (filters.clienteId && activity.clienteId !== filters.clienteId) {
+    if (clientFilter && activity.clienteId !== clientFilter) {
       return false;
     }
 
     // Filtro por oportunidad
-    if (filters.oportunidadId && activity.oportunidadId !== filters.oportunidadId) {
+    if (opportunityFilter && activity.oportunidadId !== opportunityFilter) {
       return false;
     }
 
     // Filtro por responsable
-    if (filters.responsableId && activity.responsableId !== filters.responsableId) {
+    if (ownerFilter && activity.responsableId !== ownerFilter) {
       return false;
     }
 
