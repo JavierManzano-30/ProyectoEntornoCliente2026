@@ -9,6 +9,28 @@ const ENDPOINTS = {
   EVALUATIONS: '/hr/evaluations',
 };
 
+const buildEmployeeNumber = (id) => {
+  if (!id) return '-';
+  const value = String(id).replace(/-/g, '').toUpperCase();
+  return value.slice(0, 8) || '-';
+};
+
+const toMonthYearFromPeriod = (period) => {
+  if (!period) {
+    return { month: null, year: null };
+  }
+
+  const value = String(period);
+  const [yearPart, monthPart] = value.split('-');
+  const year = Number.parseInt(yearPart, 10);
+  const month = Number.parseInt(monthPart, 10);
+
+  return {
+    month: Number.isFinite(month) ? month : null,
+    year: Number.isFinite(year) ? year : null,
+  };
+};
+
 const mapEmployee = (row = {}) => ({
   id: row.id,
   companyId: row.company_id,
@@ -20,6 +42,9 @@ const mapEmployee = (row = {}) => ({
   departmentId: row.department_id,
   departmentName: row.department_name || row.department?.name || '',
   userId: row.user_id,
+  employeeNumber: row.employee_number || row.employeeNumber || buildEmployeeNumber(row.id),
+  position: row.position || row.job_title || row.contract_type || '',
+  salary: Number(row.salary || 0),
   createdAt: row.created_at,
   updatedAt: row.updated_at,
 });
@@ -32,9 +57,10 @@ const mapAbsence = (row = {}) => ({
   status: row.status,
   startDate: row.start_date,
   endDate: row.end_date,
-  reason: row.reason,
+  reason: row.reason || row.notes || '',
   approvedBy: row.approved_by,
   approvedAt: row.approved_at,
+  employeeName: row.employee_name || row.employeeName || '',
   createdAt: row.created_at,
   updatedAt: row.updated_at,
 });
@@ -45,6 +71,9 @@ const mapDepartment = (row = {}) => ({
   name: row.name,
   description: row.description,
   managerId: row.manager_id,
+  parentId: row.parent_department_id || row.parentId || null,
+  active: row.active,
+  employeeCount: Number(row.employee_count || row.employeeCount || 0),
   createdAt: row.created_at,
   updatedAt: row.updated_at,
 });
@@ -53,11 +82,12 @@ const mapContract = (row = {}) => ({
   id: row.id,
   employeeId: row.employee_id,
   companyId: row.company_id,
-  type: row.type,
+  type: row.type || row.contract_type || '',
   startDate: row.start_date,
   endDate: row.end_date,
   salary: Number(row.salary || 0),
-  status: row.status,
+  status: row.status || (row.active ? 'active' : 'inactive'),
+  active: Boolean(row.active),
   createdAt: row.created_at,
   updatedAt: row.updated_at,
 });
@@ -66,10 +96,16 @@ const mapPayroll = (row = {}) => ({
   id: row.id,
   employeeId: row.employee_id,
   companyId: row.company_id,
-  periodStart: row.period_start,
-  periodEnd: row.period_end,
-  grossSalary: Number(row.gross_salary || 0),
-  netSalary: Number(row.net_salary || 0),
+  period: row.period || '',
+  grossAmount: Number(row.gross_amount || row.grossSalary || 0),
+  netAmount: Number(row.net_amount || row.netSalary || 0),
+  deductions: Math.max(
+    Number(row.gross_amount || row.grossSalary || 0) - Number(row.net_amount || row.netSalary || 0),
+    0
+  ),
+  employeeName: row.employee_name || row.employeeName || '',
+  employeeNumber: row.employee_number || row.employeeNumber || '-',
+  ...toMonthYearFromPeriod(row.period),
   createdAt: row.created_at,
 });
 
@@ -84,13 +120,73 @@ const mapEvaluation = (row = {}) => ({
 });
 
 export const getEmployees = async (params = {}) => {
-  const response = await api.get(ENDPOINTS.EMPLOYEES, { params });
-  return (response.data || []).map(mapEmployee);
+  const [employeesResponse, departmentsResponse, contractsResponse] = await Promise.all([
+    api.get(ENDPOINTS.EMPLOYEES, { params }),
+    api.get(ENDPOINTS.DEPARTMENTS),
+    api.get(ENDPOINTS.CONTRACTS),
+  ]);
+
+  const employees = (employeesResponse.data || []).map(mapEmployee);
+  const departments = (departmentsResponse.data || []).map(mapDepartment);
+  const contracts = (contractsResponse.data || []).map(mapContract);
+
+  const departmentById = new Map(departments.map((department) => [String(department.id), department]));
+  const activeContractByEmployeeId = new Map();
+
+  contracts.forEach((contract) => {
+    if (!contract.employeeId) return;
+    if (contract.active === false && contract.status !== 'active') return;
+
+    const key = String(contract.employeeId);
+    const current = activeContractByEmployeeId.get(key);
+
+    if (!current) {
+      activeContractByEmployeeId.set(key, contract);
+      return;
+    }
+
+    const currentDate = current.startDate ? new Date(current.startDate).getTime() : 0;
+    const candidateDate = contract.startDate ? new Date(contract.startDate).getTime() : 0;
+    if (candidateDate >= currentDate) {
+      activeContractByEmployeeId.set(key, contract);
+    }
+  });
+
+  return employees.map((employee) => {
+    const department = employee.departmentId ? departmentById.get(String(employee.departmentId)) : null;
+    const contract = activeContractByEmployeeId.get(String(employee.id));
+
+    return {
+      ...employee,
+      departmentName: employee.departmentName || department?.name || '',
+      salary: contract?.salary || employee.salary || 0,
+      position: employee.position || contract?.type || '',
+    };
+  });
 };
 
 export const getEmployee = async (id) => {
-  const response = await api.get(`${ENDPOINTS.EMPLOYEES}/${id}`);
-  return mapEmployee(response.data);
+  const [employeeResponse, departmentsResponse, contractsResponse] = await Promise.all([
+    api.get(`${ENDPOINTS.EMPLOYEES}/${id}`),
+    api.get(ENDPOINTS.DEPARTMENTS),
+    api.get(ENDPOINTS.CONTRACTS, { params: { employee_id: id } }),
+  ]);
+
+  const employee = mapEmployee(employeeResponse.data);
+  const departments = (departmentsResponse.data || []).map(mapDepartment);
+  const contracts = (contractsResponse.data || []).map(mapContract);
+
+  const departmentById = new Map(departments.map((department) => [String(department.id), department]));
+  const activeContract =
+    contracts.find((contract) => contract.active || contract.status === 'active') || contracts[0] || null;
+
+  return {
+    ...employee,
+    departmentName:
+      employee.departmentName || departmentById.get(String(employee.departmentId))?.name || '',
+    salary: activeContract?.salary || employee.salary || 0,
+    position: employee.position || activeContract?.type || '',
+  };
 };
 
 export const createEmployee = async (data) => {
@@ -119,8 +215,23 @@ export const getAbsenceBalance = async (employeeId) => {
 };
 
 export const getAbsences = async (params = {}) => {
-  const response = await api.get(ENDPOINTS.ABSENCES, { params });
-  return (response.data || []).map(mapAbsence);
+  const [absencesResponse, employeesResponse] = await Promise.all([
+    api.get(ENDPOINTS.ABSENCES, { params }),
+    api.get(ENDPOINTS.EMPLOYEES),
+  ]);
+
+  const employees = (employeesResponse.data || []).map(mapEmployee);
+  const employeeById = new Map(
+    employees.map((employee) => [String(employee.id), `${employee.firstName || ''} ${employee.lastName || ''}`.trim()])
+  );
+
+  return (absencesResponse.data || []).map((row) => {
+    const mapped = mapAbsence(row);
+    return {
+      ...mapped,
+      employeeName: mapped.employeeName || employeeById.get(String(mapped.employeeId)) || '-',
+    };
+  });
 };
 
 export const getAbsence = async (id) => {
@@ -153,8 +264,23 @@ export const cancelAbsence = async () => {
 };
 
 export const getPayrolls = async (params = {}) => {
-  const response = await api.get(ENDPOINTS.PAYROLLS, { params });
-  return (response.data || []).map(mapPayroll);
+  const [payrollsResponse, employeesResponse] = await Promise.all([
+    api.get(ENDPOINTS.PAYROLLS, { params }),
+    api.get(ENDPOINTS.EMPLOYEES),
+  ]);
+
+  const employees = (employeesResponse.data || []).map(mapEmployee);
+  const employeeById = new Map(employees.map((employee) => [String(employee.id), employee]));
+
+  return (payrollsResponse.data || []).map((row) => {
+    const mapped = mapPayroll(row);
+    const employee = employeeById.get(String(mapped.employeeId));
+    return {
+      ...mapped,
+      employeeName: mapped.employeeName || (employee ? `${employee.firstName} ${employee.lastName}`.trim() : '-'),
+      employeeNumber: mapped.employeeNumber || employee?.employeeNumber || '-',
+    };
+  });
 };
 
 export const getPayroll = async (id) => {
@@ -201,8 +327,25 @@ export const terminateContract = async () => {
 };
 
 export const getDepartments = async (params = {}) => {
-  const response = await api.get(ENDPOINTS.DEPARTMENTS, { params });
-  return (response.data || []).map(mapDepartment);
+  const [departmentsResponse, employeesResponse] = await Promise.all([
+    api.get(ENDPOINTS.DEPARTMENTS, { params }),
+    api.get(ENDPOINTS.EMPLOYEES),
+  ]);
+
+  const departments = (departmentsResponse.data || []).map(mapDepartment);
+  const employees = (employeesResponse.data || []).map(mapEmployee);
+
+  const employeeCountByDepartment = {};
+  employees.forEach((employee) => {
+    if (!employee.departmentId) return;
+    const key = String(employee.departmentId);
+    employeeCountByDepartment[key] = (employeeCountByDepartment[key] || 0) + 1;
+  });
+
+  return departments.map((department) => ({
+    ...department,
+    employeeCount: employeeCountByDepartment[String(department.id)] || department.employeeCount || 0,
+  }));
 };
 
 export const getDepartment = async (id) => {
