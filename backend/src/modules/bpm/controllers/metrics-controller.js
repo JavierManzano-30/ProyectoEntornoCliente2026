@@ -1,58 +1,61 @@
-const { pool } = require('../../../config/db');
+﻿const supabase = require('../../../config/supabase');
 const { envelopeSuccess, envelopeError } = require('../../../utils/envelope');
 
-function isRecoverableSchemaError(error) {
-  return ['42P01', '42703', '22P02'].includes(error?.code);
+function resolveCompanyId(req) {
+  return (
+    req.user?.companyId ||
+    req.user?.company_id ||
+    req.headers['x-company-id'] ||
+    req.query.companyId ||
+    null
+  );
 }
 
-async function safeCount(query, params, label) {
+function resolveUserId(req) {
+  return req.user?.userId || req.user?.user_id || req.headers['x-user-id'] || req.query.userId || null;
+}
+
+async function safeCount(table, companyId, extraFilter) {
   try {
-    const result = await pool.query(query, params);
-    return result.rows[0]?.total || 0;
+    let builder = supabase.from(table).select('*', { count: 'exact', head: true });
+
+    if (companyId) {
+      builder = builder.eq('company_id', companyId);
+    }
+
+    if (extraFilter) {
+      builder = extraFilter(builder);
+    }
+
+    const { count, error } = await builder;
+    if (error) {
+      console.error(`[BPM Metrics] ${table} count failed:`, error.message || error);
+      return 0;
+    }
+
+    return count || 0;
   } catch (error) {
-    console.error(`[BPM Metrics] ${label} count failed:`, error);
+    console.error(`[BPM Metrics] ${table} count failed:`, error.message || error);
     return 0;
   }
 }
 
 // GET /api/v1/bpm/metricas - Metricas del dashboard BPM
-async function getMetrics(req, res, next) {
+async function getMetrics(req, res) {
   try {
-    const companyId = req.user?.companyId;
+    const companyId = resolveCompanyId(req);
 
     if (!companyId) {
       return res.status(403).json(envelopeError('FORBIDDEN', 'Invalid company context'));
     }
 
     const [activeProcesses, activeInstances, pendingTasks, pendingApprovals] = await Promise.all([
-      safeCount(
-        `SELECT COUNT(*)::int AS total
-         FROM bpm_processes
-         WHERE company_id = $1 AND status = 'active'`,
-        [companyId],
-        'processes'
+      safeCount('bpm_processes', companyId, (builder) => builder.eq('status', 'active')),
+      safeCount('bpm_process_instances', companyId, (builder) =>
+        builder.in('status', ['started', 'in_progress'])
       ),
-      safeCount(
-        `SELECT COUNT(*)::int AS total
-         FROM bpm_process_instances
-         WHERE company_id = $1 AND status IN ('started', 'in_progress')`,
-        [companyId],
-        'instances'
-      ),
-      safeCount(
-        `SELECT COUNT(*)::int AS total
-         FROM bpm_process_tasks
-         WHERE company_id = $1 AND status = 'pending'`,
-        [companyId],
-        'tasks'
-      ),
-      safeCount(
-        `SELECT COUNT(*)::int AS total
-         FROM bpm_approval_requests
-         WHERE company_id = $1 AND status = 'pending'`,
-        [companyId],
-        'approvals'
-      )
+      safeCount('bpm_process_tasks', companyId, (builder) => builder.eq('status', 'pending')),
+      safeCount('bpm_approval_requests', companyId, (builder) => builder.eq('status', 'pending'))
     ]);
 
     const metrics = {
@@ -64,17 +67,6 @@ async function getMetrics(req, res, next) {
 
     return res.json(envelopeSuccess(metrics));
   } catch (err) {
-    if (isRecoverableSchemaError(err)) {
-      return res.json(
-        envelopeSuccess({
-          procesosActivos: 0,
-          instanciasActivas: 0,
-          tareasPendientes: 0,
-          aprobacionesPendientes: 0
-        })
-      );
-    }
-
     console.error('[BPM Metrics] Error:', err);
     return res.json(
       envelopeSuccess({
@@ -90,52 +82,128 @@ async function getMetrics(req, res, next) {
 // GET /api/v1/bpm/tareas/bandeja - Bandeja de tareas del usuario
 async function getTaskInbox(req, res, next) {
   try {
-    const companyId = req.user?.companyId;
-    const userId = req.user?.userId;
+    const companyId = resolveCompanyId(req);
+    const userId = resolveUserId(req);
 
-    if (!companyId || !userId) {
-      return res.status(403).json(envelopeError('FORBIDDEN', 'Invalid user context'));
+    if (!companyId) {
+      return res.status(403).json(envelopeError('FORBIDDEN', 'Invalid company context'));
     }
 
-    const { rows } = await pool.query(
-      `SELECT
-         t.id,
-         t.instance_id,
-         t.activity_id,
-         t.assigned_to,
-         t.status,
-         t.due_date,
-         t.start_date,
-         t.completed_at,
-         t.result_json,
-         t.created_at,
-         t.updated_at,
-         COALESCE(a.name, 'Tarea') AS title,
-         a.description,
-         'media'::text AS priority,
-         i.process_id,
-         p.name AS process_name
-       FROM bpm_process_tasks t
-       LEFT JOIN bpm_activities a
-         ON a.id = t.activity_id AND a.company_id = t.company_id
-       LEFT JOIN bpm_process_instances i
-         ON i.id = t.instance_id AND i.company_id = t.company_id
-       LEFT JOIN bpm_processes p
-         ON p.id = i.process_id AND p.company_id = t.company_id
-       WHERE t.company_id = $1
-         AND t.assigned_to = $2
-         AND t.status IN ('pending', 'in_progress')
-       ORDER BY t.due_date ASC NULLS LAST, t.updated_at DESC
-       LIMIT 50`,
-      [companyId, userId]
-    );
+    let taskBuilder = supabase
+      .from('bpm_process_tasks')
+      .select('*')
+      .eq('company_id', companyId)
+      .in('status', ['pending', 'in_progress'])
+      .order('due_date', { ascending: true, nullsFirst: false })
+      .order('updated_at', { ascending: false })
+      .limit(50);
 
-    return res.json(envelopeSuccess(rows || []));
-  } catch (err) {
-    if (isRecoverableSchemaError(err)) {
+    if (userId) {
+      taskBuilder = taskBuilder.eq('assigned_to', userId);
+    }
+
+    let { data: tasks, error } = await taskBuilder;
+    if (error) {
+      console.error('[BPM Task Inbox] list tasks failed:', error.message || error);
       return res.json(envelopeSuccess([]));
     }
 
+    // Fallback para entorno demo: si no hay coincidencias por assigned_to, devolver tareas de la empresa.
+    if ((!tasks || !tasks.length) && userId) {
+      const fallback = await supabase
+        .from('bpm_process_tasks')
+        .select('*')
+        .eq('company_id', companyId)
+        .in('status', ['pending', 'in_progress'])
+        .order('due_date', { ascending: true, nullsFirst: false })
+        .order('updated_at', { ascending: false })
+        .limit(50);
+
+      if (!fallback.error) {
+        tasks = fallback.data || [];
+      }
+    }
+
+    const taskRows = tasks || [];
+    if (!taskRows.length) {
+      return res.json(envelopeSuccess([]));
+    }
+
+    const activityIds = [...new Set(taskRows.map((task) => task.activity_id).filter(Boolean))];
+    const instanceIds = [...new Set(taskRows.map((task) => task.instance_id).filter(Boolean))];
+
+    const [activitiesRes, instancesRes] = await Promise.all([
+      activityIds.length
+        ? supabase
+            .from('bpm_activities')
+            .select('id,name,description')
+            .eq('company_id', companyId)
+            .in('id', activityIds)
+        : Promise.resolve({ data: [], error: null }),
+      instanceIds.length
+        ? supabase
+            .from('bpm_process_instances')
+            .select('id,process_id')
+            .eq('company_id', companyId)
+            .in('id', instanceIds)
+        : Promise.resolve({ data: [], error: null })
+    ]);
+
+    if (activitiesRes.error) {
+      console.error('[BPM Task Inbox] list activities failed:', activitiesRes.error.message || activitiesRes.error);
+    }
+
+    if (instancesRes.error) {
+      console.error('[BPM Task Inbox] list instances failed:', instancesRes.error.message || instancesRes.error);
+    }
+
+    const instances = instancesRes.data || [];
+    const processIds = [...new Set(instances.map((instance) => instance.process_id).filter(Boolean))];
+
+    const processesRes = processIds.length
+      ? await supabase
+          .from('bpm_processes')
+          .select('id,name')
+          .eq('company_id', companyId)
+          .in('id', processIds)
+      : { data: [], error: null };
+
+    if (processesRes.error) {
+      console.error('[BPM Task Inbox] list processes failed:', processesRes.error.message || processesRes.error);
+    }
+
+    const activityById = (activitiesRes.data || []).reduce((acc, row) => {
+      acc[row.id] = row;
+      return acc;
+    }, {});
+
+    const instanceById = instances.reduce((acc, row) => {
+      acc[row.id] = row;
+      return acc;
+    }, {});
+
+    const processById = (processesRes.data || []).reduce((acc, row) => {
+      acc[row.id] = row;
+      return acc;
+    }, {});
+
+    const rows = taskRows.map((task) => {
+      const activity = activityById[task.activity_id] || {};
+      const instance = instanceById[task.instance_id] || {};
+      const process = processById[instance.process_id] || {};
+
+      return {
+        ...task,
+        title: activity.name || 'Tarea',
+        description: activity.description || '',
+        priority: 'normal',
+        process_id: instance.process_id || null,
+        process_name: process.name || ''
+      };
+    });
+
+    return res.json(envelopeSuccess(rows));
+  } catch (err) {
     console.error('[BPM Task Inbox] Error:', err);
     return next(err);
   }

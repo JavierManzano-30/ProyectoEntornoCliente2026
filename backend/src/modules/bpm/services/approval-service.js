@@ -1,186 +1,235 @@
-const { pool } = require('../../../config/db');
+﻿const supabase = require('../../../config/supabase');
 const { generateId } = require('../../../utils/id');
 
-async function listApprovals(companyId, { limit, offset, processId }) {
-  const filters = [];
-  const values = [];
+function applyCompanyFilter(builder, companyId) {
+  if (companyId) {
+    return builder.eq('company_id', companyId);
+  }
+  return builder;
+}
 
-  values.push(companyId);
-  filters.push(`company_id = $${values.length}`);
+async function listApprovals(companyId, { limit, offset, processId }) {
+  let builder = supabase
+    .from('bpm_approvals')
+    .select('*', { count: 'exact' });
+
+  builder = applyCompanyFilter(builder, companyId);
 
   if (processId) {
-    values.push(processId);
-    filters.push(`process_id = $${values.length}`);
+    builder = builder.eq('process_id', processId);
   }
 
-  const whereClause = `WHERE ${filters.join(' AND ')}`;
+  const { data, error, count } = await builder
+    .order('created_at', { ascending: false })
+    .range(offset, offset + limit - 1);
 
-  const countResult = await pool.query(
-    `SELECT COUNT(*)::int AS total FROM bpm_approvals ${whereClause}`,
-    values
-  );
-  const totalItems = countResult.rows[0]?.total || 0;
-
-  values.push(limit, offset);
-  const { rows } = await pool.query(
-    `SELECT * FROM bpm_approvals ${whereClause}
-     ORDER BY created_at DESC
-     LIMIT $${values.length - 1} OFFSET $${values.length}`,
-    values
-  );
-
-  return { rows, totalItems };
+  if (error) throw error;
+  return { rows: data || [], totalItems: count || 0 };
 }
 
 async function createApproval(companyId, data) {
   const id = generateId('bpm_appr');
   const now = new Date().toISOString();
-  const { rows } = await pool.query(
-    `INSERT INTO bpm_approvals (id, company_id, process_id, name, document_type, level, required_approvers, sla_hours, created_at, updated_at)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-     RETURNING *`,
-    [
-      id, companyId, data.processId, data.name,
-      data.documentType || null, data.level, data.requiredApprovers,
-      data.slaHours || null, now, now
-    ]
-  );
-  return rows[0];
+
+  const { data: row, error } = await supabase
+    .from('bpm_approvals')
+    .insert([
+      {
+        id,
+        company_id: companyId,
+        process_id: data.processId,
+        name: data.name,
+        document_type: data.documentType || null,
+        level: data.level,
+        required_approvers: data.requiredApprovers,
+        sla_hours: data.slaHours || null,
+        created_at: now,
+        updated_at: now
+      }
+    ])
+    .select('*')
+    .single();
+
+  if (error) throw error;
+  return row;
 }
 
 async function getApprovalById(companyId, id) {
-  const { rows } = await pool.query(
-    'SELECT * FROM bpm_approvals WHERE id = $1 AND company_id = $2',
-    [id, companyId]
-  );
-  return rows[0] || null;
+  let builder = supabase
+    .from('bpm_approvals')
+    .select('*')
+    .eq('id', id)
+    .limit(1);
+
+  builder = applyCompanyFilter(builder, companyId);
+
+  const { data, error } = await builder.maybeSingle();
+  if (error) throw error;
+  return data || null;
 }
 
 async function updateApproval(companyId, id, data) {
   const now = new Date().toISOString();
-  const { rows } = await pool.query(
-    `UPDATE bpm_approvals
-     SET name = COALESCE($1, name),
-         document_type = COALESCE($2, document_type),
-         level = COALESCE($3, level),
-         required_approvers = COALESCE($4, required_approvers),
-         sla_hours = COALESCE($5, sla_hours),
-         updated_at = $6
-     WHERE id = $7 AND company_id = $8
-     RETURNING *`,
-    [
-      data.name || null, data.documentType || null,
-      data.level || null, data.requiredApprovers || null,
-      data.slaHours || null, now, id, companyId
-    ]
-  );
-  return rows[0] || null;
+
+  const patch = {
+    updated_at: now
+  };
+
+  if (data.name !== undefined) patch.name = data.name;
+  if (data.documentType !== undefined) patch.document_type = data.documentType;
+  if (data.level !== undefined) patch.level = data.level;
+  if (data.requiredApprovers !== undefined) patch.required_approvers = data.requiredApprovers;
+  if (data.slaHours !== undefined) patch.sla_hours = data.slaHours;
+
+  let builder = supabase
+    .from('bpm_approvals')
+    .update(patch)
+    .eq('id', id)
+    .select('*')
+    .limit(1);
+
+  builder = applyCompanyFilter(builder, companyId);
+
+  const { data: row, error } = await builder.maybeSingle();
+  if (error) throw error;
+  return row || null;
 }
 
 async function deleteApproval(companyId, id) {
-  const { rowCount } = await pool.query(
-    'DELETE FROM bpm_approvals WHERE id = $1 AND company_id = $2',
-    [id, companyId]
-  );
-  return rowCount > 0;
+  let builder = supabase
+    .from('bpm_approvals')
+    .delete()
+    .eq('id', id)
+    .select('id')
+    .limit(1);
+
+  builder = applyCompanyFilter(builder, companyId);
+
+  const { data, error } = await builder.maybeSingle();
+  if (error) throw error;
+  return !!data;
 }
 
 async function listRequests(companyId, { limit, offset, approvalId, status }) {
-  const filters = [];
-  const values = [];
+  let builder = supabase
+    .from('bpm_approval_requests')
+    .select('*', { count: 'exact' });
 
-  values.push(companyId);
-  filters.push(`company_id = $${values.length}`);
+  builder = applyCompanyFilter(builder, companyId);
 
   if (approvalId) {
-    values.push(approvalId);
-    filters.push(`approval_id = $${values.length}`);
+    builder = builder.eq('approval_id', approvalId);
   }
+
   if (status) {
-    values.push(status);
-    filters.push(`status = $${values.length}`);
+    builder = builder.eq('status', status);
   }
 
-  const whereClause = `WHERE ${filters.join(' AND ')}`;
+  const { data, error, count } = await builder
+    .order('created_at', { ascending: false })
+    .range(offset, offset + limit - 1);
 
-  const countResult = await pool.query(
-    `SELECT COUNT(*)::int AS total FROM bpm_approval_requests ${whereClause}`,
-    values
-  );
-  const totalItems = countResult.rows[0]?.total || 0;
-
-  values.push(limit, offset);
-  const { rows } = await pool.query(
-    `SELECT * FROM bpm_approval_requests ${whereClause}
-     ORDER BY created_at DESC
-     LIMIT $${values.length - 1} OFFSET $${values.length}`,
-    values
-  );
-
-  return { rows, totalItems };
+  if (error) throw error;
+  return { rows: data || [], totalItems: count || 0 };
 }
 
 async function getRequestById(companyId, id) {
-  const { rows } = await pool.query(
-    'SELECT * FROM bpm_approval_requests WHERE id = $1 AND company_id = $2',
-    [id, companyId]
-  );
-  return rows[0] || null;
+  let builder = supabase
+    .from('bpm_approval_requests')
+    .select('*')
+    .eq('id', id)
+    .limit(1);
+
+  builder = applyCompanyFilter(builder, companyId);
+
+  const { data, error } = await builder.maybeSingle();
+  if (error) throw error;
+  return data || null;
 }
 
 async function createRequest(companyId, data) {
   const id = generateId('bpm_areq');
   const now = new Date().toISOString();
-  const { rows } = await pool.query(
-    `INSERT INTO bpm_approval_requests
-       (id, company_id, approval_id, reference_id, reference_type, requester_id, status, priority, due_date, start_date, created_at, updated_at)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
-     RETURNING *`,
-    [
-      id, companyId, data.approvalId,
-      data.referenceId || null, data.referenceType || null,
-      data.requesterId, 'pending', data.priority,
-      data.dueDate || null, now, now, now
-    ]
-  );
-  return rows[0];
+
+  const { data: row, error } = await supabase
+    .from('bpm_approval_requests')
+    .insert([
+      {
+        id,
+        company_id: companyId,
+        approval_id: data.approvalId,
+        reference_id: data.referenceId || null,
+        reference_type: data.referenceType || null,
+        requester_id: data.requesterId,
+        status: 'pending',
+        priority: data.priority,
+        due_date: data.dueDate || null,
+        start_date: now,
+        created_at: now,
+        updated_at: now
+      }
+    ])
+    .select('*')
+    .single();
+
+  if (error) throw error;
+  return row;
 }
 
 async function updateRequestStatus(companyId, id, status) {
   const now = new Date().toISOString();
-  const { rows } = await pool.query(
-    `UPDATE bpm_approval_requests
-     SET status = $1, updated_at = $2
-     WHERE id = $3 AND company_id = $4
-     RETURNING *`,
-    [status, now, id, companyId]
-  );
-  return rows[0] || null;
+
+  let builder = supabase
+    .from('bpm_approval_requests')
+    .update({ status, updated_at: now })
+    .eq('id', id)
+    .select('*')
+    .limit(1);
+
+  builder = applyCompanyFilter(builder, companyId);
+
+  const { data: row, error } = await builder.maybeSingle();
+  if (error) throw error;
+  return row || null;
 }
 
 async function listResponses(companyId, requestId) {
-  const { rows } = await pool.query(
-    `SELECT * FROM bpm_approval_responses
-     WHERE company_id = $1 AND request_id = $2
-     ORDER BY created_at ASC`,
-    [companyId, requestId]
-  );
-  return rows;
+  let builder = supabase
+    .from('bpm_approval_responses')
+    .select('*')
+    .eq('request_id', requestId)
+    .order('created_at', { ascending: true });
+
+  builder = applyCompanyFilter(builder, companyId);
+
+  const { data, error } = await builder;
+  if (error) throw error;
+  return data || [];
 }
 
 async function addResponse(companyId, requestId, data) {
   const id = generateId('bpm_ares');
   const now = new Date().toISOString();
-  const { rows } = await pool.query(
-    `INSERT INTO bpm_approval_responses (id, company_id, request_id, approver_id, decision, comments, created_at, updated_at)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-     RETURNING *`,
-    [
-      id, companyId, requestId, data.approverId,
-      data.decision, data.comments || null, now, now
-    ]
-  );
-  return rows[0];
+
+  const { data: row, error } = await supabase
+    .from('bpm_approval_responses')
+    .insert([
+      {
+        id,
+        company_id: companyId,
+        request_id: requestId,
+        approver_id: data.approverId,
+        decision: data.decision,
+        comments: data.comments || null,
+        created_at: now,
+        updated_at: now
+      }
+    ])
+    .select('*')
+    .single();
+
+  if (error) throw error;
+  return row;
 }
 
 module.exports = {

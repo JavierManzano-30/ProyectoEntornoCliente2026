@@ -14,9 +14,21 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
+    const companyId = localStorage.getItem('companyId');
+    const userId = localStorage.getItem('userId');
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    if (companyId) {
+      config.headers['x-company-id'] = companyId;
+    }
+
+    if (userId) {
+      config.headers['x-user-id'] = userId;
+    }
+
     return config;
   },
   (error) => {

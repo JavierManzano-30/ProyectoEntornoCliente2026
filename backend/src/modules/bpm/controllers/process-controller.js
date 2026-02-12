@@ -4,7 +4,14 @@ const { validateRequiredFields, validateEnum } = require('../../../utils/validat
 const processService = require('../services/process-service');
 
 function resolveCompanyId(req) {
-  return req.user?.companyId || req.user?.companyId || req.user?.company_id || null;
+  return (
+    req.user?.companyId ||
+    req.user?.company_id ||
+    req.headers['x-company-id'] ||
+    req.query.companyId ||
+    req.body?.companyId ||
+    null
+  );
 }
 
 function mapProcess(row) {

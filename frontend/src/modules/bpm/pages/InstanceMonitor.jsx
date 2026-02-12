@@ -2,7 +2,8 @@
  * Página de monitoreo de instancia de proceso
  */
 
-import React, { useState } from 'react';
+import React from 'react';
+import { useParams } from 'react-router-dom';
 import { useInstance } from '../hooks/useInstance';
 import { INSTANCE_STATUS_LABELS } from '../constants/instanceStatus';
 import ActivityTimeline from '../components/shared/ActivityTimeline';
@@ -11,7 +12,9 @@ import SLAProgressBar from '../components/shared/SLAProgressBar';
 import { Play, Pause, AlertCircle, Clock, CheckCircle } from 'lucide-react';
 import './InstanceMonitor.css';
 
-const InstanceMonitor = ({ instanceId, onPause, onResume, onCancel }) => {
+const InstanceMonitor = ({ instanceId: instanceIdProp, onPause, onResume, onCancel }) => {
+  const params = useParams();
+  const instanceId = instanceIdProp || params.id;
   const { instance, loading, timeline } = useInstance(instanceId);
 
   if (loading) {

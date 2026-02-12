@@ -1,4 +1,4 @@
-const { pool } = require('../../../config/db');
+const supabase = require('../../../config/supabase');
 const { generateId } = require('../../../utils/id');
 
 const STATUS_FILTER_MAP = {
@@ -9,177 +9,229 @@ const STATUS_FILTER_MAP = {
   archived: 'archived'
 };
 
-async function listProcesses(companyId, { limit, offset, status, search }) {
-  const filters = [];
-  const values = [];
+function applyCompanyFilter(builder, companyId) {
+  if (companyId) {
+    return builder.eq('company_id', companyId);
+  }
+  return builder;
+}
 
-  values.push(companyId);
-  filters.push(`p.company_id = $${values.length}`);
+async function listProcesses(companyId, { limit, offset, status, search }) {
+  let builder = supabase
+    .from('bpm_processes')
+    .select('*', { count: 'exact' });
+
+  builder = applyCompanyFilter(builder, companyId);
 
   if (status) {
     const normalizedStatus = STATUS_FILTER_MAP[status] || status;
-    values.push(normalizedStatus);
-    filters.push(`p.status = $${values.length}`);
+    builder = builder.eq('status', normalizedStatus);
   }
 
   if (search) {
-    values.push(`%${search}%`);
-    filters.push(`p.name ILIKE $${values.length}`);
+    builder = builder.ilike('name', `%${search}%`);
   }
 
-  const whereClause = `WHERE ${filters.join(' AND ')}`;
+  const { data, error, count } = await builder
+    .order('created_at', { ascending: false })
+    .range(offset, offset + limit - 1);
 
-  try {
-    const countResult = await pool.query(
-      `SELECT COUNT(*)::int AS total FROM bpm_processes p ${whereClause}`,
-      values
-    );
-    const totalItems = countResult.rows[0]?.total || 0;
+  if (error) throw error;
 
-    values.push(limit, offset);
-    const { rows } = await pool.query(
-      `SELECT
-         p.*,
-         COALESCE(ai.active_instances, 0) AS active_instances
-       FROM bpm_processes p
-       LEFT JOIN (
-         SELECT process_id, COUNT(*)::int AS active_instances
-         FROM bpm_process_instances
-         WHERE company_id = $1 AND status IN ('started', 'in_progress')
-         GROUP BY process_id
-       ) ai ON ai.process_id = p.id
-       ${whereClause}
-       ORDER BY p.created_at DESC
-       LIMIT $${values.length - 1} OFFSET $${values.length}`,
-      values
-    );
-
-    return { rows, totalItems };
-  } catch (error) {
-    if (['42P01', '42703', '22P02'].includes(error?.code)) {
-      return { rows: [], totalItems: 0 };
-    }
-    throw error;
+  const rows = data || [];
+  if (!rows.length) {
+    return { rows: [], totalItems: count || 0 };
   }
+
+  const processIds = rows.map((row) => row.id);
+
+  let instanceBuilder = supabase
+    .from('bpm_process_instances')
+    .select('process_id,status');
+
+  instanceBuilder = applyCompanyFilter(instanceBuilder, companyId);
+  instanceBuilder = instanceBuilder
+    .in('process_id', processIds)
+    .in('status', ['started', 'in_progress']);
+
+  const { data: instanceRows, error: instanceError } = await instanceBuilder;
+  if (instanceError) throw instanceError;
+
+  const activeByProcess = (instanceRows || []).reduce((acc, row) => {
+    acc[row.process_id] = (acc[row.process_id] || 0) + 1;
+    return acc;
+  }, {});
+
+  return {
+    rows: rows.map((row) => ({
+      ...row,
+      active_instances: activeByProcess[row.id] || 0
+    })),
+    totalItems: count || 0
+  };
 }
 
 async function getProcessById(companyId, id) {
-  const { rows } = await pool.query(
-    'SELECT * FROM bpm_processes WHERE id = $1 AND company_id = $2',
-    [id, companyId]
-  );
-  return rows[0] || null;
+  let builder = supabase
+    .from('bpm_processes')
+    .select('*')
+    .eq('id', id)
+    .limit(1);
+
+  builder = applyCompanyFilter(builder, companyId);
+  const { data, error } = await builder.maybeSingle();
+  if (error) throw error;
+  return data || null;
 }
 
 async function createProcess(companyId, data) {
   const id = generateId('bpm_proc');
   const now = new Date().toISOString();
-  const { rows } = await pool.query(
-    `INSERT INTO bpm_processes (id, company_id, name, description, version, status, flow_json, created_by, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-     RETURNING *`,
-    [
-      id, companyId, data.name, data.description || null,
-      data.version || 1, data.status, data.flowJson || null,
-      data.createdBy || null, now, now
-    ]
-  );
-  return rows[0];
+  const { data: row, error } = await supabase
+    .from('bpm_processes')
+    .insert([{
+      id,
+      company_id: companyId,
+      name: data.name,
+      description: data.description || null,
+      version: data.version || 1,
+      status: data.status,
+      flow_json: data.flowJson || null,
+      created_by: data.createdBy || null,
+      created_at: now,
+      updated_at: now
+    }])
+    .select('*')
+    .single();
+
+  if (error) throw error;
+  return row;
 }
 
 async function updateProcess(companyId, id, data) {
   const now = new Date().toISOString();
-  const { rows } = await pool.query(
-    `UPDATE bpm_processes
-     SET name = COALESCE($1, name),
-         description = COALESCE($2, description),
-         version = COALESCE($3, version),
-         status = COALESCE($4, status),
-         flow_json = COALESCE($5, flow_json),
-         updated_at = $6
-     WHERE id = $7 AND company_id = $8
-     RETURNING *`,
-    [
-      data.name || null, data.description || null,
-      data.version || null, data.status || null,
-      data.flowJson || null, now, id, companyId
-    ]
-  );
-  return rows[0] || null;
+  const patch = { updated_at: now };
+  if (data.name !== undefined) patch.name = data.name;
+  if (data.description !== undefined) patch.description = data.description;
+  if (data.version !== undefined) patch.version = data.version;
+  if (data.status !== undefined) patch.status = data.status;
+  if (data.flowJson !== undefined) patch.flow_json = data.flowJson;
+
+  let builder = supabase
+    .from('bpm_processes')
+    .update(patch)
+    .eq('id', id)
+    .select('*')
+    .limit(1);
+
+  builder = applyCompanyFilter(builder, companyId);
+  const { data: row, error } = await builder.maybeSingle();
+  if (error) throw error;
+  return row || null;
 }
 
 async function deleteProcess(companyId, id) {
-  const { rowCount } = await pool.query(
-    'DELETE FROM bpm_processes WHERE id = $1 AND company_id = $2',
-    [id, companyId]
-  );
-  return rowCount > 0;
+  let builder = supabase
+    .from('bpm_processes')
+    .delete()
+    .eq('id', id)
+    .select('id')
+    .limit(1);
+
+  builder = applyCompanyFilter(builder, companyId);
+  const { data, error } = await builder.maybeSingle();
+  if (error) throw error;
+  return !!data;
 }
 
 async function listActivities(companyId, processId) {
-  const { rows } = await pool.query(
-    `SELECT * FROM bpm_activities
-     WHERE company_id = $1 AND process_id = $2
-     ORDER BY sort_order ASC`,
-    [companyId, processId]
-  );
-  return rows;
+  let builder = supabase
+    .from('bpm_activities')
+    .select('*')
+    .eq('process_id', processId)
+    .order('sort_order', { ascending: true });
+
+  builder = applyCompanyFilter(builder, companyId);
+  const { data, error } = await builder;
+  if (error) throw error;
+  return data || [];
 }
 
 async function getActivityById(companyId, id) {
-  const { rows } = await pool.query(
-    'SELECT * FROM bpm_activities WHERE id = $1 AND company_id = $2',
-    [id, companyId]
-  );
-  return rows[0] || null;
+  let builder = supabase
+    .from('bpm_activities')
+    .select('*')
+    .eq('id', id)
+    .limit(1);
+
+  builder = applyCompanyFilter(builder, companyId);
+  const { data, error } = await builder.maybeSingle();
+  if (error) throw error;
+  return data || null;
 }
 
 async function createActivity(companyId, processId, data) {
   const id = generateId('bpm_act');
   const now = new Date().toISOString();
-  const { rows } = await pool.query(
-    `INSERT INTO bpm_activities (id, company_id, process_id, name, description, type, sort_order, assigned_role, time_limit_hours, required_docs, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-     RETURNING *`,
-    [
-      id, companyId, processId, data.name, data.description || null,
-      data.type, data.sortOrder, data.assignedRole || null,
-      data.timeLimitHours || null, data.requiredDocs || null, now, now
-    ]
-  );
-  return rows[0];
+  const { data: row, error } = await supabase
+    .from('bpm_activities')
+    .insert([{
+      id,
+      company_id: companyId,
+      process_id: processId,
+      name: data.name,
+      description: data.description || null,
+      type: data.type,
+      sort_order: data.sortOrder,
+      assigned_role: data.assignedRole || null,
+      time_limit_hours: data.timeLimitHours || null,
+      required_docs: data.requiredDocs || null,
+      created_at: now,
+      updated_at: now
+    }])
+    .select('*')
+    .single();
+
+  if (error) throw error;
+  return row;
 }
 
 async function updateActivity(companyId, id, data) {
   const now = new Date().toISOString();
-  const { rows } = await pool.query(
-    `UPDATE bpm_activities
-     SET name = COALESCE($1, name),
-         description = COALESCE($2, description),
-         type = COALESCE($3, type),
-         sort_order = COALESCE($4, sort_order),
-         assigned_role = COALESCE($5, assigned_role),
-         time_limit_hours = COALESCE($6, time_limit_hours),
-         required_docs = COALESCE($7, required_docs),
-         updated_at = $8
-     WHERE id = $9 AND company_id = $10
-     RETURNING *`,
-    [
-      data.name || null, data.description || null,
-      data.type || null, data.sortOrder || null,
-      data.assignedRole || null, data.timeLimitHours || null,
-      data.requiredDocs || null, now, id, companyId
-    ]
-  );
-  return rows[0] || null;
+  const patch = { updated_at: now };
+  if (data.name !== undefined) patch.name = data.name;
+  if (data.description !== undefined) patch.description = data.description;
+  if (data.type !== undefined) patch.type = data.type;
+  if (data.sortOrder !== undefined) patch.sort_order = data.sortOrder;
+  if (data.assignedRole !== undefined) patch.assigned_role = data.assignedRole;
+  if (data.timeLimitHours !== undefined) patch.time_limit_hours = data.timeLimitHours;
+  if (data.requiredDocs !== undefined) patch.required_docs = data.requiredDocs;
+
+  let builder = supabase
+    .from('bpm_activities')
+    .update(patch)
+    .eq('id', id)
+    .select('*')
+    .limit(1);
+
+  builder = applyCompanyFilter(builder, companyId);
+  const { data: row, error } = await builder.maybeSingle();
+  if (error) throw error;
+  return row || null;
 }
 
 async function deleteActivity(companyId, id) {
-  const { rowCount } = await pool.query(
-    'DELETE FROM bpm_activities WHERE id = $1 AND company_id = $2',
-    [id, companyId]
-  );
-  return rowCount > 0;
+  let builder = supabase
+    .from('bpm_activities')
+    .delete()
+    .eq('id', id)
+    .select('id')
+    .limit(1);
+
+  builder = applyCompanyFilter(builder, companyId);
+  const { data, error } = await builder.maybeSingle();
+  if (error) throw error;
+  return !!data;
 }
 
 module.exports = {

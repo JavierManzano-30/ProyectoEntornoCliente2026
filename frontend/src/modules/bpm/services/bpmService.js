@@ -255,7 +255,7 @@ export const bpmService = {
    * Publicar un proceso
    */
   publishProcess: async (id) => {
-    const response = await apiClient.post(`${BASE_URL}/procesos/${id}/publicar`);
+    const response = await apiClient.put(`${BASE_URL}/procesos/${id}`, { status: 'active' });
     const payload = unwrapResponse(response);
     return normalizeProcess(payload);
   },
@@ -318,15 +318,18 @@ export const bpmService = {
    * Cancelar una instancia
    */
   cancelInstance: async (id, reason) => {
-    const response = await apiClient.post(`${BASE_URL}/instancias/${id}/cancelar`, { motivo: reason });
-    return unwrapResponse(response);
+    const response = await apiClient.patch(`${BASE_URL}/instancias/${id}/cancel`, {
+      reason
+    });
+    const payload = unwrapResponse(response);
+    return normalizeInstance(payload);
   },
 
   /**
    * Pausar una instancia
    */
   pauseInstance: async (id) => {
-    const response = await apiClient.post(`${BASE_URL}/instancias/${id}/pausar`);
+    const response = await apiClient.put(`${BASE_URL}/instancias/${id}`, { status: 'in_progress' });
     return unwrapResponse(response);
   },
 
@@ -334,7 +337,7 @@ export const bpmService = {
    * Reanudar una instancia
    */
   resumeInstance: async (id) => {
-    const response = await apiClient.post(`${BASE_URL}/instancias/${id}/reanudar`);
+    const response = await apiClient.put(`${BASE_URL}/instancias/${id}`, { status: 'started' });
     return unwrapResponse(response);
   },
 
@@ -342,16 +345,30 @@ export const bpmService = {
    * Obtener timeline de actividad de una instancia
    */
   getInstanceTimeline: async (id) => {
-    const response = await apiClient.get(`${BASE_URL}/instancias/${id}/timeline`);
-    return unwrapResponse(response);
+    const response = await apiClient.get(`${BASE_URL}/instances/${id}/tasks`);
+    const payload = unwrapResponse(response);
+    const tasks = Array.isArray(payload) ? payload : payload?.data || [];
+
+    return tasks.map((task) => ({
+      id: task.id,
+      tipo: 'tarea',
+      estado: normalizeTaskStatus(task.status),
+      fecha_inicio: task.startDate || task.createdAt || null,
+      fecha: task.completedAt || task.startDate || task.createdAt || null,
+      nombre: task.activityId || 'Actividad',
+      descripcion: task.resultJson ? 'Actividad con resultado registrado' : 'Actividad en flujo',
+      usuario: task.assignedTo || null
+    }));
   },
 
   /**
    * Obtener variables de una instancia
    */
   getInstanceVariables: async (id) => {
-    const response = await apiClient.get(`${BASE_URL}/instancias/${id}/variables`);
-    return unwrapResponse(response);
+    const response = await apiClient.get(`${BASE_URL}/instancias/${id}`);
+    const payload = unwrapResponse(response);
+    const instance = payload?.data || payload;
+    return instance?.variables || {};
   },
 
   // ==================== TAREAS ====================
@@ -370,46 +387,55 @@ export const bpmService = {
    * Obtener una tarea por ID
    */
   getTaskById: async (id) => {
-    const response = await apiClient.get(`${BASE_URL}/tareas/${id}`);
-    const payload = unwrapResponse(response);
-    return normalizeTask(payload);
+    const tasks = await bpmService.getTaskInbox();
+    return tasks.find((task) => task.id === id) || null;
   },
 
   /**
    * Completar una tarea
    */
   completeTask: async (id, taskData) => {
-    const response = await apiClient.post(`${BASE_URL}/tareas/${id}/completar`, taskData);
-    return unwrapResponse(response);
+    const response = await apiClient.patch(`${BASE_URL}/tasks/${id}`, {
+      status: 'completed',
+      resultJson: taskData || null
+    });
+    const payload = unwrapResponse(response);
+    return normalizeTask(payload);
   },
 
   /**
    * Transferir una tarea
    */
   transferTask: async (id, userId, reason) => {
-    const response = await apiClient.post(`${BASE_URL}/tareas/${id}/transferir`, {
-      usuario_id: userId,
-      motivo: reason
+    const response = await apiClient.patch(`${BASE_URL}/tasks/${id}`, {
+      assignedTo: userId,
+      resultJson: reason ? { transferReason: reason } : null
     });
-    return unwrapResponse(response);
+    const payload = unwrapResponse(response);
+    return normalizeTask(payload);
   },
 
   /**
    * Guardar borrador de tarea
    */
   saveTaskDraft: async (id, draftData) => {
-    const response = await apiClient.post(`${BASE_URL}/tareas/${id}/borrador`, draftData);
-    return unwrapResponse(response);
+    const response = await apiClient.patch(`${BASE_URL}/tasks/${id}`, {
+      resultJson: draftData || {}
+    });
+    const payload = unwrapResponse(response);
+    return normalizeTask(payload);
   },
 
   /**
    * Solicitar información en una tarea
    */
   requestTaskInformation: async (id, message) => {
-    const response = await apiClient.post(`${BASE_URL}/tareas/${id}/solicitar-info`, {
-      mensaje: message
+    const response = await apiClient.patch(`${BASE_URL}/tasks/${id}`, {
+      status: 'pending',
+      resultJson: { infoRequested: message }
     });
-    return unwrapResponse(response);
+    const payload = unwrapResponse(response);
+    return normalizeTask(payload);
   },
 
   // ==================== DOCUMENTOS ====================
@@ -418,21 +444,13 @@ export const bpmService = {
    * Subir documento a una instancia
    */
   uploadDocument: async (instanceId, file, metadata = {}) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    Object.keys(metadata).forEach(key => {
-      formData.append(key, metadata[key]);
+    const response = await apiClient.post(`${BASE_URL}/instances/${instanceId}/documents`, {
+      fileName: metadata.fileName || file?.name || 'documento',
+      documentType: metadata.documentType || metadata.type || null,
+      size: metadata.size || file?.size || null,
+      storageUrl: metadata.storageUrl || null,
+      classification: metadata.classification || null
     });
-
-    const response = await apiClient.post(
-      `${BASE_URL}/instancias/${instanceId}/documentos`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      }
-    );
     return unwrapResponse(response);
   },
 
@@ -440,7 +458,7 @@ export const bpmService = {
    * Obtener documentos de una instancia
    */
   getInstanceDocuments: async (instanceId) => {
-    const response = await apiClient.get(`${BASE_URL}/instancias/${instanceId}/documentos`);
+    const response = await apiClient.get(`${BASE_URL}/instances/${instanceId}/documents`);
     return unwrapResponse(response);
   },
 
@@ -468,8 +486,8 @@ export const bpmService = {
    * Añadir comentario a una instancia
    */
   addComment: async (instanceId, comment) => {
-    const response = await apiClient.post(`${BASE_URL}/instancias/${instanceId}/comentarios`, {
-      comentario: comment
+    const response = await apiClient.post(`${BASE_URL}/instances/${instanceId}/comments`, {
+      content: comment
     });
     return unwrapResponse(response);
   },
@@ -478,7 +496,7 @@ export const bpmService = {
    * Obtener comentarios de una instancia
    */
   getInstanceComments: async (instanceId) => {
-    const response = await apiClient.get(`${BASE_URL}/instancias/${instanceId}/comentarios`);
+    const response = await apiClient.get(`${BASE_URL}/instances/${instanceId}/comments`);
     return unwrapResponse(response);
   },
 
@@ -497,10 +515,19 @@ export const bpmService = {
    * Obtener métricas de un proceso específico
    */
   getProcessMetrics: async (processId, filters = {}) => {
-    const response = await apiClient.get(
-      `${BASE_URL}/procesos/${processId}/metricas${buildQueryString(filters)}`
-    );
-    return unwrapResponse(response);
+    const [instances, process] = await Promise.all([
+      bpmService.getAllInstances({ processId, ...filters }),
+      bpmService.getProcessById(processId)
+    ]);
+
+    return {
+      processId,
+      processName: process?.nombre || process?.name || processId,
+      totalInstances: instances.length,
+      activeInstances: instances.filter((instance) => instance.estado === 'active').length,
+      completedInstances: instances.filter((instance) => instance.estado === 'completed').length,
+      cancelledInstances: instances.filter((instance) => instance.estado === 'cancelled').length
+    };
   }
 };
 
