@@ -1,0 +1,112 @@
+.crm-customer-form-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.crm-customer-form-submit-error {
+  margin-bottom: 16px;
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.crm-customer-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.crm-customer-form-full-width {
+  grid-column: 1 / -1;
+}
+
+.crm-customer-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.crm-customer-form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.crm-customer-form-group input,
+.crm-customer-form-group textarea {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #1e293b;
+  background: #ffffff;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-family: inherit;
+}
+
+.crm-customer-form-group textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+
+.crm-customer-form-group input:focus,
+.crm-customer-form-group textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.crm-customer-form-group input:disabled,
+.crm-customer-form-group textarea:disabled {
+  background: #f8fafc;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.crm-customer-form-field-error {
+  margin: 0;
+  color: #dc2626;
+  font-size: 12px;
+}
+
+.crm-customer-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+@media (max-width: 768px) {
+  .crm-customer-form-page {
+    padding: 16px;
+  }
+
+  .crm-customer-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .crm-customer-form-actions {
+    flex-direction: column-reverse;
+  }
+}
+
+body.dark-mode .crm-customer-form-group label {
+  color: #cbd5e1;
+}
+
+body.dark-mode .crm-customer-form-group input,
+body.dark-mode .crm-customer-form-group textarea {
+  background: #1f2937;
+  border-color: #4b5563;
+  color: #e5e7eb;
+}
+
+body.dark-mode .crm-customer-form-actions {
+  border-top-color: #374151;
+}

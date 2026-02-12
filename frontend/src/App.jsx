@@ -41,6 +41,7 @@ const MainHub = React.lazy(() => import("./modules/main"));
 // Páginas del módulo CRM
 import CRMDashboard from "./modules/crm/pages/CRMDashboard";
 import CustomerList from "./modules/crm/pages/CustomerList";
+import CustomerForm from "./modules/crm/pages/CustomerForm";
 import LeadList from "./modules/crm/pages/LeadList";
 import OpportunityBoard from "./modules/crm/pages/OpportunityBoard";
 import ActivityList from "./modules/crm/pages/ActivityList";
@@ -148,6 +149,9 @@ function App() {
               <Route index element={<CRMDashboard />} />
               <Route path="dashboard" element={<CRMDashboard />} />
               <Route path="clientes" element={<CustomerList />} />
+              <Route path="clientes/nuevo" element={<CustomerForm />} />
+              <Route path="clientes/:id" element={<CustomerForm />} />
+              <Route path="clientes/:id/editar" element={<CustomerForm />} />
               <Route path="leads" element={<LeadList />} />
               <Route path="oportunidades" element={<OpportunityBoard />} />
               <Route path="actividades" element={<ActivityList />} />

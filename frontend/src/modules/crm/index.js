@@ -4,6 +4,7 @@ export { default as LeadList } from './pages/LeadList';
 export { default as OpportunityBoard } from './pages/OpportunityBoard';
 export { default as CRMDashboard } from './pages/CRMDashboard';
 export { default as ActivityList } from './pages/ActivityList';
+export { default as CustomerForm } from './pages/CustomerForm';
 
 // Componentes de clientes
 export { default as CustomerTable } from './components/customers/CustomerTable';
