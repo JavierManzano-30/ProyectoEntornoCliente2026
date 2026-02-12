@@ -1,0 +1,129 @@
+.task-create-page {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.task-create-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: #111827;
+}
+
+.task-create-header p {
+  margin: 0.5rem 0 0;
+  color: #6b7280;
+}
+
+.task-create-error {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid #fecaca;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+}
+
+.task-create-card {
+  margin-top: 1.5rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+}
+
+.task-create-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.task-create-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.task-create-field span {
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 600;
+}
+
+.task-create-field input,
+.task-create-field select {
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  padding: 0.65rem 0.8rem;
+  font-size: 0.95rem;
+  background: #ffffff;
+  color: #111827;
+}
+
+.task-create-field input:focus,
+.task-create-field select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.task-create-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.task-create-actions .btn-secondary,
+.task-create-actions .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+@media (max-width: 760px) {
+  .task-create-page {
+    padding: 1rem;
+  }
+
+  .task-create-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .task-create-actions {
+    flex-direction: column-reverse;
+  }
+
+  .task-create-actions .btn-secondary,
+  .task-create-actions .btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+body.dark-mode .task-create-header h1 {
+  color: #f3f4f6;
+}
+
+body.dark-mode .task-create-header p {
+  color: #9ca3af;
+}
+
+body.dark-mode .task-create-card {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+body.dark-mode .task-create-field span {
+  color: #d1d5db;
+}
+
+body.dark-mode .task-create-field input,
+body.dark-mode .task-create-field select {
+  color: #f3f4f6;
+  background: #111827;
+  border-color: #4b5563;
+}

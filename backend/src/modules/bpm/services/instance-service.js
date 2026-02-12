@@ -189,6 +189,105 @@ async function listTasks(companyId, instanceId) {
   return data || [];
 }
 
+async function createTask(companyId, data) {
+  const now = new Date().toISOString();
+  const taskId = generateId('bpm_task');
+
+  let instanceId = data.instanceId || null;
+  let processId = data.processId || null;
+
+  if (instanceId) {
+    let instanceBuilder = supabase
+      .from('bpm_process_instances')
+      .select('id,process_id')
+      .eq('id', instanceId)
+      .limit(1);
+
+    instanceBuilder = applyCompanyFilter(instanceBuilder, companyId);
+    const { data: instanceRow, error: instanceError } = await instanceBuilder.maybeSingle();
+    if (instanceError) throw instanceError;
+    if (!instanceRow) {
+      throw new Error('Instance not found');
+    }
+    processId = instanceRow.process_id;
+  }
+
+  if (!processId) {
+    throw new Error('processId is required');
+  }
+
+  let activityBuilder = supabase
+    .from('bpm_activities')
+    .select('id,process_id')
+    .eq('id', data.activityId)
+    .limit(1);
+
+  activityBuilder = applyCompanyFilter(activityBuilder, companyId);
+  const { data: activityRow, error: activityError } = await activityBuilder.maybeSingle();
+  if (activityError) throw activityError;
+  if (!activityRow) {
+    throw new Error('Activity not found');
+  }
+
+  if (activityRow.process_id !== processId) {
+    throw new Error('Activity does not belong to process');
+  }
+
+  if (!instanceId) {
+    const createdInstanceId = generateId('bpm_inst');
+    const { data: instanceCreated, error: createInstanceError } = await supabase
+      .from('bpm_process_instances')
+      .insert([
+        {
+          id: createdInstanceId,
+          company_id: companyId,
+          process_id: processId,
+          reference_id: null,
+          reference_type: null,
+          alm_project_id: null,
+          alm_task_id: null,
+          status: 'started',
+          progress_percent: 0,
+          started_by: data.startedBy || data.assignedTo || 'system',
+          start_date: now,
+          end_date: null,
+          created_at: now,
+          updated_at: now
+        }
+      ])
+      .select('id')
+      .single();
+
+    if (createInstanceError) throw createInstanceError;
+    instanceId = instanceCreated.id;
+  }
+
+  const { data: row, error } = await supabase
+    .from('bpm_process_tasks')
+    .insert([
+      {
+        id: taskId,
+        company_id: companyId,
+        instance_id: instanceId,
+        activity_id: data.activityId,
+        alm_task_id: data.almTaskId || null,
+        assigned_to: data.assignedTo || null,
+        status: data.status || 'pending',
+        due_date: data.dueDate || null,
+        start_date: data.status === 'in_progress' ? now : null,
+        completed_at: data.status === 'completed' ? now : null,
+        result_json: data.resultJson || null,
+        created_at: now,
+        updated_at: now
+      }
+    ])
+    .select('*')
+    .single();
+
+  if (error) throw error;
+  return row;
+}
+
 async function updateTask(companyId, id, data) {
   const now = new Date().toISOString();
 
@@ -198,6 +297,7 @@ async function updateTask(companyId, id, data) {
 
   if (data.status !== undefined) patch.status = data.status;
   if (data.assignedTo !== undefined) patch.assigned_to = data.assignedTo;
+  if (data.dueDate !== undefined) patch.due_date = data.dueDate;
   if (data.resultJson !== undefined) patch.result_json = data.resultJson;
   if (data.status === 'in_progress') patch.start_date = now;
   if (data.status === 'completed') patch.completed_at = now;
@@ -346,6 +446,7 @@ module.exports = {
   updateInstance,
   cancelInstance,
   listTasks,
+  createTask,
   updateTask,
   addDocument,
   listDocuments,

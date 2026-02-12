@@ -21,15 +21,21 @@ export const useTaskInbox = (initialFilters = {}, pollingInterval = 30000) => {
   
   const intervalRef = useRef(null);
 
+  const isTaskOverdue = useCallback((task) => {
+    if (!task?.fecha_limite) return false;
+    return new Date(task.fecha_limite) < new Date() && task.estado !== 'completed';
+  }, []);
+
   const buildStats = useCallback((taskList) => ({
     total: taskList.length,
-    pending: taskList.filter(t => t.estado === 'pending' || t.estado === 'assigned').length,
-    inProgress: taskList.filter(t => t.estado === 'in_progress').length,
-    overdue: taskList.filter(t => {
-      if (!t.fecha_limite) return false;
-      return new Date(t.fecha_limite) < new Date() && t.estado !== 'completed';
-    }).length
-  }), []);
+    pending: taskList.filter(
+      (t) => (t.estado === 'pending' || t.estado === 'assigned') && !isTaskOverdue(t)
+    ).length,
+    inProgress: taskList.filter(
+      (t) => t.estado === 'in_progress' && !isTaskOverdue(t)
+    ).length,
+    overdue: taskList.filter((t) => isTaskOverdue(t)).length
+  }), [isTaskOverdue]);
 
   const fetchTasks = useCallback(async () => {
     setLoading(true);

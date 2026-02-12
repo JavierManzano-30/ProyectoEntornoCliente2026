@@ -75,6 +75,8 @@ import {
   ProcessDesigner,
   ProcessStartForm,
   TaskInbox,
+  TaskDetail,
+  TaskCreateForm,
   InstanceMonitor,
   BPMProvider,
 } from "./modules/bpm";
@@ -197,6 +199,8 @@ function App() {
               <Route path="procesos/:id/diseñar" element={<ProcessDesigner />} />
               <Route path="procesos/:id/iniciar" element={<ProcessStartForm />} />
               <Route path="tareas" element={<TaskInbox />} />
+              <Route path="tareas/nueva" element={<TaskCreateForm />} />
+              <Route path="tareas/:id" element={<TaskDetail />} />
               <Route path="instancias/:id" element={<InstanceMonitor />} />
             </Route>
 

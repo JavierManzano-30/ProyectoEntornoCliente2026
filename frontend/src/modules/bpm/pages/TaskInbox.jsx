@@ -3,6 +3,7 @@
  */
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTaskInbox } from '../hooks/useTaskInbox';
 import { TASK_PRIORITY_LABELS } from '../constants/taskPriority';
 import { TASK_STATUS_LABELS } from '../constants/taskStatus';
@@ -11,15 +12,24 @@ import SLAProgressBar from '../components/shared/SLAProgressBar';
 import './TaskInbox.css';
 
 const TaskInbox = () => {
+  const navigate = useNavigate();
   const { tasks, stats, loading, filters, setFilters } = useTaskInbox();
   const [selectedTab, setSelectedTab] = useState('pending');
 
+  const isTaskOverdue = (task) => {
+    if (!task?.fecha_limite) return false;
+    return new Date(task.fecha_limite) < new Date() && task.estado !== 'completed';
+  };
+
   const filteredTasks = tasks.filter(task => {
-    if (selectedTab === 'pending') return task.estado === 'assigned' || task.estado === 'pending';
-    if (selectedTab === 'inProgress') return task.estado === 'in_progress';
+    if (selectedTab === 'pending') {
+      return (task.estado === 'assigned' || task.estado === 'pending') && !isTaskOverdue(task);
+    }
+    if (selectedTab === 'inProgress') {
+      return task.estado === 'in_progress' && !isTaskOverdue(task);
+    }
     if (selectedTab === 'overdue') {
-      if (!task.fecha_limite) return false;
-      return new Date(task.fecha_limite) < new Date() && task.estado !== 'completed';
+      return isTaskOverdue(task);
     }
     return true;
   });
@@ -27,8 +37,16 @@ const TaskInbox = () => {
   return (
     <div className="task-inbox">
       <div className="inbox-header">
-        <h1>Mis Tareas</h1>
-        <p className="subtitle">Bandeja de tareas y aprobaciones</p>
+        <div className="inbox-header-content">
+          <h1>Mis Tareas</h1>
+          <p className="subtitle">Bandeja de tareas y aprobaciones</p>
+        </div>
+        <button
+          className="btn-action btn-create-task"
+          onClick={() => navigate('/bpm/tareas/nueva')}
+        >
+          Nueva Tarea
+        </button>
       </div>
 
       <div className="inbox-stats">
@@ -125,9 +143,14 @@ const TaskInbox = () => {
 
               <div className="task-footer">
                 <span className="task-status">
-                  {TASK_STATUS_LABELS[task.estado]}
+                  {isTaskOverdue(task) ? 'Vencida' : TASK_STATUS_LABELS[task.estado]}
                 </span>
-                <button className="btn-action">Ver Detalles</button>
+                <button
+                  className="btn-action"
+                  onClick={() => navigate(`/bpm/tareas/${task.id}`)}
+                >
+                  Ver Detalles
+                </button>
               </div>
             </div>
           ))

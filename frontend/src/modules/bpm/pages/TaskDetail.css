@@ -1,0 +1,231 @@
+.task-detail-page {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.task-detail-header {
+  margin-bottom: 1rem;
+}
+
+.task-detail-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+}
+
+.task-detail-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.task-detail-title-row h1 {
+  margin: 0;
+  font-size: 1.9rem;
+  color: #111827;
+}
+
+.task-priority-chip {
+  display: inline-block;
+  border-radius: 9999px;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.task-priority-chip.priority-low {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.task-priority-chip.priority-normal {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.task-priority-chip.priority-high {
+  background: #fed7aa;
+  color: #92400e;
+}
+
+.task-priority-chip.priority-urgent,
+.task-priority-chip.priority-critical {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.task-detail-description {
+  margin: 1rem 0 1.25rem;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.task-actions-panel {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.6rem;
+  background: #f9fafb;
+}
+
+.task-status-actions,
+.task-due-controls {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.task-due-controls {
+  margin-top: 0.7rem;
+}
+
+.task-due-controls input[type='datetime-local'] {
+  min-width: 220px;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.45rem;
+  background: #ffffff;
+}
+
+.btn-action-primary,
+.btn-action-secondary,
+.btn-action-danger {
+  border: none;
+  border-radius: 0.45rem;
+  padding: 0.52rem 0.85rem;
+  cursor: pointer;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.btn-action-primary {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.btn-action-secondary {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.btn-action-danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.btn-action-primary:disabled,
+.btn-action-secondary:disabled,
+.btn-action-danger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.task-detail-error-inline {
+  margin-top: 0.8rem;
+}
+
+.task-action-help {
+  margin: 0.7rem 0 0 0;
+  font-size: 0.83rem;
+  color: #6b7280;
+}
+
+.task-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.task-detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.6rem;
+  padding: 0.8rem;
+}
+
+.task-detail-item .label {
+  display: block;
+  font-size: 0.77rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #9ca3af;
+}
+
+.task-detail-item .value {
+  display: block;
+  margin-top: 0.2rem;
+  color: #111827;
+}
+
+.task-detail-item .value.value-overdue {
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+.task-detail-error {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border: 1px solid #fecaca;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 0.6rem;
+  padding: 0.8rem 1rem;
+}
+
+.task-detail-loading {
+  color: #6b7280;
+}
+
+@media (max-width: 760px) {
+  .task-detail-page {
+    padding: 1rem;
+  }
+
+  .task-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+body.dark-mode .task-detail-card,
+body.dark-mode .task-detail-item {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+body.dark-mode .task-detail-title-row h1,
+body.dark-mode .task-detail-item .value {
+  color: #f3f4f6;
+}
+
+body.dark-mode .task-detail-description,
+body.dark-mode .task-detail-loading {
+  color: #d1d5db;
+}
+
+body.dark-mode .task-actions-panel {
+  background: #111827;
+  border-color: #374151;
+}
+
+body.dark-mode .task-due-controls input[type='datetime-local'] {
+  background: #1f2937;
+  border-color: #4b5563;
+  color: #f3f4f6;
+}
+
+body.dark-mode .btn-action-secondary {
+  background: #374151;
+  color: #f3f4f6;
+}
+
+body.dark-mode .task-action-help {
+  color: #9ca3af;
+}

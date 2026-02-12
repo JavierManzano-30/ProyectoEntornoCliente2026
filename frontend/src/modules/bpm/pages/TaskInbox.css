@@ -4,6 +4,13 @@
   margin: 0 auto;
 }
 
+.inbox-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
 .inbox-header h1 {
   margin: 0;
   font-size: 2rem;
@@ -224,6 +231,10 @@
   background-color: #2563eb;
 }
 
+.btn-create-task {
+  align-self: center;
+}
+
 .loading,
 .empty-state {
   text-align: center;
@@ -276,4 +287,15 @@ body.dark-mode .tab-btn:hover {
 
 body.dark-mode .task-footer {
   border-top-color: #374151;
+}
+
+@media (max-width: 760px) {
+  .inbox-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-create-task {
+    align-self: stretch;
+  }
 }

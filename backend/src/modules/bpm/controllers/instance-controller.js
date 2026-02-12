@@ -202,6 +202,46 @@ async function listTasks(req, res, next) {
   }
 }
 
+async function createTask(req, res, next) {
+  try {
+    const companyId = resolveCompanyId(req);
+    if (!companyId) {
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'companyId is required'));
+    }
+
+    const errors = validateRequiredFields(req.body, ['activityId']);
+    if (!req.body.instanceId && !req.body.processId) {
+      errors.push({ field: 'processId', message: 'Required when instanceId is not provided' });
+    }
+
+    if (req.body.status) {
+      const statusError = validateEnum(req.body.status, ['pending', 'in_progress', 'completed', 'rejected']);
+      if (statusError) {
+        errors.push({ field: 'status', message: statusError });
+      }
+    }
+
+    if (errors.length) {
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', errors));
+    }
+
+    const row = await instanceService.createTask(companyId, {
+      ...req.body,
+      startedBy: req.body.startedBy || req.user?.userId || req.user?.id || null
+    });
+
+    return res.status(201).json(envelopeSuccess(mapTask(row)));
+  } catch (err) {
+    if (err?.message === 'Activity not found' || err?.message === 'Instance not found') {
+      return res.status(404).json(envelopeError('RESOURCE_NOT_FOUND', err.message));
+    }
+    if (err?.message === 'processId is required' || err?.message === 'Activity does not belong to process') {
+      return res.status(400).json(envelopeError('VALIDATION_ERROR', err.message));
+    }
+    return next(err);
+  }
+}
+
 async function updateTask(req, res, next) {
   try {
     const companyId = resolveCompanyId(req);
@@ -213,6 +253,13 @@ async function updateTask(req, res, next) {
       const statusError = validateEnum(req.body.status, ['pending', 'in_progress', 'completed', 'rejected']);
       if (statusError) {
         return res.status(400).json(envelopeError('VALIDATION_ERROR', statusError));
+      }
+    }
+
+    if (req.body.dueDate !== undefined && req.body.dueDate !== null) {
+      const dueDate = new Date(req.body.dueDate);
+      if (Number.isNaN(dueDate.getTime())) {
+        return res.status(400).json(envelopeError('VALIDATION_ERROR', 'dueDate must be a valid date'));
       }
     }
 
@@ -319,6 +366,7 @@ module.exports = {
   updateInstance,
   cancelInstance,
   listTasks,
+  createTask,
   updateTask,
   addDocument,
   listDocuments,

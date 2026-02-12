@@ -242,6 +242,15 @@ export const bpmService = {
   },
 
   /**
+   * Obtener actividades de un proceso
+   */
+  getProcessActivities: async (processId) => {
+    const response = await apiClient.get(`${BASE_URL}/processes/${processId}/activities`);
+    const payload = unwrapResponse(response);
+    return Array.isArray(payload) ? payload : payload?.data || [];
+  },
+
+  /**
    * Crear un nuevo proceso
    */
   createProcess: async (processData) => {
@@ -403,6 +412,24 @@ export const bpmService = {
   getTaskById: async (id) => {
     const tasks = await bpmService.getTaskInbox();
     return tasks.find((task) => task.id === id) || null;
+  },
+
+  /**
+   * Crear una tarea BPM manual
+   */
+  createTask: async (taskData) => {
+    const response = await apiClient.post(`${BASE_URL}/tareas`, taskData);
+    const payload = unwrapResponse(response);
+    return normalizeTask(payload);
+  },
+
+  /**
+   * Actualizar una tarea
+   */
+  updateTask: async (id, patch) => {
+    const response = await apiClient.patch(`${BASE_URL}/tasks/${id}`, patch);
+    const payload = unwrapResponse(response);
+    return normalizeTask(payload);
   },
 
   /**

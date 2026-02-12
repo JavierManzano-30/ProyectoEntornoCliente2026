@@ -34,8 +34,8 @@ export const useTask = (taskId) => {
     if (!taskId) return;
     
     try {
-      await bpmService.completeTask(taskId, taskData);
-      setTask(prev => ({ ...prev, estado: 'completada' }));
+      const updated = await bpmService.completeTask(taskId, taskData);
+      setTask(updated);
     } catch (err) {
       console.error('Error al completar tarea:', err);
       throw err;
@@ -46,8 +46,8 @@ export const useTask = (taskId) => {
     if (!taskId) return;
     
     try {
-      await bpmService.transferTask(taskId, userId, reason);
-      setTask(prev => ({ ...prev, estado: 'transferida' }));
+      const updated = await bpmService.transferTask(taskId, userId, reason);
+      setTask(updated);
     } catch (err) {
       console.error('Error al transferir tarea:', err);
       throw err;
@@ -69,10 +69,22 @@ export const useTask = (taskId) => {
     if (!taskId) return;
     
     try {
-      await bpmService.requestTaskInformation(taskId, message);
-      setTask(prev => ({ ...prev, estado: 'info_solicitada' }));
+      const updated = await bpmService.requestTaskInformation(taskId, message);
+      setTask(updated);
     } catch (err) {
       console.error('Error al solicitar información:', err);
+      throw err;
+    }
+  };
+
+  const updateTask = async (patch) => {
+    if (!taskId) return;
+    try {
+      const updated = await bpmService.updateTask(taskId, patch);
+      setTask(updated);
+      return updated;
+    } catch (err) {
+      console.error('Error al actualizar tarea:', err);
       throw err;
     }
   };
@@ -85,6 +97,7 @@ export const useTask = (taskId) => {
     completeTask,
     transferTask,
     saveTaskDraft,
-    requestInformation
+    requestInformation,
+    updateTask
   };
 };

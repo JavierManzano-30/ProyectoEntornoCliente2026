@@ -47,6 +47,8 @@ router.patch('/instances/:id/cancel', requireAuth, instanceController.cancelInst
 router.patch('/instancias/:id/cancel', requireAuth, instanceController.cancelInstance); // Alias español
 
 router.get('/instances/:instanceId/tasks', requireAuth, instanceController.listTasks);
+router.post('/tasks', requireAuth, instanceController.createTask);
+router.post('/tareas', requireAuth, instanceController.createTask); // Alias español
 router.patch('/tasks/:id', requireAuth, instanceController.updateTask);
 
 router.get('/instances/:instanceId/documents', requireAuth, instanceController.listDocuments);

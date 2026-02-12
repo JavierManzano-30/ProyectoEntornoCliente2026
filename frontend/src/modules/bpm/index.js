@@ -11,6 +11,8 @@ export { default as ProcessStartForm } from './pages/ProcessStartForm';
 export { default as ProcessDesigner } from './pages/ProcessDesigner';
 export { default as InstanceMonitor } from './pages/InstanceMonitor';
 export { default as TaskInbox } from './pages/TaskInbox';
+export { default as TaskDetail } from './pages/TaskDetail';
+export { default as TaskCreateForm } from './pages/TaskCreateForm';
 
 // Componentes - Procesos
 export { default as ProcessCard } from './components/processes/ProcessCard';
