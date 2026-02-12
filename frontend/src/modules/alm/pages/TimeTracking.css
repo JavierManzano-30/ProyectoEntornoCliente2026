@@ -2,52 +2,60 @@
   padding: 2rem;
 }
 
-.stats-grid {
+.time-tracking-page .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1rem;
   margin-bottom: 2rem;
 }
 
-.stat-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+.time-tracking-page .stats-grid > .card.stat-card {
+  border: none;
+  color: #ffffff;
+  overflow: hidden;
 }
 
-.stat-card:nth-child(2) {
+.time-tracking-page .stats-grid > .card.stat-card.stat-card--total {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+}
+
+.time-tracking-page .stats-grid > .card.stat-card.stat-card--today {
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
 }
 
-.stat-card:nth-child(3) {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+.time-tracking-page .stats-grid > .card.stat-card.stat-card--average {
+  background: linear-gradient(135deg, #4facfe 0%, #00c6ff 100%);
 }
 
-.stat-card:nth-child(4) {
+.time-tracking-page .stats-grid > .card.stat-card.stat-card--projects {
   background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
 }
 
-.stat-content {
+.time-tracking-page .stats-grid > .card.stat-card .stat-content {
   text-align: center;
 }
 
-.stat-number {
+.time-tracking-page .stats-grid > .card.stat-card .stat-number {
   font-size: 2rem;
   font-weight: 700;
-  line-height: 1;
+  line-height: 1.1;
   margin-bottom: 0.5rem;
+  color: #ffffff;
 }
 
-.stat-label {
-  font-size: 0.875rem;
-  opacity: 0.9;
-  font-weight: 500;
+.time-tracking-page .stats-grid > .card.stat-card .stat-label {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
 }
 
-.form-section {
+.time-tracking-page .form-section {
   margin-bottom: 2rem;
 }
 
-.form-header {
+.time-tracking-page .form-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -56,13 +64,13 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
-.form-header h3 {
+.time-tracking-page .form-header h3 {
   margin: 0;
   font-size: 1.125rem;
   color: #111827;
 }
 
-.close-btn {
+.time-tracking-page .close-btn {
   background: none;
   border: none;
   font-size: 1.5rem;
@@ -77,37 +85,37 @@
   transition: color 0.2s;
 }
 
-.close-btn:hover {
+.time-tracking-page .close-btn:hover {
   color: #111827;
 }
 
-.time-form {
+.time-tracking-page .time-form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.form-row {
+.time-tracking-page .form-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
 }
 
-.form-group {
+.time-tracking-page .form-group {
   display: flex;
   flex-direction: column;
 }
 
-.form-group label {
+.time-tracking-page .form-group label {
   font-weight: 600;
   font-size: 0.875rem;
   color: #374151;
   margin-bottom: 0.5rem;
 }
 
-.form-group input,
-.form-group select,
-.form-group textarea {
+.time-tracking-page .form-group input,
+.time-tracking-page .form-group select,
+.time-tracking-page .form-group textarea {
   padding: 0.75rem;
   border: 1px solid #e5e7eb;
   border-radius: 6px;
@@ -116,20 +124,20 @@
   transition: border-color 0.2s;
 }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
+.time-tracking-page .form-group input:focus,
+.time-tracking-page .form-group select:focus,
+.time-tracking-page .form-group textarea:focus {
   outline: none;
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-.form-group textarea {
+.time-tracking-page .form-group textarea {
   resize: vertical;
   min-height: 80px;
 }
 
-.form-actions {
+.time-tracking-page .form-actions {
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
@@ -137,30 +145,30 @@
   border-top: 1px solid #f3f4f6;
 }
 
-.filters-section {
+.time-tracking-page .filters-section {
   margin-bottom: 2rem;
 }
 
-.filters-row {
+.time-tracking-page .filters-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
 }
 
-.filter-group {
+.time-tracking-page .filter-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.filter-group label {
+.time-tracking-page .filter-group label {
   font-weight: 500;
   font-size: 0.875rem;
   color: #6b7280;
 }
 
-.filter-select,
-.filter-input {
+.time-tracking-page .filter-select,
+.time-tracking-page .filter-input {
   padding: 0.75rem;
   border: 1px solid #e5e7eb;
   border-radius: 6px;
@@ -168,14 +176,14 @@
   transition: border-color 0.2s;
 }
 
-.filter-select:focus,
-.filter-input:focus {
+.time-tracking-page .filter-select:focus,
+.time-tracking-page .filter-input:focus {
   outline: none;
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-.clear-filter {
+.time-tracking-page .clear-filter {
   padding: 0.5rem 1rem;
   border: 1px solid #e5e7eb;
   background-color: #f3f4f6;
@@ -185,23 +193,23 @@
   transition: all 0.2s;
 }
 
-.clear-filter:hover {
+.time-tracking-page .clear-filter:hover {
   background-color: #e5e7eb;
 }
 
-.entries-timeline {
+.time-tracking-page .entries-timeline {
   display: flex;
   flex-direction: column;
   gap: 2rem;
 }
 
-.date-group {
+.time-tracking-page .date-group {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.date-header {
+.time-tracking-page .date-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -209,11 +217,11 @@
   border-bottom: 2px solid #e5e7eb;
   position: sticky;
   top: 0;
-  background: white;
+  background: #f3f4f6;
   z-index: 10;
 }
 
-.date-label {
+.time-tracking-page .date-label {
   margin: 0;
   font-size: 0.95rem;
   font-weight: 600;
@@ -221,7 +229,7 @@
   text-transform: capitalize;
 }
 
-.total-hours {
+.time-tracking-page .total-hours {
   display: inline-block;
   padding: 0.375rem 0.75rem;
   background-color: #dbeafe;
@@ -231,20 +239,20 @@
   font-size: 0.875rem;
 }
 
-.entries-list {
+.time-tracking-page .entries-list {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-.entry-card {
+.time-tracking-page .entry-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
 }
 
-.entry-content {
+.time-tracking-page .entry-content {
   flex: 1;
   display: flex;
   justify-content: space-between;
@@ -252,45 +260,45 @@
   gap: 1rem;
 }
 
-.entry-info {
+.time-tracking-page .entry-info {
   flex: 1;
 }
 
-.entry-project {
+.time-tracking-page .entry-project {
   margin: 0;
   font-size: 0.9375rem;
   font-weight: 600;
   color: #111827;
 }
 
-.entry-task {
-  margin: 0.25rem 0 0 0;
+.time-tracking-page .entry-task {
+  margin: 0.25rem 0 0;
   font-size: 0.8125rem;
   color: #6b7280;
 }
 
-.entry-description {
-  margin: 0.5rem 0 0 0;
+.time-tracking-page .entry-description {
+  margin: 0.5rem 0 0;
   font-size: 0.8125rem;
   color: #9ca3af;
   font-style: italic;
   line-height: 1.4;
 }
 
-.entry-hours {
+.time-tracking-page .entry-hours {
   font-size: 1.125rem;
   font-weight: 700;
   color: #2563eb;
-  min-width: 60px;
+  min-width: 80px;
   text-align: right;
 }
 
-.entry-actions {
+.time-tracking-page .entry-actions {
   display: flex;
   gap: 0.5rem;
 }
 
-.action-btn {
+.time-tracking-page .action-btn {
   background: none;
   border: none;
   padding: 0.5rem;
@@ -303,23 +311,23 @@
   justify-content: center;
 }
 
-.action-btn:hover {
+.time-tracking-page .action-btn:hover {
   background-color: #f3f4f6;
 }
 
-.action-btn.edit:hover {
+.time-tracking-page .action-btn.edit:hover {
   color: #2563eb;
 }
 
-.action-btn.delete:hover {
+.time-tracking-page .action-btn.delete:hover {
   color: #ef4444;
 }
 
-.empty-state {
+.time-tracking-page .empty-state {
   grid-column: 1 / -1;
 }
 
-.empty-content {
+.time-tracking-page .empty-content {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -329,19 +337,19 @@
   color: #6b7280;
 }
 
-.empty-content svg {
+.time-tracking-page .empty-content svg {
   margin-bottom: 1rem;
   color: #d1d5db;
 }
 
-.empty-content h3 {
+.time-tracking-page .empty-content h3 {
   margin: 0.5rem 0;
   font-size: 1.125rem;
   font-weight: 600;
   color: #111827;
 }
 
-.empty-content p {
+.time-tracking-page .empty-content p {
   margin: 0;
   font-size: 0.875rem;
 }
@@ -351,100 +359,100 @@
     padding: 1rem;
   }
 
-  .stats-grid {
+  .time-tracking-page .stats-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.75rem;
   }
 
-  .stat-number {
+  .time-tracking-page .stats-grid > .card.stat-card .stat-number {
     font-size: 1.5rem;
   }
 
-  .form-actions {
+  .time-tracking-page .form-actions {
     flex-direction: column-reverse;
   }
 
-  .form-actions button {
+  .time-tracking-page .form-actions button {
     width: 100%;
   }
 
-  .filters-row {
+  .time-tracking-page .filters-row {
     grid-template-columns: 1fr;
   }
 
-  .date-header {
+  .time-tracking-page .date-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
   }
 
-  .entry-content {
+  .time-tracking-page .entry-content {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .entry-hours {
+  .time-tracking-page .entry-hours {
     text-align: left;
   }
 }
 
-body.dark-mode .form-header {
+body.dark-mode .time-tracking-page .form-header {
   border-bottom-color: #374151;
 }
 
-body.dark-mode .form-header h3,
-body.dark-mode .date-label,
-body.dark-mode .entry-project,
-body.dark-mode .empty-content h3 {
+body.dark-mode .time-tracking-page .form-header h3,
+body.dark-mode .time-tracking-page .date-label,
+body.dark-mode .time-tracking-page .entry-project,
+body.dark-mode .time-tracking-page .empty-content h3 {
   color: #f3f4f6;
 }
 
-body.dark-mode .close-btn,
-body.dark-mode .form-group label,
-body.dark-mode .filter-group label,
-body.dark-mode .entry-task,
-body.dark-mode .empty-content,
-body.dark-mode .empty-content p {
+body.dark-mode .time-tracking-page .close-btn,
+body.dark-mode .time-tracking-page .form-group label,
+body.dark-mode .time-tracking-page .filter-group label,
+body.dark-mode .time-tracking-page .entry-task,
+body.dark-mode .time-tracking-page .empty-content,
+body.dark-mode .time-tracking-page .empty-content p {
   color: #9ca3af;
 }
 
-body.dark-mode .close-btn:hover {
+body.dark-mode .time-tracking-page .close-btn:hover {
   color: #f3f4f6;
 }
 
-body.dark-mode .form-group input,
-body.dark-mode .form-group select,
-body.dark-mode .form-group textarea,
-body.dark-mode .filter-select,
-body.dark-mode .filter-input {
+body.dark-mode .time-tracking-page .form-group input,
+body.dark-mode .time-tracking-page .form-group select,
+body.dark-mode .time-tracking-page .form-group textarea,
+body.dark-mode .time-tracking-page .filter-select,
+body.dark-mode .time-tracking-page .filter-input {
   background: #111827;
   border-color: #374151;
   color: #e5e7eb;
 }
 
-body.dark-mode .clear-filter {
+body.dark-mode .time-tracking-page .clear-filter {
   background-color: #374151;
   border-color: #4b5563;
   color: #e5e7eb;
 }
 
-body.dark-mode .clear-filter:hover {
+body.dark-mode .time-tracking-page .clear-filter:hover {
   background-color: #4b5563;
 }
 
-body.dark-mode .date-header {
+body.dark-mode .time-tracking-page .date-header {
   border-bottom-color: #374151;
   background: #1f2937;
 }
 
-body.dark-mode .entry-description {
+body.dark-mode .time-tracking-page .entry-description {
   color: #9ca3af;
 }
 
-body.dark-mode .action-btn {
+body.dark-mode .time-tracking-page .action-btn {
   color: #9ca3af;
 }
 
-body.dark-mode .action-btn:hover {
+body.dark-mode .time-tracking-page .action-btn:hover {
   background-color: #374151;
 }

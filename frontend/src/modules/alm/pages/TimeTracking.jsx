@@ -47,6 +47,9 @@ const TimeTracking = () => {
     return Object.entries(grouped).sort(([dateA], [dateB]) => dateB.localeCompare(dateA));
   }, [filteredEntries]);
 
+  const totalHours = Number(stats.totalHoras || 0);
+  const averageHours = Number(stats.promedioHoras || 0);
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -113,25 +116,25 @@ const TimeTracking = () => {
       />
 
       <div className="stats-grid">
-        <Card padding="medium" className="stat-card">
+        <Card padding="medium" className="stat-card stat-card--total">
           <div className="stat-content">
-            <div className="stat-number">{stats.totalHoras}</div>
+            <div className="stat-number">{totalHours.toFixed(2)}h</div>
             <div className="stat-label">Horas Registradas</div>
           </div>
         </Card>
-        <Card padding="medium" className="stat-card">
+        <Card padding="medium" className="stat-card stat-card--today">
           <div className="stat-content">
             <div className="stat-number">{stats.entradasHoy}</div>
             <div className="stat-label">Entradas Hoy</div>
           </div>
         </Card>
-        <Card padding="medium" className="stat-card">
+        <Card padding="medium" className="stat-card stat-card--average">
           <div className="stat-content">
-            <div className="stat-number">{stats.promedioHoras.toFixed(1)}</div>
+            <div className="stat-number">{averageHours.toFixed(1)}h</div>
             <div className="stat-label">Promedio de Horas</div>
           </div>
         </Card>
-        <Card padding="medium" className="stat-card">
+        <Card padding="medium" className="stat-card stat-card--projects">
           <div className="stat-content">
             <div className="stat-number">{stats.proyectosActivos}</div>
             <div className="stat-label">Proyectos Activos</div>

@@ -89,9 +89,12 @@ async function getKPIs(companyId, period = 'mes') {
     { data: salesPrevious, error: salesPrevError },
     { data: purchasesCurrent, error: purchasesError },
     { data: purchasesPrevious, error: purchasesPrevError },
-    { count: totalClients, error: clientsError },
+    { count: totalCustomers, error: customersError },
+    { count: totalClientsAllTypes, error: clientsAllTypesError },
     { data: currentClients, error: currentClientsError },
+    { data: currentClientsAllTypes, error: currentClientsAllTypesError },
     { data: previousClients, error: previousClientsError },
+    { data: previousClientsAllTypes, error: previousClientsAllTypesError },
     { data: currentOpps, error: currentOppsError },
     { data: previousOpps, error: previousOppsError }
   ] = await Promise.all([
@@ -121,9 +124,13 @@ async function getKPIs(companyId, period = 'mes') {
       .lte('order_date', prevEndDate),
     supabase
       .from('crm_clients')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact', head: true })
       .eq('company_id', companyId)
       .eq('type', 'customer'),
+    supabase
+      .from('crm_clients')
+      .select('id', { count: 'exact', head: true })
+      .eq('company_id', companyId),
     supabase
       .from('crm_clients')
       .select('id')
@@ -135,7 +142,19 @@ async function getKPIs(companyId, period = 'mes') {
       .from('crm_clients')
       .select('id')
       .eq('company_id', companyId)
+      .gte('created_at', start.toISOString())
+      .lte('created_at', end.toISOString()),
+    supabase
+      .from('crm_clients')
+      .select('id')
+      .eq('company_id', companyId)
       .eq('type', 'customer')
+      .gte('created_at', prevStart.toISOString())
+      .lte('created_at', prevEnd.toISOString()),
+    supabase
+      .from('crm_clients')
+      .select('id')
+      .eq('company_id', companyId)
       .gte('created_at', prevStart.toISOString())
       .lte('created_at', prevEnd.toISOString()),
     supabase
@@ -152,20 +171,24 @@ async function getKPIs(companyId, period = 'mes') {
       .lte('created_at', prevEnd.toISOString())
   ]);
 
-  if (salesError || salesPrevError || purchasesError || purchasesPrevError || clientsError) {
+  if (salesError || salesPrevError || purchasesError || purchasesPrevError || customersError) {
     console.error('[BI KPIs] Database error:', {
       salesError,
       salesPrevError,
       purchasesError,
       purchasesPrevError,
-      clientsError
+      customersError
     });
   }
 
-  if (currentClientsError || previousClientsError || currentOppsError || previousOppsError) {
+  if (clientsAllTypesError || currentClientsError || currentClientsAllTypesError
+    || previousClientsError || previousClientsAllTypesError || currentOppsError || previousOppsError) {
     console.error('[BI KPIs] Supplemental data error:', {
+      clientsAllTypesError,
       currentClientsError,
+      currentClientsAllTypesError,
       previousClientsError,
+      previousClientsAllTypesError,
       currentOppsError,
       previousOppsError
     });
@@ -176,7 +199,7 @@ async function getKPIs(companyId, period = 'mes') {
   const costesActual = sumBy(purchasesCurrent, 'total');
   const costesPrevios = sumBy(purchasesPrevious, 'total');
   const beneficioActual = ventasActual - costesActual;
-  const beneficioPrevio = ventasPrevias - costesPrevias;
+  const beneficioPrevio = ventasPrevias - costesPrevios;
 
   const ticketActual = average(ventasActual, salesCurrent?.length || 0);
   const ticketPrevio = average(ventasPrevias, salesPrevious?.length || 0);
@@ -190,8 +213,16 @@ async function getKPIs(companyId, period = 'mes') {
     previousOpps?.length || 0
   );
 
-  const nuevosClientesActual = currentClients?.length || 0;
-  const nuevosClientesPrevio = previousClients?.length || 0;
+  const customerCount = totalCustomers || 0;
+  const allTypeCount = totalClientsAllTypes || 0;
+  const clientesActivosValue = customerCount > 0 ? customerCount : allTypeCount;
+
+  const nuevosClientesActual = (currentClients?.length || 0) > 0
+    ? (currentClients?.length || 0)
+    : (currentClientsAllTypes?.length || 0);
+  const nuevosClientesPrevio = (previousClients?.length || 0) > 0
+    ? (previousClients?.length || 0)
+    : (previousClientsAllTypes?.length || 0);
   const clientesChange = calcPercentChange(nuevosClientesActual, nuevosClientesPrevio);
 
   return {
@@ -208,7 +239,7 @@ async function getKPIs(companyId, period = 'mes') {
       ...calcPercentChange(beneficioActual, beneficioPrevio)
     },
     clientesActivos: {
-      value: totalClients || 0,
+      value: clientesActivosValue,
       change: clientesChange.change,
       trend: clientesChange.trend
     },
