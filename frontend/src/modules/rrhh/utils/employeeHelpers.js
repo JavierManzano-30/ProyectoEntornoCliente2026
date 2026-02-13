@@ -87,8 +87,12 @@ export const filterEmployees = (employees, filters) => {
       }
     }
     
-    // Filtro por departamento
-    if (filters.department && employee.departmentId !== filters.department) {
+    // Filtro por departamento (acepta id o nombre para alinearse con los selects)
+    if (
+      filters.department &&
+      employee.departmentId !== filters.department &&
+      employee.departmentName !== filters.department
+    ) {
       return false;
     }
     
