@@ -37,30 +37,30 @@ const ProjectList = () => {
       />
 
       <div className="project-metrics">
-        <Card padding="medium">
+        <Card padding="medium" className="metric-card">
           <div className="metric-icon blue"><FolderKanban size={24} /></div>
-          <div className="metric-content">
+          <div className="metric-inline">
             <span className="metric-value">{stats.total}</span>
             <span className="metric-label">Total Proyectos</span>
           </div>
         </Card>
-        <Card padding="medium">
+        <Card padding="medium" className="metric-card">
           <div className="metric-icon green"><CheckCircle size={24} /></div>
-          <div className="metric-content">
+          <div className="metric-inline">
             <span className="metric-value">{stats.activos}</span>
             <span className="metric-label">En Curso</span>
           </div>
         </Card>
-        <Card padding="medium">
+        <Card padding="medium" className="metric-card">
           <div className="metric-icon orange"><Clock size={24} /></div>
-          <div className="metric-content">
+          <div className="metric-inline">
             <span className="metric-value">{stats.horasTotales}h</span>
             <span className="metric-label">Horas Trabajadas</span>
           </div>
         </Card>
-        <Card padding="medium">
+        <Card padding="medium" className="metric-card">
           <div className="metric-icon purple"><TrendingUp size={24} /></div>
-          <div className="metric-content">
+          <div className="metric-inline">
             <span className="metric-value">{stats.completados}</span>
             <span className="metric-label">Completados</span>
           </div>

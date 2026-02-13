@@ -156,20 +156,24 @@
 .metric-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
   margin-bottom: 0.75rem;
+  gap: 1rem;
 }
 
 .metric-label {
   font-size: 0.875rem;
   font-weight: 500;
   color: #6b7280;
+  flex: 1;
 }
 
 .metric-value {
-  font-size: 0.875rem;
+  font-size: 1.75rem;
   font-weight: 600;
   color: #111827;
+  white-space: nowrap;
+  text-align: right;
 }
 
 .progress-bar {
