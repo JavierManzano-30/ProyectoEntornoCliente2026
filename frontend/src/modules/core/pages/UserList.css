@@ -73,19 +73,68 @@
   margin-bottom: 1.5rem;
 }
 
+.search-section.card-padding-medium .card-body,
 .search-section .card-body {
   width: 100%;
+  padding: 0;
+}
+
+.filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1rem;
+}
+
+.filters-header .search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  max-width: 520px;
+  height: 44px;
+  padding: 0 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.filters-header .search-box svg {
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.filters-header .search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.9375rem;
+  color: #1e293b;
+  height: 100%;
+  padding: 0;
+}
+
+.filters-header .search-input::placeholder {
+  color: #94a3b8;
+}
+
+.filters-header > .btn {
+  height: 44px;
+  white-space: nowrap;
 }
 
 .search-bar {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: stretch;
   width: 100%;
 }
 
 .search-input-wrapper {
-  flex: 1 1 0;
+  width: 100%;
   position: relative;
   display: flex;
   align-items: center;
@@ -100,6 +149,7 @@
 .search-bar > .btn {
   flex: 0 0 auto;
   height: 44px;
+  align-self: stretch;
 }
 
 .search-input-wrapper svg {
@@ -120,6 +170,16 @@
 .search-input:focus {
   outline: none;
   box-shadow: none;
+}
+
+@media (max-width: 640px) {
+  .search-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .search-bar > .btn {
+    width: 100%;
+  }
 }
 
 .filters-panel {
@@ -283,7 +343,7 @@
   }
 
   .search-bar {
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
 
   .filters-panel {
@@ -292,6 +352,16 @@
 
   .filter-group {
     max-width: none;
+  }
+
+  .filters-header {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0;
+  }
+
+  .filters-header > .btn {
+    width: 100%;
   }
 }
 
@@ -330,6 +400,23 @@ body.dark-mode .filter-group select {
   background: #111827;
   border-color: #374151;
   color: #e5e7eb;
+}
+
+body.dark-mode .filters-header .search-box {
+  background: #111827;
+  border-color: #374151;
+}
+
+body.dark-mode .filters-header .search-box svg {
+  color: #6b7280;
+}
+
+body.dark-mode .filters-header .search-input {
+  color: #e5e7eb;
+}
+
+body.dark-mode .filters-header .search-input::placeholder {
+  color: #6b7280;
 }
 
 body.dark-mode .users-table thead {

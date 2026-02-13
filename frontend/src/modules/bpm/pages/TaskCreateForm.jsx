@@ -111,7 +111,11 @@ const TaskCreateForm = () => {
       });
       navigate('/bpm/tareas');
     } catch (err) {
-      setError(err.response?.data?.message || 'Error al crear la tarea.');
+      const apiMessage =
+        err.response?.data?.error?.message ||
+        err.response?.data?.message ||
+        err.message;
+      setError(apiMessage || 'Error al crear la tarea.');
       console.error('Error creating BPM task:', err);
     } finally {
       setLoading(false);
@@ -155,7 +159,13 @@ const TaskCreateForm = () => {
               required
               disabled={!form.processId || loadingActivities}
             >
-              <option value="">{loadingActivities ? 'Cargando...' : 'Selecciona una actividad'}</option>
+              <option value="">
+                {loadingActivities
+                  ? 'Cargando...'
+                  : activities.length === 0
+                    ? 'No hay actividades configuradas'
+                    : 'Selecciona una actividad'}
+              </option>
               {activities.map((activity) => (
                 <option key={activity.id} value={activity.id}>
                   {activity.name}

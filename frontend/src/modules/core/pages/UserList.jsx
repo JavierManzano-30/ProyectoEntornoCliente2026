@@ -129,7 +129,7 @@ const UserList = () => {
       </div>
 
       {/* Barra de búsqueda y filtros */}
-      <Card padding="medium" className="search-section">
+      <Card padding="none" className="search-section">
         <div className="search-bar">
           <div className="search-input-wrapper">
             <Search size={20} />
