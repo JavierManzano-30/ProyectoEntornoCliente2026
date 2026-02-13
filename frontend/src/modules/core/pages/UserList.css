@@ -26,10 +26,21 @@
   flex-shrink: 0;
 }
 
-.metric-icon-blue { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); }
-.metric-icon-green { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); }
-.metric-icon-red { background: linear-gradient(135deg, #ef4444 0%, #f87171 100%); }
-.metric-icon-purple { background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); }
+.metric-icon-blue {
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+}
+
+.metric-icon-green {
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+}
+
+.metric-icon-red {
+  background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+}
+
+.metric-icon-purple {
+  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+}
 
 .metric-info {
   display: flex;
@@ -139,7 +150,7 @@
   padding: 1rem;
   text-align: left;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #374151;
   white-space: nowrap;
 }
@@ -184,7 +195,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.75rem;
   flex-shrink: 0;
 }

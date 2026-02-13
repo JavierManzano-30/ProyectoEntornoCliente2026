@@ -163,7 +163,7 @@
   align-items: center;
   gap: 0.25rem;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .metric-trend.positive {
@@ -218,7 +218,7 @@
 
 .recent-ticket-id {
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #2563eb;
   font-family: 'Courier New', monospace;
 }
@@ -261,7 +261,7 @@
 
 .team-member-tickets {
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #2563eb;
 }
 

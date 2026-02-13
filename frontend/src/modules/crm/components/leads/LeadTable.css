@@ -19,7 +19,7 @@
 .lead-table th {
   padding: 0.75rem 1rem;
   text-align: left;
-  font-weight: 600;
+  font-weight: 700;
   color: #374151;
   font-size: 0.75rem;
   text-transform: uppercase;
@@ -55,7 +55,7 @@
 }
 
 .lead-value {
-  font-weight: 600;
+  font-weight: 700;
   color: #f59e0b;
 }
 

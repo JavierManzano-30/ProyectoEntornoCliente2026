@@ -55,6 +55,7 @@ body.dark-mode .main-header {
 body.dark-mode .header-title-blue {
   color: #60a5fa;
 }
+
 .main-layout {
   display: flex;
   min-height: 100vh;
@@ -78,22 +79,23 @@ body.dark-mode .header-title-blue {
   padding: 2rem 1.5rem;
   border-bottom: 1px solid #e5e7eb;
 }
- .sidebar-header {
-   padding: 2rem 1.5rem 1rem 1.5rem;
-   border-bottom: 1px solid #e5e7eb;
- }
 
- .sidebar-company {
-   margin-top: 0.5rem;
-   font-size: 1rem;
-   color: #4f8cff;
-   font-weight: 500;
- }
+.sidebar-header {
+  padding: 2rem 1.5rem 1rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
 
- .company-name {
+.sidebar-company {
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  color: #4f8cff;
+  font-weight: 500;
+}
+
+.company-name {
   font-weight: 700;
   color: #2563eb;
- }
+}
 
 body.dark-mode .company-name {
   color: #60a5fa !important;
@@ -174,7 +176,7 @@ body.dark-mode .company-name {
 .header-title {
   margin: 0;
   font-size: 1.25rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #111827;
 }
 

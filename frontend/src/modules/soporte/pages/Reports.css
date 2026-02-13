@@ -19,7 +19,7 @@
   align-items: center;
   gap: 0.75rem;
   font-size: 1.75rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #1e293b;
   margin-bottom: 0.5rem;
 }
@@ -191,7 +191,7 @@
 
 .report-card-header h3 {
   font-size: 1.125rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #1e293b;
 }
 
@@ -398,7 +398,7 @@
   padding: 0.875rem;
   text-align: left;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #475569;
   background: #f8fafc;
   border-bottom: 2px solid #e2e8f0;
@@ -420,7 +420,7 @@
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .badge.success {
@@ -467,6 +467,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }

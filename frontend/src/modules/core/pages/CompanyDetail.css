@@ -61,7 +61,7 @@
   align-items: center;
 }
 
-.header-stat > svg {
+.header-stat>svg {
   color: #6b7280;
 }
 
@@ -75,7 +75,7 @@
 .stat-value {
   display: block;
   font-size: 0.9375rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #111827;
 }
 
@@ -87,7 +87,7 @@
 
 .company-details-grid h3 {
   font-size: 1.125rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #111827;
   margin: 0 0 1.5rem 0;
 }
@@ -104,7 +104,7 @@
   align-items: flex-start;
 }
 
-.info-item > svg {
+.info-item>svg {
   color: #6b7280;
   flex-shrink: 0;
   margin-top: 0.25rem;

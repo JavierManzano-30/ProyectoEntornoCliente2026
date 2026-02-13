@@ -33,7 +33,7 @@
   border-radius: 9999px;
   padding: 0.35rem 0.8rem;
   font-size: 0.78rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
@@ -99,7 +99,7 @@
   padding: 0.52rem 0.85rem;
   cursor: pointer;
   font-size: 0.86rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .btn-action-primary {
@@ -152,7 +152,7 @@
 .task-detail-item .label {
   display: block;
   font-size: 0.77rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   color: #9ca3af;
 }

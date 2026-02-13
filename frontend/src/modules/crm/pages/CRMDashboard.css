@@ -101,7 +101,7 @@
 
 .crm-dashboard__card h3 {
   font-size: 1.125rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #111827;
   margin: 0 0 1rem 0;
 }
@@ -132,7 +132,7 @@
 
 .pipeline-item__cantidad {
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #6b7280;
 }
 
@@ -151,7 +151,7 @@
 
 .pipeline-item__valor {
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #111827;
   text-align: right;
 }
@@ -177,7 +177,7 @@
 }
 
 .opportunity-item__value {
-  font-weight: 600;
+  font-weight: 700;
   color: #059669;
 }
 

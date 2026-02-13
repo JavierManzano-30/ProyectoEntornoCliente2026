@@ -35,12 +35,35 @@
   flex-shrink: 0;
 }
 
-.metric-icon-blue { background: #eff6ff; color: #3b82f6; }
-.metric-icon-green { background: #f0fdf4; color: #22c55e; }
-.metric-icon-purple { background: #faf5ff; color: #a855f7; }
-.metric-icon-orange { background: #fff7ed; color: #f97316; }
-.metric-icon-yellow { background: #fefce8; color: #eab308; }
-.metric-icon-red { background: #fef2f2; color: #ef4444; }
+.metric-icon-blue {
+  background: #eff6ff;
+  color: #3b82f6;
+}
+
+.metric-icon-green {
+  background: #f0fdf4;
+  color: #22c55e;
+}
+
+.metric-icon-purple {
+  background: #faf5ff;
+  color: #a855f7;
+}
+
+.metric-icon-orange {
+  background: #fff7ed;
+  color: #f97316;
+}
+
+.metric-icon-yellow {
+  background: #fefce8;
+  color: #eab308;
+}
+
+.metric-icon-red {
+  background: #fef2f2;
+  color: #ef4444;
+}
 
 .metric-info {
   flex: 1;
@@ -54,7 +77,7 @@
 
 .metric-value {
   font-size: 1.75rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #1e293b;
   margin: 0 0 2px 0;
 }
@@ -163,7 +186,7 @@
   padding: 12px 16px;
   text-align: left;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   color: #475569;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -212,7 +235,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 14px;
   flex-shrink: 0;
 }
@@ -280,12 +303,35 @@
   }
 }
 
-body.dark-mode .metric-icon-blue { background: #1e3a8a; color: #93c5fd; }
-body.dark-mode .metric-icon-green { background: #064e3b; color: #6ee7b7; }
-body.dark-mode .metric-icon-purple { background: #4c1d95; color: #c4b5fd; }
-body.dark-mode .metric-icon-orange { background: #7c2d12; color: #fdba74; }
-body.dark-mode .metric-icon-yellow { background: #713f12; color: #fde68a; }
-body.dark-mode .metric-icon-red { background: #7f1d1d; color: #fca5a5; }
+body.dark-mode .metric-icon-blue {
+  background: #1e3a8a;
+  color: #93c5fd;
+}
+
+body.dark-mode .metric-icon-green {
+  background: #064e3b;
+  color: #6ee7b7;
+}
+
+body.dark-mode .metric-icon-purple {
+  background: #4c1d95;
+  color: #c4b5fd;
+}
+
+body.dark-mode .metric-icon-orange {
+  background: #7c2d12;
+  color: #fdba74;
+}
+
+body.dark-mode .metric-icon-yellow {
+  background: #713f12;
+  color: #fde68a;
+}
+
+body.dark-mode .metric-icon-red {
+  background: #7f1d1d;
+  color: #fca5a5;
+}
 
 body.dark-mode .metric-label,
 body.dark-mode .metric-trend,

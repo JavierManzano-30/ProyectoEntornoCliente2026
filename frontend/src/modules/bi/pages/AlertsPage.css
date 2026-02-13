@@ -208,7 +208,7 @@
 .alert-header h3 {
   margin: 0;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #1e293b;
 }
 
@@ -219,7 +219,7 @@
   background: #3b82f6;
   color: white;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -286,7 +286,7 @@
 .empty-state h3 {
   margin: 0 0 0.5rem 0;
   font-size: 1.25rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #475569;
 }
 

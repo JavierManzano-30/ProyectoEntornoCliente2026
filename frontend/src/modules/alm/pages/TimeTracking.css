@@ -9,33 +9,33 @@
   margin-bottom: 2rem;
 }
 
-.time-tracking-page .stats-grid > .card.stat-card {
+.time-tracking-page .stats-grid>.card.stat-card {
   border: none;
   color: #ffffff;
   overflow: hidden;
 }
 
-.time-tracking-page .stats-grid > .card.stat-card.stat-card--total {
+.time-tracking-page .stats-grid>.card.stat-card.stat-card--total {
   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
 }
 
-.time-tracking-page .stats-grid > .card.stat-card.stat-card--today {
+.time-tracking-page .stats-grid>.card.stat-card.stat-card--today {
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
 }
 
-.time-tracking-page .stats-grid > .card.stat-card.stat-card--average {
+.time-tracking-page .stats-grid>.card.stat-card.stat-card--average {
   background: linear-gradient(135deg, #4facfe 0%, #00c6ff 100%);
 }
 
-.time-tracking-page .stats-grid > .card.stat-card.stat-card--projects {
+.time-tracking-page .stats-grid>.card.stat-card.stat-card--projects {
   background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
 }
 
-.time-tracking-page .stats-grid > .card.stat-card .stat-content {
+.time-tracking-page .stats-grid>.card.stat-card .stat-content {
   text-align: center;
 }
 
-.time-tracking-page .stats-grid > .card.stat-card .stat-number {
+.time-tracking-page .stats-grid>.card.stat-card .stat-number {
   font-size: 2rem;
   font-weight: 700;
   line-height: 1.1;
@@ -43,12 +43,12 @@
   color: #ffffff;
 }
 
-.time-tracking-page .stats-grid > .card.stat-card .stat-label {
+.time-tracking-page .stats-grid>.card.stat-card .stat-label {
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.02em;
   color: rgba(255, 255, 255, 0.9);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .time-tracking-page .form-section {
@@ -107,7 +107,7 @@
 }
 
 .time-tracking-page .form-group label {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.875rem;
   color: #374151;
   margin-bottom: 0.5rem;
@@ -224,7 +224,7 @@
 .time-tracking-page .date-label {
   margin: 0;
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #111827;
   text-transform: capitalize;
 }
@@ -235,7 +235,7 @@
   background-color: #dbeafe;
   color: #1e40af;
   border-radius: 9999px;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.875rem;
 }
 
@@ -267,7 +267,7 @@
 .time-tracking-page .entry-project {
   margin: 0;
   font-size: 0.9375rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #111827;
 }
 
@@ -345,7 +345,7 @@
 .time-tracking-page .empty-content h3 {
   margin: 0.5rem 0;
   font-size: 1.125rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #111827;
 }
 
@@ -364,7 +364,7 @@
     gap: 0.75rem;
   }
 
-  .time-tracking-page .stats-grid > .card.stat-card .stat-number {
+  .time-tracking-page .stats-grid>.card.stat-card .stat-number {
     font-size: 1.5rem;
   }
 

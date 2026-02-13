@@ -22,7 +22,7 @@
 
 .project-card-title {
   font-size: 1.125rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #111827;
   margin: 0;
   flex: 1;
@@ -57,7 +57,7 @@
 
 .progress-value {
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #2563eb;
 }
 

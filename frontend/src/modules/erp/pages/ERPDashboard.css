@@ -13,7 +13,7 @@
 
 .dashboard-header h1 {
   font-size: 2rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #1f2937;
 }
 
@@ -137,7 +137,7 @@
 
 .detail-card h3 {
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #374151;
   margin-bottom: 1rem;
   padding-bottom: 0.75rem;
@@ -163,7 +163,7 @@
 
 .detail-item strong {
   color: #111827;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .detail-item.warning strong {
@@ -183,7 +183,7 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #92400e;
   margin-bottom: 1rem;
 }
@@ -234,7 +234,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .dashboard-error {

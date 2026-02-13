@@ -15,7 +15,7 @@
   align-items: center;
   gap: 0.75rem;
   font-size: 1.75rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #1e293b;
   margin-bottom: 0.5rem;
 }
@@ -78,7 +78,7 @@
 
 .content-header h2 {
   font-size: 1.375rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #1e293b;
   margin-bottom: 0.25rem;
 }
@@ -127,7 +127,7 @@
 
 .tablon-info h3 {
   font-size: 1.125rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #1e293b;
   margin-bottom: 0.25rem;
 }
@@ -168,7 +168,7 @@
   color: #dc2626;
   border-radius: 4px;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
@@ -213,7 +213,7 @@
 
 .cat-info h4 {
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #1e293b;
   margin-bottom: 0.25rem;
 }
@@ -269,7 +269,7 @@
 
 .prior-info h4 {
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   margin-bottom: 0.25rem;
 }
 
@@ -283,7 +283,7 @@
   background: white;
   border-radius: 6px;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
@@ -306,7 +306,7 @@
   align-items: center;
   gap: 0.625rem;
   font-size: 1.125rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #1e293b;
   margin-bottom: 1.25rem;
 }
@@ -397,7 +397,7 @@
 
 .modal-header h2 {
   font-size: 1.25rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #1e293b;
 }
 
@@ -592,7 +592,7 @@
 
 .estado-header h4 {
   font-size: 0.9375rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #1e293b;
   margin-bottom: 0.125rem;
 }
@@ -642,7 +642,7 @@
 
 .campo-info h4 {
   font-size: 0.9375rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #1e293b;
   margin-bottom: 0.375rem;
 }
@@ -718,7 +718,7 @@
 
 .plantilla-card h4 {
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #1e293b;
   margin-bottom: 0.5rem;
 }
@@ -768,7 +768,7 @@
 
 .tema-section h3 {
   font-size: 1.125rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #1e293b;
   margin-bottom: 1.25rem;
 }
@@ -830,7 +830,7 @@
 .preview-header {
   padding: 0.875rem 1rem;
   color: white;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.9375rem;
 }
 
@@ -845,7 +845,7 @@
   border-radius: 4px;
   font-size: 0.75rem;
   color: white;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 /* Horarios */
@@ -864,7 +864,7 @@
 
 .horario-section h3 {
   font-size: 1.125rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #1e293b;
   margin-bottom: 1rem;
 }

@@ -135,7 +135,7 @@
   align-items: center;
   gap: 0.25rem;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .kpi-change.up {
@@ -168,7 +168,7 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #1e293b;
   margin: 0;
 }
@@ -296,7 +296,7 @@
 
 .category-percentage {
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #3b82f6;
 }
 
@@ -327,7 +327,7 @@
 
 .region-name {
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #1e293b;
 }
 
@@ -352,7 +352,7 @@
 
 .region-value {
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #10b981;
 }
 
@@ -370,7 +370,7 @@
   text-align: left;
   padding: 0.75rem 1rem;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -406,7 +406,7 @@
   background: #f1f5f9;
   color: #64748b;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .product-name {
@@ -422,12 +422,12 @@
   background: #dbeafe;
   color: #1e40af;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .product-revenue {
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #10b981;
 }
 
@@ -442,7 +442,7 @@
   .kpis-grid {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   }
-  
+
   .kpi-value {
     font-size: 1.5rem;
   }

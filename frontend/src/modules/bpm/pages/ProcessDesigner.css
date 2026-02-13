@@ -76,7 +76,7 @@
   color: white;
   border: none;
   border-radius: 0.5rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
   font-size: 0.9375rem;
@@ -111,14 +111,17 @@
 
 .saving {
   color: #3b82f6;
-  font-weight: 600;
+  font-weight: 700;
   animation: pulse 1s infinite;
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }

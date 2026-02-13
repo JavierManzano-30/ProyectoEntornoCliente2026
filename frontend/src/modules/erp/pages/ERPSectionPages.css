@@ -1,25 +1,25 @@
 .erp-section-page {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-.erp-section-header {
+.page-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
+  align-items: center;
+  margin-bottom: 2rem;
 }
 
 .erp-section-header h1 {
-  margin: 0;
-  font-size: 2.75rem;
-  color: #0f172a;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
 }
 
 .erp-section-header p {
-  margin: 0.4rem 0 0;
-  color: #64748b;
+  display: flex;
+  gap: 0.75rem;
 }
 
 .erp-section-grid {
@@ -39,7 +39,7 @@
   margin: 0;
   font-size: 0.9rem;
   color: #64748b;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .erp-section-card strong {

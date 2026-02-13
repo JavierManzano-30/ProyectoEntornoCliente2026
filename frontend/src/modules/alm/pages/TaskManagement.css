@@ -132,7 +132,7 @@
 .column-title {
   margin: 0;
   font-size: 0.9375rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #111827;
 }
 
@@ -142,7 +142,7 @@
   background-color: white;
   border-radius: 9999px;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #6b7280;
 }
 
@@ -191,7 +191,7 @@
 .empty-content h3 {
   margin: 0.5rem 0;
   font-size: 1.125rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #111827;
 }
 

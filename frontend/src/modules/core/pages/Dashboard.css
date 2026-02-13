@@ -96,7 +96,7 @@
 
 .section-title {
   font-size: 1.125rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #111827;
   margin: 0;
   display: flex;
@@ -164,7 +164,7 @@
 
 .activity-text strong {
   color: #111827;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .activity-time {
@@ -242,7 +242,7 @@
 
 .quick-action-label {
   font-size: 0.9375rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #111827;
 }
 

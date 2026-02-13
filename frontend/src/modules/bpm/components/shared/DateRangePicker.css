@@ -126,7 +126,7 @@
 }
 
 .calendar-title {
-  font-weight: 600;
+  font-weight: 700;
   color: #1f2937;
   font-size: 0.9375rem;
   text-transform: capitalize;
@@ -141,7 +141,7 @@
 }
 
 .calendar-weekdays div {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.75rem;
   color: #6b7280;
 }
@@ -152,8 +152,7 @@
   gap: 0.5rem;
 }
 
-.calendar-day-empty {
-}
+.calendar-day-empty {}
 
 .calendar-day {
   aspect-ratio: 1;
@@ -188,7 +187,7 @@
   background-color: #3b82f6;
   color: white;
   border-color: #3b82f6;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .date-picker-actions {

@@ -38,7 +38,7 @@
 .task-title {
   margin: 0;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #111827;
 }
 
@@ -47,7 +47,7 @@
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   color: white;
   white-space: nowrap;
 }
@@ -118,7 +118,7 @@
 }
 
 .priority-badge {
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .task-footer {
@@ -142,7 +142,7 @@
 
 .hours-value {
   color: #111827;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .due-date {
@@ -164,7 +164,7 @@
 
 .due-value.overdue-text {
   color: #ef4444;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .progress-bar {

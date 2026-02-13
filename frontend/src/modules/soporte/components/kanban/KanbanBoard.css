@@ -44,7 +44,7 @@
 .kanban-column-title {
   margin: 0;
   font-size: 0.9375rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #111827;
   text-transform: uppercase;
   letter-spacing: 0.025em;
@@ -165,7 +165,7 @@
   .kanban-board {
     grid-template-columns: 1fr;
   }
-  
+
   .kanban-column {
     min-width: 100%;
   }
