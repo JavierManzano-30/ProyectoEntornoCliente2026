@@ -65,7 +65,7 @@ export const useSales = () => {
     try {
       await erpService.sendInvoiceEmail(invoiceId, emailData);
       setInvoices(prev => prev.map(inv => 
-        inv.id === invoiceId ? { ...inv, status: 'sent' } : inv
+        inv.id === invoiceId ? { ...inv, status: 'issued' } : inv
       ));
     } catch (err) {
       setError(err.message);

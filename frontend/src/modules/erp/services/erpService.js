@@ -10,6 +10,7 @@ const BASE_URL = '/erp';
 
 const DEFAULT_LIST_PARAMS = { page: 1, limit: 100 };
 const CANCELED_ORDER_STATUS = new Set(['canceled', 'cancelled']);
+let isFinancialKpiEndpointAvailable = null;
 
 const toArray = (value) => {
   if (Array.isArray(value)) return value;
@@ -896,8 +897,13 @@ export const getCostAnalysis = async (params) => {
  * Obtener KPIs financieros
  */
 export const getFinancialKPIs = async (params) => {
+  if (isFinancialKpiEndpointAvailable === false) {
+    return buildKPIsFromOperationalData(params);
+  }
+
   try {
     const response = await axios.get(`${BASE_URL}/reports/financial-kpis`, { params });
+    isFinancialKpiEndpointAvailable = true;
     return response.data;
   } catch (error) {
     const status = error?.response?.status;
@@ -905,6 +911,11 @@ export const getFinancialKPIs = async (params) => {
       throw error;
     }
     if (!status) throw error;
+
+    if (status === 404) {
+      // Evita repetir logs 404 en consola en cada recarga de dashboard.
+      isFinancialKpiEndpointAvailable = false;
+    }
     return buildKPIsFromOperationalData(params);
   }
 };

@@ -55,6 +55,20 @@ const emptyInvoiceForm = () => ({
   taxAmount: '0'
 });
 
+const buildInvoiceDocument = (invoice) => {
+  const lines = [
+    'Factura ERP',
+    `Numero: ${invoice.number || '-'}`,
+    `Cliente: ${invoice.customerName || 'Sin cliente'}`,
+    `Fecha emision: ${formatDate(invoice.date)}`,
+    `Fecha vencimiento: ${formatDate(invoice.dueDate)}`,
+    `Estado: ${INVOICE_STATUS_LABELS[invoice.status] || invoice.status}`,
+    `Total: ${formatCurrency(invoice.total || 0)}`,
+    `Pendiente: ${formatCurrency(invoice.pending || 0)}`
+  ];
+  return lines.join('\n');
+};
+
 const SalesInvoicing = () => {
   const { invoices, loading, loadInvoices, createInvoice, sendInvoice, recordPayment } = useSales();
   const [searchTerm, setSearchTerm] = useState('');
@@ -63,6 +77,7 @@ const SalesInvoicing = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [invoiceForm, setInvoiceForm] = useState(emptyInvoiceForm());
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
 
   useEffect(() => {
     loadInvoices();
@@ -161,6 +176,18 @@ const SalesInvoicing = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleDownloadInvoice = (invoice) => {
+    const blob = new Blob([buildInvoiceDocument(invoice)], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${invoice.number || invoice.id || 'factura'}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -318,7 +345,9 @@ const SalesInvoicing = () => {
                   </td>
                   <td>
                     <div className="action-buttons">
-                      <button className="btn-icon" title="Ver factura">Ver</button>
+                      <button className="btn-icon" title="Ver factura" onClick={() => setSelectedInvoice(invoice)}>
+                        Ver
+                      </button>
                       {invoice.status === 'draft' && (
                         <button className="btn-icon" title="Enviar" onClick={() => handleSendInvoice(invoice.id)} disabled={saving}>
                           <Send size={14} />
@@ -332,7 +361,7 @@ const SalesInvoicing = () => {
                       <button
                         className="btn-icon"
                         title="Descargar PDF"
-                        disabled
+                        onClick={() => handleDownloadInvoice(invoice)}
                       >
                         <Download size={14} />
                       </button>
@@ -344,6 +373,35 @@ const SalesInvoicing = () => {
           </table>
         )}
       </div>
+
+      {selectedInvoice && (
+        <section className="erp-section-panel">
+          <div className="page-header">
+            <h2>Detalle de factura {selectedInvoice.number || '-'}</h2>
+            <button className="btn-secondary" onClick={() => setSelectedInvoice(null)}>
+              Cerrar
+            </button>
+          </div>
+          <div className="erp-section-grid">
+            <article className="erp-section-card">
+              <h3>Cliente</h3>
+              <strong>{selectedInvoice.customerName || 'Sin cliente'}</strong>
+            </article>
+            <article className="erp-section-card">
+              <h3>Estado</h3>
+              <strong>{INVOICE_STATUS_LABELS[selectedInvoice.status] || selectedInvoice.status}</strong>
+            </article>
+            <article className="erp-section-card">
+              <h3>Total</h3>
+              <strong>{formatCurrency(selectedInvoice.total || 0)}</strong>
+            </article>
+            <article className="erp-section-card">
+              <h3>Pendiente</h3>
+              <strong>{formatCurrency(selectedInvoice.pending || 0)}</strong>
+            </article>
+          </div>
+        </section>
+      )}
     </div>
   );
 };

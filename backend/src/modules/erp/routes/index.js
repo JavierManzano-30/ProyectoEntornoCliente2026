@@ -6,6 +6,7 @@ const products = require('../controllers/product-controller');
 const inventory = require('../controllers/inventory-controller');
 const purchases = require('../controllers/purchase-controller');
 const sales = require('../controllers/sales-controller');
+const reports = require('../controllers/reports-controller');
 
 const router = express.Router();
 const { envelopeError } = require('../../../utils/envelope');
@@ -99,5 +100,7 @@ router.get('/invoices', sales.listInvoices);
 router.post('/invoices', sales.createInvoice);
 router.get('/invoices/:id', sales.getInvoice);
 router.put('/invoices/:id', sales.updateInvoice);
+
+router.get('/reports/financial-kpis', reports.getFinancialKPIs);
 
 module.exports = router;

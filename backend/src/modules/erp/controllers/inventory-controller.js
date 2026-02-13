@@ -193,7 +193,7 @@ async function listMovements(req, res, next) {
 
 async function createMovement(req, res, next) {
   try {
-    const errors = validateRequiredFields(req.body, ['productId', 'warehouseId', 'movementType', 'quantity', 'userId']);
+    const errors = validateRequiredFields(req.body, ['productId', 'warehouseId', 'movementType', 'quantity']);
     if (errors.length) {
       return res.status(400).json(envelopeError('VALIDATION_ERROR', 'Invalid data', errors));
     }
@@ -202,7 +202,11 @@ async function createMovement(req, res, next) {
       return res.status(400).json(envelopeError('VALIDATION_ERROR', typeErr));
     }
     const companyId = resolveCompanyId(req);
-    const row = await inventoryService.createMovement(companyId, req.body);
+    const payload = {
+      ...req.body,
+      userId: req.body.userId || req.user?.id || req.user?.userId || req.headers['x-user-id'] || 'system'
+    };
+    const row = await inventoryService.createMovement(companyId, payload);
     return res.status(201).json(envelopeSuccess(mapMovement(row)));
   } catch (err) {
     return next(err);

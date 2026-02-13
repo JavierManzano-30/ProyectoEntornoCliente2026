@@ -1,6 +1,11 @@
 const supabase = require('../../../config/supabase');
-const { pool } = require('../../../config/db');
 const { generateId } = require('../../../utils/id');
+
+function pickDefined(values) {
+  return Object.fromEntries(
+    Object.entries(values).filter(([, value]) => value !== undefined)
+  );
+}
 
 async function listSalesOrders(companyId, { filters, limit, offset }) {
   let query = supabase.from('erp_sales_orders').select('*', { count: 'exact' });
@@ -17,14 +22,11 @@ async function listSalesOrders(companyId, { filters, limit, offset }) {
 }
 
 async function getSalesOrderById(companyId, id) {
-  const values = [id];
-  let query = 'SELECT * FROM erp_sales_orders WHERE id = $1';
-  if (companyId) {
-    values.push(companyId);
-    query += ` AND company_id = $2`;
-  }
-  const result = await pool.query(query, values);
-  return result.rows[0] || null;
+  let query = supabase.from('erp_sales_orders').select('*').eq('id', id);
+  if (companyId) query = query.eq('company_id', companyId);
+  const { data, error } = await query.maybeSingle();
+  if (error) throw error;
+  return data || null;
 }
 
 async function getSalesOrderItems(companyId, orderId) {
@@ -42,98 +44,130 @@ async function getSalesOrderItems(companyId, orderId) {
 
 async function createSalesOrder(companyId, data) {
   const now = new Date().toISOString();
-  const id = generateId('erp_so');
-  const result = await pool.query(
-    `INSERT INTO erp_sales_orders
-      (id, company_id, client_id, order_number, status, order_date, expected_delivery_date, actual_delivery_date, subtotal, tax, total, currency, payment_terms, created_by, created_at, updated_at)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING *`,
-    [id, companyId, data.clientId, data.orderNumber,
-     data.status || 'quote', data.orderDate,
-     data.expectedDeliveryDate || null, data.actualDeliveryDate || null,
-     data.subtotal, data.tax, data.total,
-     data.currency || 'COP', data.paymentTerms || null,
-     data.createdBy || null, now, now]
-  );
-  return result.rows[0];
+  const id = data.id || generateId('erp_so');
+  const { data: row, error } = await supabase
+    .from('erp_sales_orders')
+    .insert([{
+      id,
+      company_id: companyId,
+      client_id: data.clientId,
+      order_number: data.orderNumber,
+      status: data.status || 'quote',
+      order_date: data.orderDate,
+      expected_delivery_date: data.expectedDeliveryDate || null,
+      actual_delivery_date: data.actualDeliveryDate || null,
+      subtotal: data.subtotal,
+      tax: data.tax,
+      total: data.total,
+      currency: data.currency || 'EUR',
+      payment_terms: data.paymentTerms || null,
+      created_by: data.createdBy || null,
+      created_at: now,
+      updated_at: now
+    }])
+    .select('*')
+    .single();
+
+  if (error) throw error;
+  return row;
 }
 
 async function updateSalesOrder(companyId, id, data) {
   const now = new Date().toISOString();
-  const values = [
-    data.clientId, data.orderNumber, data.status || 'quote',
-    data.orderDate, data.expectedDeliveryDate || null,
-    data.actualDeliveryDate || null, data.subtotal, data.tax, data.total,
-    data.currency || 'COP', data.paymentTerms || null, now, id
-  ];
-  let query = `UPDATE erp_sales_orders SET
-    client_id=$1, order_number=$2, status=$3, order_date=$4,
-    expected_delivery_date=$5, actual_delivery_date=$6, subtotal=$7,
-    tax=$8, total=$9, currency=$10, payment_terms=$11, updated_at=$12
-    WHERE id=$13`;
-  if (companyId) {
-    values.push(companyId);
-    query += ` AND company_id=$${values.length}`;
+  const payload = pickDefined({
+    client_id: data.clientId,
+    order_number: data.orderNumber,
+    status: data.status,
+    order_date: data.orderDate,
+    expected_delivery_date: data.expectedDeliveryDate,
+    actual_delivery_date: data.actualDeliveryDate,
+    subtotal: data.subtotal,
+    tax: data.tax,
+    total: data.total,
+    currency: data.currency,
+    payment_terms: data.paymentTerms,
+    updated_at: now
+  });
+
+  let query = supabase.from('erp_sales_orders').update(payload).eq('id', id);
+  if (companyId) query = query.eq('company_id', companyId);
+
+  const { data: rows, error } = await query.select('*');
+  if (error) {
+    if (payload.updated_at && /updated_at/i.test(error.message || '')) {
+      const retryPayload = { ...payload };
+      delete retryPayload.updated_at;
+
+      let retryQuery = supabase.from('erp_sales_orders').update(retryPayload).eq('id', id);
+      if (companyId) retryQuery = retryQuery.eq('company_id', companyId);
+
+      const { data: retryRows, error: retryError } = await retryQuery.select('*');
+      if (retryError) throw retryError;
+      return retryRows?.[0] || null;
+    }
+    throw error;
   }
-  query += ' RETURNING *';
-  const result = await pool.query(query, values);
-  return result.rows[0] || null;
+  return rows?.[0] || null;
 }
 
 async function deleteSalesOrder(companyId, id) {
-  const values = [id];
-  let query = 'DELETE FROM erp_sales_orders WHERE id=$1';
-  if (companyId) {
-    values.push(companyId);
-    query += ` AND company_id=$2`;
-  }
-  query += ' RETURNING id';
-  const result = await pool.query(query, values);
-  return result.rows[0] || null;
+  let query = supabase.from('erp_sales_orders').delete().eq('id', id);
+  if (companyId) query = query.eq('company_id', companyId);
+  const { data, error } = await query.select('id').maybeSingle();
+  if (error) throw error;
+  return data || null;
 }
 
 async function addSalesItem(companyId, data) {
   const now = new Date().toISOString();
-  const id = generateId('erp_si');
-  const result = await pool.query(
-    `INSERT INTO erp_sales_items
-      (id, company_id, sales_order_id, product_id, quantity, unit_price, discount_percentage, subtotal, created_at, updated_at)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
-    [id, companyId, data.salesOrderId, data.productId,
-     data.quantity, data.unitPrice, data.discountPercentage || 0,
-     data.subtotal, now, now]
-  );
-  return result.rows[0];
+  const id = data.id || generateId('erp_si');
+  const { data: row, error } = await supabase
+    .from('erp_sales_items')
+    .insert([{
+      id,
+      company_id: companyId,
+      sales_order_id: data.salesOrderId,
+      product_id: data.productId,
+      quantity: data.quantity,
+      unit_price: data.unitPrice,
+      discount_percentage: data.discountPercentage || 0,
+      subtotal: data.subtotal,
+      created_at: now,
+      updated_at: now
+    }])
+    .select('*')
+    .single();
+
+  if (error) throw error;
+  return row;
 }
 
 async function updateSalesItem(companyId, id, data) {
   const now = new Date().toISOString();
-  const values = [
-    data.productId, data.quantity, data.unitPrice,
-    data.discountPercentage || 0, data.subtotal, now, id
-  ];
-  let query = `UPDATE erp_sales_items SET
-    product_id=$1, quantity=$2, unit_price=$3,
-    discount_percentage=$4, subtotal=$5, updated_at=$6
-    WHERE id=$7`;
-  if (companyId) {
-    values.push(companyId);
-    query += ` AND company_id=$${values.length}`;
-  }
-  query += ' RETURNING *';
-  const result = await pool.query(query, values);
-  return result.rows[0] || null;
+  const payload = pickDefined({
+    product_id: data.productId,
+    quantity: data.quantity,
+    unit_price: data.unitPrice,
+    discount_percentage: data.discountPercentage,
+    subtotal: data.subtotal,
+    updated_at: now
+  });
+
+  let query = supabase.from('erp_sales_items').update(payload).eq('id', id);
+  if (companyId) query = query.eq('company_id', companyId);
+
+  const { data: row, error } = await query.select('*').maybeSingle();
+  if (error) throw error;
+  return row || null;
 }
 
 async function deleteSalesItem(companyId, id) {
-  const values = [id];
-  let query = 'DELETE FROM erp_sales_items WHERE id=$1';
-  if (companyId) {
-    values.push(companyId);
-    query += ` AND company_id=$2`;
-  }
-  query += ' RETURNING id';
-  const result = await pool.query(query, values);
-  return result.rows[0] || null;
+  let query = supabase.from('erp_sales_items').delete().eq('id', id);
+  if (companyId) query = query.eq('company_id', companyId);
+
+  const { data, error } = await query.select('id').maybeSingle();
+  if (error) throw error;
+  return data || null;
 }
 
 async function listInvoices(companyId, { filters, limit, offset }) {
@@ -151,55 +185,84 @@ async function listInvoices(companyId, { filters, limit, offset }) {
 }
 
 async function getInvoiceById(companyId, id) {
-  const values = [id];
-  let query = 'SELECT * FROM erp_invoices WHERE id = $1';
-  if (companyId) {
-    values.push(companyId);
-    query += ` AND company_id = $2`;
-  }
-  const result = await pool.query(query, values);
-  return result.rows[0] || null;
+  let query = supabase.from('erp_invoices').select('*').eq('id', id);
+  if (companyId) query = query.eq('company_id', companyId);
+
+  const { data, error } = await query.maybeSingle();
+  if (error) throw error;
+  return data || null;
 }
 
 async function createInvoice(companyId, data) {
   const now = new Date().toISOString();
-  const id = generateId('erp_inv');
-  const result = await pool.query(
-    `INSERT INTO erp_invoices
-      (id, company_id, sales_order_id, client_id, invoice_number, status, issue_date, due_date, paid_date, subtotal, tax_percent, tax_amount, total, currency, notes, created_by, created_at, updated_at)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) RETURNING *`,
-    [id, companyId, data.salesOrderId || null, data.clientId,
-     data.invoiceNumber, data.status || 'draft',
-     data.issueDate, data.dueDate || null, data.paidDate || null,
-     data.subtotal, data.taxPercent || null, data.taxAmount || null,
-     data.total, data.currency || 'COP', data.notes || null,
-     data.createdBy || null, now, now]
-  );
-  return result.rows[0];
+  const id = data.id || generateId('erp_inv');
+  const { data: row, error } = await supabase
+    .from('erp_invoices')
+    .insert([{
+      id,
+      company_id: companyId,
+      sales_order_id: data.salesOrderId || null,
+      client_id: data.clientId,
+      invoice_number: data.invoiceNumber,
+      status: data.status || 'draft',
+      issue_date: data.issueDate,
+      due_date: data.dueDate || null,
+      paid_date: data.paidDate || null,
+      subtotal: data.subtotal,
+      tax_percent: data.taxPercent || null,
+      tax_amount: data.taxAmount || null,
+      total: data.total,
+      currency: data.currency || 'EUR',
+      notes: data.notes || null,
+      created_by: data.createdBy || null,
+      created_at: now,
+      updated_at: now
+    }])
+    .select('*')
+    .single();
+
+  if (error) throw error;
+  return row;
 }
 
 async function updateInvoice(companyId, id, data) {
   const now = new Date().toISOString();
-  const values = [
-    data.salesOrderId || null, data.clientId,
-    data.invoiceNumber, data.status || 'draft',
-    data.issueDate, data.dueDate || null, data.paidDate || null,
-    data.subtotal, data.taxPercent || null, data.taxAmount || null,
-    data.total, data.currency || 'COP', data.notes || null, now, id
-  ];
-  let query = `UPDATE erp_invoices SET
-    sales_order_id=$1, client_id=$2, invoice_number=$3, status=$4,
-    issue_date=$5, due_date=$6, paid_date=$7, subtotal=$8,
-    tax_percent=$9, tax_amount=$10, total=$11, currency=$12,
-    notes=$13, updated_at=$14
-    WHERE id=$15`;
-  if (companyId) {
-    values.push(companyId);
-    query += ` AND company_id=$${values.length}`;
+  const payload = pickDefined({
+    sales_order_id: data.salesOrderId,
+    client_id: data.clientId,
+    invoice_number: data.invoiceNumber,
+    status: data.status,
+    issue_date: data.issueDate,
+    due_date: data.dueDate,
+    paid_date: data.paidDate,
+    subtotal: data.subtotal,
+    tax_percent: data.taxPercent,
+    tax_amount: data.taxAmount,
+    total: data.total,
+    currency: data.currency,
+    notes: data.notes,
+    updated_at: now
+  });
+
+  let query = supabase.from('erp_invoices').update(payload).eq('id', id);
+  if (companyId) query = query.eq('company_id', companyId);
+
+  const { data: rows, error } = await query.select('*');
+  if (error) {
+    if (payload.updated_at && /updated_at/i.test(error.message || '')) {
+      const retryPayload = { ...payload };
+      delete retryPayload.updated_at;
+
+      let retryQuery = supabase.from('erp_invoices').update(retryPayload).eq('id', id);
+      if (companyId) retryQuery = retryQuery.eq('company_id', companyId);
+
+      const { data: retryRows, error: retryError } = await retryQuery.select('*');
+      if (retryError) throw retryError;
+      return retryRows?.[0] || null;
+    }
+    throw error;
   }
-  query += ' RETURNING *';
-  const result = await pool.query(query, values);
-  return result.rows[0] || null;
+  return rows?.[0] || null;
 }
 
 module.exports = {

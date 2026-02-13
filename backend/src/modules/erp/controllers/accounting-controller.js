@@ -13,17 +13,15 @@ function resolveCompanyId(req) {
 }
 
 function normalizeJournalEntryPayload(body = {}, companyId) {
-  const now = new Date().toISOString();
   return {
     company_id: companyId,
     entry_number: body.entry_number || body.entryNumber || body.number || null,
-    entry_date: body.entry_date || body.entryDate || body.date || now.slice(0, 10),
+    entry_date: body.entry_date || body.entryDate || body.date || new Date().toISOString().slice(0, 10),
     description: body.description || body.entry_description || null,
     entry_type: body.entry_type || body.entryType || body.type || 'standard',
     total_debit: body.total_debit ?? body.totalDebit ?? 0,
     total_credit: body.total_credit ?? body.totalCredit ?? 0,
-    status: body.status || 'draft',
-    updated_at: now
+    status: body.status || 'draft'
   };
 }
 
@@ -112,15 +110,35 @@ async function createJournalEntry(req, res, next) {
       return res.status(403).json(envelopeError('FORBIDDEN', 'Invalid company context'));
     }
 
-    const payload = normalizeJournalEntryPayload(req.body, companyId);
-    payload.created_at = new Date().toISOString();
-    payload.created_by = req.user?.id || req.user?.userId || null;
+    const now = new Date().toISOString();
+    const payload = {
+      ...normalizeJournalEntryPayload(req.body, companyId),
+      created_by: req.user?.id || req.user?.userId || req.headers['x-user-id'] || 'system',
+      created_at: now,
+      updated_at: now
+    };
 
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('erp_journal_entries')
       .insert(payload)
       .select()
       .single();
+
+    // Compatibilidad con esquemas ERP antiguos que no incluyen todas las columnas opcionales.
+    if (error && /(created_by|created_at|updated_at|entry_type)/i.test(error.message || '')) {
+      const fallback = {
+        ...payload,
+        entry_type: undefined,
+        created_by: undefined,
+        created_at: undefined,
+        updated_at: undefined
+      };
+      ({ data, error } = await supabase
+        .from('erp_journal_entries')
+        .insert(fallback)
+        .select()
+        .single());
+    }
 
     if (error) {
       console.error('[ERP accounting] createJournalEntry:', error);
@@ -140,16 +158,31 @@ async function updateJournalEntry(req, res, next) {
       return res.status(403).json(envelopeError('FORBIDDEN', 'Invalid company context'));
     }
 
-    const payload = normalizeJournalEntryPayload(req.body, companyId);
+    const payload = {
+      ...normalizeJournalEntryPayload(req.body, companyId),
+      updated_at: new Date().toISOString()
+    };
     delete payload.company_id;
 
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('erp_journal_entries')
       .update(payload)
       .eq('id', req.params.id)
       .eq('company_id', companyId)
       .select()
       .single();
+
+    if (error && /updated_at/i.test(error.message || '')) {
+      const fallback = { ...payload };
+      delete fallback.updated_at;
+      ({ data, error } = await supabase
+        .from('erp_journal_entries')
+        .update(fallback)
+        .eq('id', req.params.id)
+        .eq('company_id', companyId)
+        .select()
+        .single());
+    }
 
     if (error || !data) {
       return res.status(404).json(envelopeError('NOT_FOUND', 'Journal entry not found'));
