@@ -63,6 +63,19 @@
   margin: 0;
 }
 
+body.dark-mode .stat-card {
+  background: #1f2937;
+  border: 1px solid #374151;
+}
+
+body.dark-mode .stat-card__title {
+  color: #e5e7eb;
+}
+
+body.dark-mode .stat-card__value {
+  color: #f3f4f6;
+}
+
 @media (max-width: 768px) {
   .customer-stats {
     grid-template-columns: 1fr;

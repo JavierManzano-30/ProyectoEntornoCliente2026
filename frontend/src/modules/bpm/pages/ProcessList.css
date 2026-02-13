@@ -6,8 +6,11 @@
 
 .process-list-header {
   display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 1.5rem;
+  row-gap: 1rem;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 2rem;
 }
 

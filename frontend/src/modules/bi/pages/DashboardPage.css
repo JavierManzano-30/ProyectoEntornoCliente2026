@@ -165,6 +165,49 @@ body.dark-mode .kpi-value {
   color: #f3f4f6;
 }
 
+body.dark-mode .chart-card {
+  background: #1f2937;
+  border: 1px solid #374151;
+}
+
+body.dark-mode .chart-header {
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .chart-header h3 {
+  color: #f3f4f6;
+}
+
+body.dark-mode .bar-label,
+body.dark-mode .legend-item,
+body.dark-mode .category-name,
+body.dark-mode .region-name,
+body.dark-mode .region-count,
+body.dark-mode .products-table thead th,
+body.dark-mode .product-name {
+  color: #e5e7eb;
+}
+
+body.dark-mode .chart-legend {
+  border-top-color: #374151;
+}
+
+body.dark-mode .region-bar-wrapper {
+  background: #374151;
+}
+
+body.dark-mode .products-table thead th {
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .products-table tbody tr {
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .products-table tbody tr:hover {
+  background-color: #111827;
+}
+
 /* Grid de Gráficos */
 .charts-grid {
   display: grid;
