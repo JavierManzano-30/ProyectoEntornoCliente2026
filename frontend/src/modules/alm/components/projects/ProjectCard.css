@@ -119,3 +119,55 @@
 .footer-item svg {
   color: #6b7280;
 }
+
+/* Dark Mode */
+body.dark-mode .project-card {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+body.dark-mode .project-card:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+body.dark-mode .project-card-title {
+  color: #f3f4f6;
+}
+
+body.dark-mode .project-card-description {
+  color: #d1d5db;
+}
+
+body.dark-mode .progress-label {
+  color: #9ca3af;
+}
+
+body.dark-mode .progress-bar {
+  background: #374151;
+}
+
+body.dark-mode .progress-tasks {
+  color: #6b7280;
+}
+
+body.dark-mode .project-card-meta {
+  border-top-color: #374151;
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .meta-item {
+  color: #d1d5db;
+}
+
+body.dark-mode .meta-item svg {
+  color: #9ca3af;
+}
+
+body.dark-mode .footer-item {
+  color: #f3f4f6;
+}
+
+body.dark-mode .footer-item svg {
+  color: #9ca3af;
+}

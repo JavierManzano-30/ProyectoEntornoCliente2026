@@ -146,6 +146,25 @@
   color: #ef4444;
 }
 
+/* Dark Mode */
+body.dark-mode .kpi-card {
+  background: #1f2937;
+  border: 1px solid #374151;
+}
+
+body.dark-mode .kpi-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .kpi-label,
+body.dark-mode .dashboard-details {
+  color: #d1d5db;
+}
+
+body.dark-mode .kpi-value {
+  color: #f3f4f6;
+}
+
 /* Grid de Gráficos */
 .charts-grid {
   display: grid;
