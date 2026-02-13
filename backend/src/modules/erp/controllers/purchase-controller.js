@@ -4,7 +4,14 @@ const { validateRequiredFields, validateEnum } = require('../../../utils/validat
 const purchaseService = require('../services/purchase-service');
 
 function resolveCompanyId(req) {
-  return req.user?.companyId || req.user?.companyId || req.user?.company_id || null;
+  return (
+    req.user?.companyId
+    || req.user?.company_id
+    || req.headers['x-company-id']
+    || req.query.companyId
+    || req.query.company_id
+    || null
+  );
 }
 
 function mapSupplier(row) {

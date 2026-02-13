@@ -9,14 +9,36 @@ const toNumber = (value) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
-/**
- * Página de Control de Inventario
- * Gestión de productos y stock
- */
+const emptyProductForm = () => ({
+  name: '',
+  sku: `SKU-${Date.now()}`,
+  costPrice: '0',
+  salePrice: '0'
+});
+
 const InventoryControl = () => {
-  const { products, stockLevels, loading, loadProducts, loadStockLevels } = useInventory();
+  const {
+    products,
+    stockLevels,
+    loading,
+    loadProducts,
+    loadStockLevels,
+    createProduct,
+    createMovement
+  } = useInventory();
   const [searchTerm, setSearchTerm] = useState('');
   const [stockFilter, setStockFilter] = useState('all');
+  const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showProductForm, setShowProductForm] = useState(false);
+  const [productForm, setProductForm] = useState(emptyProductForm());
+  const [adjustmentProductId, setAdjustmentProductId] = useState('');
+  const [adjustmentForm, setAdjustmentForm] = useState({
+    movementType: 'in',
+    quantity: '1',
+    warehouseId: '',
+    userId: localStorage.getItem('userId') || ''
+  });
 
   const stockByProductId = stockLevels.reduce((acc, stock) => {
     const productId = stock.productId || stock.product_id;
@@ -25,14 +47,18 @@ const InventoryControl = () => {
     acc[productId] = {
       current: previous.current + toNumber(stock.quantityAvailable ?? stock.quantity_available),
       min: previous.min + toNumber(stock.minimumQuantity ?? stock.minimum_quantity),
-      max: previous.max + toNumber(stock.maximumQuantity ?? stock.maximum_quantity)
+      max: previous.max + toNumber(stock.maximumQuantity ?? stock.maximum_quantity),
+      warehouseId: stock.warehouseId || stock.warehouse_id
     };
     return acc;
   }, {});
 
+  const reload = async () => {
+    await Promise.all([loadProducts(), loadStockLevels()]);
+  };
+
   useEffect(() => {
-    loadProducts();
-    loadStockLevels();
+    reload();
   }, [loadProducts, loadStockLevels]);
 
   const getStockStatus = (current, min, max) => {
@@ -46,23 +72,24 @@ const InventoryControl = () => {
     const current = toNumber(stockData.current ?? product.stock);
     const min = toNumber(stockData.min ?? product.minStock);
     const max = toNumber(stockData.max ?? product.maxStock);
-    return { current, min, max };
+    const warehouseId = stockData.warehouseId || product.warehouseId || product.warehouse_id;
+    return { current, min, max, warehouseId };
   };
 
-  const filteredProducts = products.filter(product => {
+  const filteredProducts = products.filter((product) => {
     const inventory = getProductInventory(product);
     const productName = product.name || '';
     const productSku = product.sku || product.productCode || '';
-    const matchesSearch = productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         productSku.toLowerCase().includes(searchTerm.toLowerCase());
-    
+    const matchesSearch = productName.toLowerCase().includes(searchTerm.toLowerCase())
+      || productSku.toLowerCase().includes(searchTerm.toLowerCase());
+
     if (stockFilter === 'low') {
       return matchesSearch && inventory.current <= inventory.min;
     }
     if (stockFilter === 'out') {
       return matchesSearch && inventory.current === 0;
     }
-    
+
     return matchesSearch;
   });
 
@@ -78,23 +105,178 @@ const InventoryControl = () => {
 
   const totalStockValue = products.reduce((sum, product) => {
     const inventory = getProductInventory(product);
-    const unitCost = toNumber(product.cost ?? product.costPrice);
+    const unitCost = toNumber(product.cost ?? product.costPrice ?? product.cost_price);
     return sum + (inventory.current * unitCost);
   }, 0);
+
+  const handleCreateProduct = async (event) => {
+    event.preventDefault();
+    if (!productForm.name || !productForm.sku) {
+      setErrorMessage('Nombre y SKU son obligatorios.');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setErrorMessage('');
+      await createProduct({
+        name: productForm.name,
+        sku: productForm.sku,
+        costPrice: toNumber(productForm.costPrice),
+        salePrice: toNumber(productForm.salePrice),
+        status: 'active'
+      });
+      setProductForm(emptyProductForm());
+      setShowProductForm(false);
+      await reload();
+    } catch (error) {
+      setErrorMessage('No se pudo crear el producto.');
+      console.error('Error creando producto ERP:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleAdjustment = async (event) => {
+    event.preventDefault();
+    if (!adjustmentProductId || !adjustmentForm.warehouseId || !adjustmentForm.userId) {
+      setErrorMessage('Producto, almacen y userId son obligatorios para el ajuste.');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setErrorMessage('');
+      await createMovement({
+        productId: adjustmentProductId,
+        warehouseId: adjustmentForm.warehouseId,
+        movementType: adjustmentForm.movementType,
+        quantity: Math.abs(toNumber(adjustmentForm.quantity)),
+        userId: adjustmentForm.userId,
+        description: 'Ajuste manual desde modulo ERP'
+      });
+      setAdjustmentProductId('');
+      setAdjustmentForm((prev) => ({ ...prev, quantity: '1' }));
+      await loadStockLevels();
+    } catch (error) {
+      setErrorMessage('No se pudo registrar el movimiento.');
+      console.error('Error registrando movimiento ERP:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="inventory-control">
       <div className="page-header">
         <h1>Control de Inventario</h1>
         <div className="page-actions">
-          <button className="btn-primary">
+          <button className="btn-primary" onClick={() => setShowProductForm((prev) => !prev)} disabled={saving}>
             <Plus size={20} />
-            Nuevo Producto
+            {showProductForm ? 'Cerrar formulario' : 'Nuevo Producto'}
           </button>
         </div>
       </div>
 
-      {/* Stats */}
+      {errorMessage && <p className="form-error">{errorMessage}</p>}
+      {showProductForm && (
+        <form className="filters-bar" onSubmit={handleCreateProduct}>
+          <input
+            className="filter-select"
+            type="text"
+            placeholder="Nombre"
+            value={productForm.name}
+            onChange={(event) => setProductForm((prev) => ({ ...prev, name: event.target.value }))}
+          />
+          <input
+            className="filter-select"
+            type="text"
+            placeholder="SKU"
+            value={productForm.sku}
+            onChange={(event) => setProductForm((prev) => ({ ...prev, sku: event.target.value }))}
+          />
+          <input
+            className="filter-select"
+            type="number"
+            step="0.01"
+            placeholder="Coste"
+            value={productForm.costPrice}
+            onChange={(event) => setProductForm((prev) => ({ ...prev, costPrice: event.target.value }))}
+          />
+          <input
+            className="filter-select"
+            type="number"
+            step="0.01"
+            placeholder="Precio venta"
+            value={productForm.salePrice}
+            onChange={(event) => setProductForm((prev) => ({ ...prev, salePrice: event.target.value }))}
+          />
+          <button className="btn-primary" type="submit" disabled={saving}>
+            Guardar producto
+          </button>
+        </form>
+      )}
+
+      <form className="filters-bar" onSubmit={handleAdjustment}>
+        <select
+          className="filter-select"
+          value={adjustmentProductId}
+          onChange={(event) => {
+            const productId = event.target.value;
+            setAdjustmentProductId(productId);
+            const selectedProduct = products.find((product) => product.id === productId);
+            if (selectedProduct) {
+              const selectedInventory = getProductInventory(selectedProduct);
+              setAdjustmentForm((prev) => ({
+                ...prev,
+                warehouseId: selectedInventory.warehouseId || prev.warehouseId
+              }));
+            }
+          }}
+        >
+          <option value="">Producto para ajuste</option>
+          {products.map((product) => (
+            <option key={product.id} value={product.id}>
+              {product.name}
+            </option>
+          ))}
+        </select>
+        <select
+          className="filter-select"
+          value={adjustmentForm.movementType}
+          onChange={(event) => setAdjustmentForm((prev) => ({ ...prev, movementType: event.target.value }))}
+        >
+          <option value="in">Entrada</option>
+          <option value="out">Salida</option>
+          <option value="adjustment">Ajuste</option>
+        </select>
+        <input
+          className="filter-select"
+          type="number"
+          step="0.01"
+          placeholder="Cantidad"
+          value={adjustmentForm.quantity}
+          onChange={(event) => setAdjustmentForm((prev) => ({ ...prev, quantity: event.target.value }))}
+        />
+        <input
+          className="filter-select"
+          type="text"
+          placeholder="warehouseId"
+          value={adjustmentForm.warehouseId}
+          onChange={(event) => setAdjustmentForm((prev) => ({ ...prev, warehouseId: event.target.value }))}
+        />
+        <input
+          className="filter-select"
+          type="text"
+          placeholder="userId"
+          value={adjustmentForm.userId}
+          onChange={(event) => setAdjustmentForm((prev) => ({ ...prev, userId: event.target.value }))}
+        />
+        <button className="btn-primary" type="submit" disabled={saving}>
+          Registrar ajuste
+        </button>
+      </form>
+
       <div className="inventory-stats">
         <div className="stat-card">
           <Package size={24} className="stat-icon" />
@@ -126,7 +308,6 @@ const InventoryControl = () => {
         </div>
       </div>
 
-      {/* Filters */}
       <div className="filters-bar">
         <div className="search-box">
           <Search size={20} />
@@ -138,7 +319,7 @@ const InventoryControl = () => {
           />
         </div>
 
-        <select 
+        <select
           value={stockFilter}
           onChange={(e) => setStockFilter(e.target.value)}
           className="filter-select"
@@ -149,11 +330,10 @@ const InventoryControl = () => {
         </select>
       </div>
 
-      {/* Products Table */}
       <div className="products-table-container">
         {loading ? (
           <div className="table-loading">
-            <div className="spinner"></div>
+            <div className="spinner" />
             <p>Cargando productos...</p>
           </div>
         ) : filteredProducts.length === 0 ? (
@@ -167,9 +347,9 @@ const InventoryControl = () => {
               <tr>
                 <th>SKU</th>
                 <th>Producto</th>
-                <th>Categoría</th>
+                <th>Categoria</th>
                 <th className="text-right">Stock</th>
-                <th className="text-right">Stock Mín.</th>
+                <th className="text-right">Stock Min.</th>
                 <th className="text-right">Costo Unit.</th>
                 <th className="text-right">Precio</th>
                 <th className="text-right">Valor Stock</th>
@@ -178,13 +358,13 @@ const InventoryControl = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredProducts.map(product => {
+              {filteredProducts.map((product) => {
                 const inventory = getProductInventory(product);
-                const unitCost = toNumber(product.cost ?? product.costPrice);
-                const unitPrice = toNumber(product.price ?? product.salePrice);
+                const unitCost = toNumber(product.cost ?? product.costPrice ?? product.cost_price);
+                const unitPrice = toNumber(product.price ?? product.salePrice ?? product.sale_price);
                 const stockStatus = getStockStatus(inventory.current, inventory.min, inventory.max);
                 const stockValue = inventory.current * unitCost;
-                
+
                 return (
                   <tr key={product.id}>
                     <td className="product-sku">{product.sku || product.productCode || '-'}</td>
@@ -207,7 +387,7 @@ const InventoryControl = () => {
                       </span>
                     </td>
                     <td>
-                      <button className="btn-icon">Ver</button>
+                      <span className="erp-section-muted">Usa formulario</span>
                     </td>
                   </tr>
                 );

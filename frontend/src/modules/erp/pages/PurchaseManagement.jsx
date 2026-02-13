@@ -12,31 +12,51 @@ const statusClass = (status) => {
   return 'status-warn';
 };
 
+const toNumber = (value) => {
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const toIsoDate = () => new Date().toISOString().slice(0, 10);
+const emptyOrderForm = () => ({
+  supplierId: '',
+  orderNumber: `PO-${Date.now()}`,
+  orderDate: toIsoDate(),
+  total: '0',
+  currency: 'EUR'
+});
+
 const PurchaseManagement = () => {
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [orders, setOrders] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [invoices, setInvoices] = useState([]);
+  const [showOrderForm, setShowOrderForm] = useState(false);
+  const [orderForm, setOrderForm] = useState(emptyOrderForm());
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [ordersData, suppliersData, invoicesData] = await Promise.all([
+        erpService.getPurchaseOrders(),
+        erpService.getVendors(),
+        erpService.getPurchaseInvoices()
+      ]);
+      setOrders(Array.isArray(ordersData) ? ordersData : []);
+      setSuppliers(Array.isArray(suppliersData) ? suppliersData : []);
+      setInvoices(Array.isArray(invoicesData) ? invoicesData : []);
+    } catch (error) {
+      setErrorMessage('No se pudo cargar compras.');
+      console.error('Error cargando compras ERP:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const [ordersData, suppliersData, invoicesData] = await Promise.all([
-          erpService.getPurchaseOrders(),
-          erpService.getVendors(),
-          erpService.getPurchaseInvoices()
-        ]);
-        setOrders(Array.isArray(ordersData) ? ordersData : []);
-        setSuppliers(Array.isArray(suppliersData) ? suppliersData : []);
-        setInvoices(Array.isArray(invoicesData) ? invoicesData : []);
-      } catch (error) {
-        console.error('Error cargando compras ERP:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    load();
+    loadData();
   }, []);
 
   const metrics = useMemo(() => {
@@ -57,6 +77,50 @@ const PurchaseManagement = () => {
     };
   }, [orders, suppliers, invoices]);
 
+  const handleCreateOrder = async (event) => {
+    event.preventDefault();
+    const total = toNumber(orderForm.total);
+    if (!orderForm.supplierId || !orderForm.orderNumber) {
+      setErrorMessage('supplierId y orderNumber son obligatorios.');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setErrorMessage('');
+      await erpService.createPurchaseOrder({
+        supplierId: orderForm.supplierId,
+        orderNumber: orderForm.orderNumber,
+        orderDate: orderForm.orderDate || toIsoDate(),
+        total,
+        status: 'draft',
+        currency: orderForm.currency || 'EUR'
+      });
+      setOrderForm(emptyOrderForm());
+      setShowOrderForm(false);
+      await loadData();
+    } catch (error) {
+      setErrorMessage('No se pudo crear la orden de compra.');
+      console.error('Error creando orden ERP:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleConfirmOrder = async (orderId) => {
+    try {
+      setSaving(true);
+      setErrorMessage('');
+      await erpService.confirmPurchaseOrder(orderId);
+      await loadData();
+    } catch (error) {
+      setErrorMessage('No se pudo confirmar la orden.');
+      console.error('Error confirmando orden ERP:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="erp-section-page">
       <header className="erp-section-header">
@@ -64,7 +128,52 @@ const PurchaseManagement = () => {
           <h1>Gestion de Compras</h1>
           <p>Ordenes, proveedores y facturas de compra desde las tablas ERP.</p>
         </div>
+        <button className="btn-primary" onClick={() => setShowOrderForm((prev) => !prev)} disabled={saving}>
+          {showOrderForm ? 'Cerrar formulario' : 'Nueva Orden'}
+        </button>
       </header>
+
+      {errorMessage && <p className="form-error">{errorMessage}</p>}
+      {showOrderForm && (
+        <form className="filters-bar" onSubmit={handleCreateOrder}>
+          <select
+            className="filter-select"
+            value={orderForm.supplierId}
+            onChange={(event) => setOrderForm((prev) => ({ ...prev, supplierId: event.target.value }))}
+          >
+            <option value="">Selecciona proveedor</option>
+            {suppliers.map((supplier) => (
+              <option key={supplier.id} value={supplier.id}>
+                {supplier.legalName || supplier.id}
+              </option>
+            ))}
+          </select>
+          <input
+            className="filter-select"
+            type="text"
+            placeholder="Numero de orden"
+            value={orderForm.orderNumber}
+            onChange={(event) => setOrderForm((prev) => ({ ...prev, orderNumber: event.target.value }))}
+          />
+          <input
+            className="filter-select"
+            type="date"
+            value={orderForm.orderDate}
+            onChange={(event) => setOrderForm((prev) => ({ ...prev, orderDate: event.target.value }))}
+          />
+          <input
+            className="filter-select"
+            type="number"
+            step="0.01"
+            placeholder="Total"
+            value={orderForm.total}
+            onChange={(event) => setOrderForm((prev) => ({ ...prev, total: event.target.value }))}
+          />
+          <button className="btn-primary" type="submit" disabled={saving}>
+            Guardar orden
+          </button>
+        </form>
+      )}
 
       <section className="erp-section-grid">
         <article className="erp-section-card">
@@ -109,6 +218,7 @@ const PurchaseManagement = () => {
                 <th>Fecha</th>
                 <th>Total</th>
                 <th>Estado</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -124,6 +234,15 @@ const PurchaseManagement = () => {
                       <span className={`erp-section-status ${statusClass(order.status)}`}>
                         {order.status || '-'}
                       </span>
+                    </td>
+                    <td>
+                      {String(order.status || '').toLowerCase() === 'draft' ? (
+                        <button className="btn-icon" onClick={() => handleConfirmOrder(order.id)} disabled={saving}>
+                          Confirmar
+                        </button>
+                      ) : (
+                        <span className="erp-section-muted">-</span>
+                      )}
                     </td>
                   </tr>
                 );

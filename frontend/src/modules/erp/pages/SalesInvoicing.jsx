@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Plus, Search, Download, Send } from 'lucide-react';
 import { useSales } from '../hooks';
 import { formatCurrency, formatDate } from '../utils';
@@ -23,6 +23,8 @@ const toDate = (value) => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
+const toIsoDate = () => new Date().toISOString().slice(0, 10);
+
 const getInvoiceView = (invoice) => {
   const status = normalizeStatus(invoice.status);
   const total = toNumber(invoice.total);
@@ -44,23 +46,33 @@ const getInvoiceView = (invoice) => {
   };
 };
 
-/**
- * Página de Facturación y Ventas
- * Gestión de facturas de venta y cuentas por cobrar
- */
+const emptyInvoiceForm = () => ({
+  clientId: '',
+  invoiceNumber: `F-${Date.now()}`,
+  issueDate: toIsoDate(),
+  dueDate: toIsoDate(),
+  subtotal: '0',
+  taxAmount: '0'
+});
+
 const SalesInvoicing = () => {
-  const { invoices, loading, loadInvoices } = useSales();
+  const { invoices, loading, loadInvoices, createInvoice, sendInvoice, recordPayment } = useSales();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const invoiceList = invoices.map(getInvoiceView);
+  const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [invoiceForm, setInvoiceForm] = useState(emptyInvoiceForm());
 
   useEffect(() => {
     loadInvoices();
   }, [loadInvoices]);
 
-  const filteredInvoices = invoiceList.filter(invoice => {
-    const matchesSearch = invoice.number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         invoice.customerName?.toLowerCase().includes(searchTerm.toLowerCase());
+  const invoiceList = useMemo(() => invoices.map(getInvoiceView), [invoices]);
+
+  const filteredInvoices = invoiceList.filter((invoice) => {
+    const matchesSearch = invoice.number?.toLowerCase().includes(searchTerm.toLowerCase())
+      || invoice.customerName?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -85,23 +97,135 @@ const SalesInvoicing = () => {
     })
     .reduce((sum, invoice) => sum + invoice.total, 0);
 
-  const handleCreateInvoice = () => {
-    console.log('Crear nueva factura');
+  const reload = async () => {
+    await loadInvoices();
+  };
+
+  const handleCreateInvoice = async (event) => {
+    event.preventDefault();
+    const subtotal = toNumber(invoiceForm.subtotal);
+    const taxAmount = toNumber(invoiceForm.taxAmount);
+    const total = subtotal + taxAmount;
+    if (!invoiceForm.clientId || !invoiceForm.invoiceNumber) {
+      setErrorMessage('ClientId e invoiceNumber son obligatorios.');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setErrorMessage('');
+      await createInvoice({
+        clientId: invoiceForm.clientId,
+        invoiceNumber: invoiceForm.invoiceNumber,
+        issueDate: invoiceForm.issueDate || toIsoDate(),
+        dueDate: invoiceForm.dueDate || toIsoDate(),
+        subtotal,
+        taxAmount,
+        total,
+        status: 'draft'
+      });
+      setInvoiceForm(emptyInvoiceForm());
+      setShowCreateForm(false);
+      await reload();
+    } catch (error) {
+      setErrorMessage('No se pudo crear la factura. Revisa los datos e intenta de nuevo.');
+      console.error('Error creando factura ERP:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSendInvoice = async (invoiceId) => {
+    try {
+      setSaving(true);
+      setErrorMessage('');
+      await sendInvoice(invoiceId, {});
+      await reload();
+    } catch (error) {
+      setErrorMessage('No se pudo enviar la factura.');
+      console.error('Error enviando factura ERP:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleRecordPayment = async (invoiceId) => {
+    try {
+      setSaving(true);
+      setErrorMessage('');
+      await recordPayment(invoiceId, { paidDate: toIsoDate() });
+      await reload();
+    } catch (error) {
+      setErrorMessage('No se pudo registrar el pago.');
+      console.error('Error registrando pago ERP:', error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
     <div className="sales-invoicing">
       <div className="page-header">
-        <h1>Facturación y Ventas</h1>
+        <h1>Facturacion y Ventas</h1>
         <div className="page-actions">
-          <button className="btn-primary" onClick={handleCreateInvoice}>
+          <button className="btn-primary" onClick={() => setShowCreateForm((prev) => !prev)} disabled={saving}>
             <Plus size={20} />
-            Nueva Factura
+            {showCreateForm ? 'Cerrar formulario' : 'Nueva Factura'}
           </button>
         </div>
       </div>
 
-      {/* Stats Cards */}
+      {errorMessage && <p className="form-error">{errorMessage}</p>}
+      {showCreateForm && (
+        <form className="filters-bar" onSubmit={handleCreateInvoice}>
+          <input
+            className="filter-select"
+            type="text"
+            placeholder="clientId"
+            value={invoiceForm.clientId}
+            onChange={(event) => setInvoiceForm((prev) => ({ ...prev, clientId: event.target.value }))}
+          />
+          <input
+            className="filter-select"
+            type="text"
+            placeholder="invoiceNumber"
+            value={invoiceForm.invoiceNumber}
+            onChange={(event) => setInvoiceForm((prev) => ({ ...prev, invoiceNumber: event.target.value }))}
+          />
+          <input
+            className="filter-select"
+            type="date"
+            value={invoiceForm.issueDate}
+            onChange={(event) => setInvoiceForm((prev) => ({ ...prev, issueDate: event.target.value }))}
+          />
+          <input
+            className="filter-select"
+            type="date"
+            value={invoiceForm.dueDate}
+            onChange={(event) => setInvoiceForm((prev) => ({ ...prev, dueDate: event.target.value }))}
+          />
+          <input
+            className="filter-select"
+            type="number"
+            step="0.01"
+            placeholder="Subtotal"
+            value={invoiceForm.subtotal}
+            onChange={(event) => setInvoiceForm((prev) => ({ ...prev, subtotal: event.target.value }))}
+          />
+          <input
+            className="filter-select"
+            type="number"
+            step="0.01"
+            placeholder="Impuestos"
+            value={invoiceForm.taxAmount}
+            onChange={(event) => setInvoiceForm((prev) => ({ ...prev, taxAmount: event.target.value }))}
+          />
+          <button className="btn-primary" type="submit" disabled={saving}>
+            Guardar factura
+          </button>
+        </form>
+      )}
+
       <div className="invoice-stats">
         <div className="stat-card">
           <span className="stat-label">Facturas Pendientes</span>
@@ -126,19 +250,18 @@ const SalesInvoicing = () => {
         </div>
       </div>
 
-      {/* Filters */}
       <div className="filters-bar">
         <div className="search-box">
           <Search size={20} />
           <input
             type="text"
-            placeholder="Buscar por número o cliente..."
+            placeholder="Buscar por numero o cliente..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
-        <select 
+        <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           className="filter-select"
@@ -151,17 +274,16 @@ const SalesInvoicing = () => {
         </select>
       </div>
 
-      {/* Invoices Table */}
       <div className="invoices-table-container">
         {loading ? (
           <div className="table-loading">
-            <div className="spinner"></div>
+            <div className="spinner" />
             <p>Cargando facturas...</p>
           </div>
         ) : filteredInvoices.length === 0 ? (
           <div className="table-empty">
             <p>No se encontraron facturas</p>
-            <button className="btn-primary" onClick={handleCreateInvoice}>
+            <button className="btn-primary" onClick={() => setShowCreateForm(true)} disabled={saving}>
               <Plus size={20} />
               Crear primera factura
             </button>
@@ -170,7 +292,7 @@ const SalesInvoicing = () => {
           <table className="invoices-table">
             <thead>
               <tr>
-                <th>Número</th>
+                <th>Numero</th>
                 <th>Cliente</th>
                 <th>Fecha</th>
                 <th>Vencimiento</th>
@@ -181,7 +303,7 @@ const SalesInvoicing = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredInvoices.map(invoice => (
+              {filteredInvoices.map((invoice) => (
                 <tr key={invoice.id}>
                   <td className="invoice-number">{invoice.number || '-'}</td>
                   <td>{invoice.customerName || 'Sin cliente'}</td>
@@ -196,15 +318,22 @@ const SalesInvoicing = () => {
                   </td>
                   <td>
                     <div className="action-buttons">
-                      <button className="btn-icon" title="Ver factura">
-                        Ver
-                      </button>
+                      <button className="btn-icon" title="Ver factura">Ver</button>
                       {invoice.status === 'draft' && (
-                        <button className="btn-icon" title="Enviar">
+                        <button className="btn-icon" title="Enviar" onClick={() => handleSendInvoice(invoice.id)} disabled={saving}>
                           <Send size={14} />
                         </button>
                       )}
-                      <button className="btn-icon" title="Descargar PDF">
+                      {invoice.status !== 'paid' && invoice.status !== 'cancelled' && (
+                        <button className="btn-icon" title="Registrar pago" onClick={() => handleRecordPayment(invoice.id)} disabled={saving}>
+                          Pagar
+                        </button>
+                      )}
+                      <button
+                        className="btn-icon"
+                        title="Descargar PDF"
+                        disabled
+                      >
                         <Download size={14} />
                       </button>
                     </div>

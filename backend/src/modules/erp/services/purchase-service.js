@@ -1,30 +1,18 @@
+const supabase = require('../../../config/supabase');
 const { pool } = require('../../../config/db');
 const { generateId } = require('../../../utils/id');
 
 async function listSuppliers(companyId, { filters, limit, offset }) {
-  const values = [];
-  const clauses = [];
-  if (companyId) {
-    values.push(companyId);
-    clauses.push(`company_id = $${values.length}`);
-  }
-  if (filters.search) {
-    values.push(`%${filters.search}%`);
-    clauses.push(`(legal_name ILIKE $${values.length} OR tax_id ILIKE $${values.length})`);
-  }
-  const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
+  let query = supabase.from('erp_suppliers').select('*', { count: 'exact' });
+  if (companyId) query = query.eq('company_id', companyId);
+  if (filters.search) query = query.or(`legal_name.ilike.%${filters.search}%,tax_id.ilike.%${filters.search}%`);
 
-  const countResult = await pool.query(
-    `SELECT COUNT(*)::int AS total FROM erp_suppliers ${where}`, values
-  );
-  const totalItems = countResult.rows[0]?.total || 0;
+  const { data, error, count } = await query
+    .order('id', { ascending: false })
+    .range(offset, offset + limit - 1);
 
-  values.push(limit, offset);
-  const rows = await pool.query(
-    `SELECT * FROM erp_suppliers ${where} ORDER BY created_at DESC LIMIT $${values.length - 1} OFFSET $${values.length}`,
-    values
-  );
-  return { rows: rows.rows, totalItems };
+  if (error) throw error;
+  return { rows: data || [], totalItems: count || 0 };
 }
 
 async function getSupplierById(companyId, id) {
@@ -78,33 +66,17 @@ async function deleteSupplier(companyId, id) {
 }
 
 async function listPurchaseOrders(companyId, { filters, limit, offset }) {
-  const values = [];
-  const clauses = [];
-  if (companyId) {
-    values.push(companyId);
-    clauses.push(`company_id = $${values.length}`);
-  }
-  if (filters.status) {
-    values.push(filters.status);
-    clauses.push(`status = $${values.length}`);
-  }
-  if (filters.supplierId) {
-    values.push(filters.supplierId);
-    clauses.push(`supplier_id = $${values.length}`);
-  }
-  const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
+  let query = supabase.from('erp_purchase_orders').select('*', { count: 'exact' });
+  if (companyId) query = query.eq('company_id', companyId);
+  if (filters.status) query = query.eq('status', filters.status);
+  if (filters.supplierId) query = query.eq('supplier_id', filters.supplierId);
 
-  const countResult = await pool.query(
-    `SELECT COUNT(*)::int AS total FROM erp_purchase_orders ${where}`, values
-  );
-  const totalItems = countResult.rows[0]?.total || 0;
+  const { data, error, count } = await query
+    .order('id', { ascending: false })
+    .range(offset, offset + limit - 1);
 
-  values.push(limit, offset);
-  const rows = await pool.query(
-    `SELECT * FROM erp_purchase_orders ${where} ORDER BY created_at DESC LIMIT $${values.length - 1} OFFSET $${values.length}`,
-    values
-  );
-  return { rows: rows.rows, totalItems };
+  if (error) throw error;
+  return { rows: data || [], totalItems: count || 0 };
 }
 
 async function getPurchaseOrderById(companyId, id) {
@@ -119,15 +91,16 @@ async function getPurchaseOrderById(companyId, id) {
 }
 
 async function getPurchaseOrderItems(companyId, orderId) {
-  const values = [orderId];
-  let query = 'SELECT * FROM erp_purchase_items WHERE purchase_order_id = $1';
-  if (companyId) {
-    values.push(companyId);
-    query += ` AND company_id = $2`;
-  }
-  query += ' ORDER BY created_at ASC';
-  const result = await pool.query(query, values);
-  return result.rows;
+  let query = supabase
+    .from('erp_purchase_items')
+    .select('*')
+    .eq('purchase_order_id', orderId)
+    .order('id', { ascending: true });
+
+  if (companyId) query = query.eq('company_id', companyId);
+  const { data, error } = await query;
+  if (error) throw error;
+  return data || [];
 }
 
 async function createPurchaseOrder(companyId, data) {
@@ -225,29 +198,16 @@ async function deletePurchaseItem(companyId, id) {
 }
 
 async function listPurchaseInvoices(companyId, { filters, limit, offset }) {
-  const values = [];
-  const clauses = [];
-  if (companyId) {
-    values.push(companyId);
-    clauses.push(`company_id = $${values.length}`);
-  }
-  if (filters.status) {
-    values.push(filters.status);
-    clauses.push(`status = $${values.length}`);
-  }
-  const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
+  let query = supabase.from('erp_purchase_invoices').select('*', { count: 'exact' });
+  if (companyId) query = query.eq('company_id', companyId);
+  if (filters.status) query = query.eq('status', filters.status);
 
-  const countResult = await pool.query(
-    `SELECT COUNT(*)::int AS total FROM erp_purchase_invoices ${where}`, values
-  );
-  const totalItems = countResult.rows[0]?.total || 0;
+  const { data, error, count } = await query
+    .order('id', { ascending: false })
+    .range(offset, offset + limit - 1);
 
-  values.push(limit, offset);
-  const rows = await pool.query(
-    `SELECT * FROM erp_purchase_invoices ${where} ORDER BY created_at DESC LIMIT $${values.length - 1} OFFSET $${values.length}`,
-    values
-  );
-  return { rows: rows.rows, totalItems };
+  if (error) throw error;
+  return { rows: data || [], totalItems: count || 0 };
 }
 
 async function createPurchaseInvoice(companyId, data) {

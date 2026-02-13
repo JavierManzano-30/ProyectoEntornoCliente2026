@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Plus, Search, Download } from 'lucide-react';
 import { useAccounting } from '../hooks';
+import erpService from '../services/erpService';
 import { formatCurrency, formatDate } from '../utils';
 import { ACCOUNTING_ENTRY_STATUS_LABELS, ACCOUNTING_ENTRY_STATUS_COLORS } from '../constants';
 import './AccountingGeneral.css';
@@ -16,21 +17,35 @@ const normalizeEntry = (entry) => ({
   status: entry.status || entry.entry_status || 'draft'
 });
 
-/**
- * Pagina de Contabilidad General
- * Gestion de plan contable y asientos contables
- */
+const toNumber = (value) => {
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const toIsoDate = () => new Date().toISOString().slice(0, 10);
+const emptyEntryForm = () => ({
+  description: '',
+  totalDebit: '0',
+  totalCredit: '0',
+  entryDate: toIsoDate()
+});
+
 const AccountingGeneral = () => {
-  const { journalEntries, loading, loadJournalEntries } = useAccounting();
+  const { journalEntries, chartOfAccounts, loading, loadJournalEntries, loadChartOfAccounts, createEntry, postEntry } = useAccounting();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [view, setView] = useState('entries');
+  const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showEntryForm, setShowEntryForm] = useState(false);
+  const [entryForm, setEntryForm] = useState(emptyEntryForm());
 
   useEffect(() => {
     loadJournalEntries();
-  }, [loadJournalEntries]);
+    loadChartOfAccounts();
+  }, [loadJournalEntries, loadChartOfAccounts]);
 
-  const normalizedEntries = journalEntries.map(normalizeEntry);
+  const normalizedEntries = useMemo(() => journalEntries.map(normalizeEntry), [journalEntries]);
 
   const filteredEntries = normalizedEntries.filter((entry) => {
     const search = searchTerm.toLowerCase();
@@ -39,21 +54,117 @@ const AccountingGeneral = () => {
     return matchesSearch && matchesStatus;
   });
 
+  const handleCreateEntry = async (event) => {
+    event.preventDefault();
+    if (!entryForm.description) {
+      setErrorMessage('La descripcion es obligatoria.');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setErrorMessage('');
+      await createEntry({
+        entryNumber: `AS-${Date.now()}`,
+        entryDate: entryForm.entryDate || toIsoDate(),
+        description: entryForm.description,
+        entryType: 'standard',
+        totalDebit: toNumber(entryForm.totalDebit),
+        totalCredit: toNumber(entryForm.totalCredit),
+        status: 'draft'
+      });
+      setEntryForm(emptyEntryForm());
+      setShowEntryForm(false);
+      await loadJournalEntries();
+    } catch (error) {
+      setErrorMessage('No se pudo crear el asiento.');
+      console.error('Error creando asiento ERP:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handlePostEntry = async (entryId) => {
+    try {
+      setSaving(true);
+      setErrorMessage('');
+      await postEntry(entryId);
+      await loadJournalEntries();
+    } catch (error) {
+      setErrorMessage('No se pudo contabilizar el asiento.');
+      console.error('Error contabilizando asiento ERP:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleReverseEntry = async (entryId) => {
+    try {
+      setSaving(true);
+      setErrorMessage('');
+      await erpService.reverseJournalEntry(entryId, { reason: 'Reversion manual desde frontend ERP' });
+      await loadJournalEntries();
+    } catch (error) {
+      setErrorMessage('No se pudo revertir el asiento.');
+      console.error('Error revirtiendo asiento ERP:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="accounting-general">
       <div className="page-header">
         <h1>Contabilidad General</h1>
         <div className="page-actions">
-          <button className="btn-primary">
+          <button className="btn-primary" onClick={() => setShowEntryForm((prev) => !prev)} disabled={saving}>
             <Plus size={20} />
-            Nuevo Asiento
+            {showEntryForm ? 'Cerrar formulario' : 'Nuevo Asiento'}
           </button>
-          <button className="btn-secondary">
+          <button className="btn-secondary" disabled>
             <Download size={20} />
             Exportar
           </button>
         </div>
       </div>
+
+      {errorMessage && <p className="form-error">{errorMessage}</p>}
+      {showEntryForm && (
+        <form className="filters-bar" onSubmit={handleCreateEntry}>
+          <input
+            className="filter-select"
+            type="date"
+            value={entryForm.entryDate}
+            onChange={(event) => setEntryForm((prev) => ({ ...prev, entryDate: event.target.value }))}
+          />
+          <input
+            className="filter-select"
+            type="text"
+            placeholder="Descripcion"
+            value={entryForm.description}
+            onChange={(event) => setEntryForm((prev) => ({ ...prev, description: event.target.value }))}
+          />
+          <input
+            className="filter-select"
+            type="number"
+            step="0.01"
+            placeholder="Debe"
+            value={entryForm.totalDebit}
+            onChange={(event) => setEntryForm((prev) => ({ ...prev, totalDebit: event.target.value }))}
+          />
+          <input
+            className="filter-select"
+            type="number"
+            step="0.01"
+            placeholder="Haber"
+            value={entryForm.totalCredit}
+            onChange={(event) => setEntryForm((prev) => ({ ...prev, totalCredit: event.target.value }))}
+          />
+          <button className="btn-primary" type="submit" disabled={saving}>
+            Guardar asiento
+          </button>
+        </form>
+      )}
 
       <div className="view-tabs">
         <button className={view === 'entries' ? 'active' : ''} onClick={() => setView('entries')}>
@@ -83,6 +194,7 @@ const AccountingGeneral = () => {
               <option value="posted">Contabilizado</option>
               <option value="approved">Aprobado</option>
               <option value="closed">Cerrado</option>
+              <option value="reversed">Revertido</option>
             </select>
           </div>
 
@@ -127,9 +239,16 @@ const AccountingGeneral = () => {
                         </span>
                       </td>
                       <td>
-                        <button className="btn-icon" title="Ver detalle">
-                          Ver
-                        </button>
+                        {entry.status === 'draft' && (
+                          <button className="btn-icon" title="Contabilizar" onClick={() => handlePostEntry(entry.id)} disabled={saving}>
+                            Contabilizar
+                          </button>
+                        )}
+                        {entry.status === 'posted' && (
+                          <button className="btn-icon" title="Revertir" onClick={() => handleReverseEntry(entry.id)} disabled={saving}>
+                            Revertir
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -142,9 +261,38 @@ const AccountingGeneral = () => {
 
       {view === 'accounts' && (
         <div className="accounts-view">
-          <div className="accounts-placeholder">
-            <h3>Plan Contable</h3>
-            <p>Aqui se muestra el plan contable cargado desde ERP.</p>
+          <div className="entries-table-container">
+            {loading ? (
+              <div className="table-loading">
+                <div className="spinner" />
+                <p>Cargando plan contable...</p>
+              </div>
+            ) : chartOfAccounts.length === 0 ? (
+              <div className="table-empty">
+                <p>No hay cuentas contables.</p>
+              </div>
+            ) : (
+              <table className="entries-table">
+                <thead>
+                  <tr>
+                    <th>Codigo</th>
+                    <th>Nombre</th>
+                    <th>Tipo</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {chartOfAccounts.map((account) => (
+                    <tr key={account.id}>
+                      <td>{account.code || '-'}</td>
+                      <td>{account.name || '-'}</td>
+                      <td>{account.accountType || account.account_type || '-'}</td>
+                      <td>{account.status || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       )}

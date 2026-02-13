@@ -2,7 +2,14 @@ const supabase = require('../../../config/supabase');
 const { envelopeSuccess, envelopeError } = require('../../../utils/envelope');
 
 function resolveCompanyId(req) {
-  return req.user?.companyId || req.user?.company_id || null;
+  return (
+    req.user?.companyId
+    || req.user?.company_id
+    || req.headers['x-company-id']
+    || req.query.companyId
+    || req.query.company_id
+    || null
+  );
 }
 
 function normalizeJournalEntryPayload(body = {}, companyId) {

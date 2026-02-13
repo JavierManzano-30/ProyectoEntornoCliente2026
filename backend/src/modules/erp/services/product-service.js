@@ -1,160 +1,145 @@
-const { pool } = require('../../../config/db');
+const supabase = require('../../../config/supabase');
 const { generateId } = require('../../../utils/id');
 
 async function listProducts(companyId, { filters, limit, offset }) {
-  const values = [];
-  const clauses = [];
+  let query = supabase.from('erp_products').select('*', { count: 'exact' });
+  if (companyId) query = query.eq('company_id', companyId);
+  if (filters.status) query = query.eq('status', filters.status);
+  if (filters.categoryId) query = query.eq('category_id', filters.categoryId);
+  if (filters.search) query = query.or(`name.ilike.%${filters.search}%,product_code.ilike.%${filters.search}%`);
 
-  if (companyId) {
-    values.push(companyId);
-    clauses.push(`company_id = $${values.length}`);
-  }
-  if (filters.status) {
-    values.push(filters.status);
-    clauses.push(`status = $${values.length}`);
-  }
-  if (filters.categoryId) {
-    values.push(filters.categoryId);
-    clauses.push(`category_id = $${values.length}`);
-  }
-  if (filters.search) {
-    values.push(`%${filters.search}%`);
-    clauses.push(`(name ILIKE $${values.length} OR product_code ILIKE $${values.length})`);
-  }
+  const { data, error, count } = await query
+    .order('id', { ascending: false })
+    .range(offset, offset + limit - 1);
 
-  const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
-
-  const countResult = await pool.query(
-    `SELECT COUNT(*)::int AS total FROM erp_products ${where}`,
-    values
-  );
-  const totalItems = countResult.rows[0]?.total || 0;
-
-  values.push(limit, offset);
-  const rows = await pool.query(
-    `SELECT * FROM erp_products ${where} ORDER BY created_at DESC LIMIT $${values.length - 1} OFFSET $${values.length}`,
-    values
-  );
-
-  return { rows: rows.rows, totalItems };
+  if (error) throw error;
+  return { rows: data || [], totalItems: count || 0 };
 }
 
 async function getProductById(companyId, id) {
-  const values = [id];
-  let query = 'SELECT * FROM erp_products WHERE id = $1';
-  if (companyId) {
-    values.push(companyId);
-    query += ` AND company_id = $2`;
-  }
-  const result = await pool.query(query, values);
-  return result.rows[0] || null;
+  let query = supabase.from('erp_products').select('*').eq('id', id);
+  if (companyId) query = query.eq('company_id', companyId);
+  const { data, error } = await query.maybeSingle();
+  if (error) throw error;
+  return data || null;
 }
 
 async function createProduct(companyId, data) {
   const now = new Date().toISOString();
   const id = generateId('erp_prod');
-  const result = await pool.query(
-    `INSERT INTO erp_products
-      (id, company_id, product_code, name, description, category_id, cost_price, sale_price, profit_margin, unit_of_measure, status, created_at, updated_at)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
-     RETURNING *`,
-    [id, companyId, data.productCode, data.name, data.description || null, data.categoryId || null,
-     data.costPrice, data.salePrice, data.profitMargin || null, data.unitOfMeasure || null,
-     data.status, now, now]
-  );
-  return result.rows[0];
+  const { data: row, error } = await supabase
+    .from('erp_products')
+    .insert([{
+      id,
+      company_id: companyId,
+      product_code: data.productCode,
+      name: data.name,
+      description: data.description || null,
+      category_id: data.categoryId || null,
+      cost_price: data.costPrice,
+      sale_price: data.salePrice,
+      profit_margin: data.profitMargin || null,
+      unit_of_measure: data.unitOfMeasure || null,
+      status: data.status,
+      created_at: now,
+      updated_at: now
+    }])
+    .select('*')
+    .single();
+
+  if (error) throw error;
+  return row;
 }
 
 async function updateProduct(companyId, id, data) {
   const now = new Date().toISOString();
-  const values = [
-    data.productCode, data.name, data.description || null, data.categoryId || null,
-    data.costPrice, data.salePrice, data.profitMargin || null, data.unitOfMeasure || null,
-    data.status, now, id
-  ];
-  let query = `UPDATE erp_products SET
-    product_code=$1, name=$2, description=$3, category_id=$4,
-    cost_price=$5, sale_price=$6, profit_margin=$7, unit_of_measure=$8,
-    status=$9, updated_at=$10
-    WHERE id=$11`;
-  if (companyId) {
-    values.push(companyId);
-    query += ` AND company_id=$${values.length}`;
-  }
-  query += ' RETURNING *';
-  const result = await pool.query(query, values);
-  return result.rows[0] || null;
+  let query = supabase
+    .from('erp_products')
+    .update({
+      product_code: data.productCode,
+      name: data.name,
+      description: data.description || null,
+      category_id: data.categoryId || null,
+      cost_price: data.costPrice,
+      sale_price: data.salePrice,
+      profit_margin: data.profitMargin || null,
+      unit_of_measure: data.unitOfMeasure || null,
+      status: data.status,
+      updated_at: now
+    })
+    .eq('id', id);
+  if (companyId) query = query.eq('company_id', companyId);
+
+  const { data: row, error } = await query.select('*').maybeSingle();
+  if (error) throw error;
+  return row || null;
 }
 
 async function deleteProduct(companyId, id) {
-  const values = [id];
-  let query = 'DELETE FROM erp_products WHERE id=$1';
-  if (companyId) {
-    values.push(companyId);
-    query += ` AND company_id=$2`;
-  }
-  query += ' RETURNING id';
-  const result = await pool.query(query, values);
-  return result.rows[0] || null;
+  let query = supabase.from('erp_products').delete().eq('id', id);
+  if (companyId) query = query.eq('company_id', companyId);
+  const { data, error } = await query.select('id').maybeSingle();
+  if (error) throw error;
+  return data || null;
 }
 
 async function listCategories(companyId, { limit, offset }) {
-  const values = [];
-  const clauses = [];
-  if (companyId) {
-    values.push(companyId);
-    clauses.push(`company_id = $${values.length}`);
-  }
-  const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
+  let query = supabase.from('erp_product_categories').select('*', { count: 'exact' });
+  if (companyId) query = query.eq('company_id', companyId);
 
-  const countResult = await pool.query(
-    `SELECT COUNT(*)::int AS total FROM erp_product_categories ${where}`,
-    values
-  );
-  const totalItems = countResult.rows[0]?.total || 0;
+  const { data, error, count } = await query
+    .order('id', { ascending: false })
+    .range(offset, offset + limit - 1);
 
-  values.push(limit, offset);
-  const rows = await pool.query(
-    `SELECT * FROM erp_product_categories ${where} ORDER BY created_at DESC LIMIT $${values.length - 1} OFFSET $${values.length}`,
-    values
-  );
-  return { rows: rows.rows, totalItems };
+  if (error) throw error;
+  return { rows: data || [], totalItems: count || 0 };
 }
 
 async function createCategory(companyId, data) {
   const now = new Date().toISOString();
   const id = generateId('erp_cat');
-  const result = await pool.query(
-    `INSERT INTO erp_product_categories (id, company_id, name, description, is_active, created_at, updated_at)
-     VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
-    [id, companyId, data.name, data.description || null, data.isActive !== false, now, now]
-  );
-  return result.rows[0];
+  const { data: row, error } = await supabase
+    .from('erp_product_categories')
+    .insert([{
+      id,
+      company_id: companyId,
+      name: data.name,
+      description: data.description || null,
+      is_active: data.isActive !== false,
+      created_at: now,
+      updated_at: now
+    }])
+    .select('*')
+    .single();
+
+  if (error) throw error;
+  return row;
 }
 
 async function updateCategory(companyId, id, data) {
   const now = new Date().toISOString();
-  const values = [data.name, data.description || null, data.isActive !== false, now, id];
-  let query = `UPDATE erp_product_categories SET name=$1, description=$2, is_active=$3, updated_at=$4 WHERE id=$5`;
-  if (companyId) {
-    values.push(companyId);
-    query += ` AND company_id=$${values.length}`;
-  }
-  query += ' RETURNING *';
-  const result = await pool.query(query, values);
-  return result.rows[0] || null;
+  let query = supabase
+    .from('erp_product_categories')
+    .update({
+      name: data.name,
+      description: data.description || null,
+      is_active: data.isActive !== false,
+      updated_at: now
+    })
+    .eq('id', id);
+  if (companyId) query = query.eq('company_id', companyId);
+
+  const { data: row, error } = await query.select('*').maybeSingle();
+  if (error) throw error;
+  return row || null;
 }
 
 async function deleteCategory(companyId, id) {
-  const values = [id];
-  let query = 'DELETE FROM erp_product_categories WHERE id=$1';
-  if (companyId) {
-    values.push(companyId);
-    query += ` AND company_id=$2`;
-  }
-  query += ' RETURNING id';
-  const result = await pool.query(query, values);
-  return result.rows[0] || null;
+  let query = supabase.from('erp_product_categories').delete().eq('id', id);
+  if (companyId) query = query.eq('company_id', companyId);
+  const { data, error } = await query.select('id').maybeSingle();
+  if (error) throw error;
+  return data || null;
 }
 
 module.exports = {

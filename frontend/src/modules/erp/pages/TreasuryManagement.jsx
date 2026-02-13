@@ -4,6 +4,7 @@ import { formatCurrency, formatDate } from '../utils';
 import './ERPSectionPages.css';
 
 const isPendingStatus = (status) => !['paid', 'voided'].includes(String(status || '').toLowerCase());
+const toIsoDate = () => new Date().toISOString().slice(0, 10);
 
 const isOverdue = (row, dateField = 'dueDate') => {
   const dateValue = row?.[dateField] || row?.due_date;
@@ -15,26 +16,30 @@ const isOverdue = (row, dateField = 'dueDate') => {
 
 const TreasuryManagement = () => {
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [salesInvoices, setSalesInvoices] = useState([]);
   const [purchaseInvoices, setPurchaseInvoices] = useState([]);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const [salesData, purchaseData] = await Promise.all([
-          erpService.getSalesInvoices(),
-          erpService.getPurchaseInvoices()
-        ]);
-        setSalesInvoices(Array.isArray(salesData) ? salesData : []);
-        setPurchaseInvoices(Array.isArray(purchaseData) ? purchaseData : []);
-      } catch (error) {
-        console.error('Error cargando tesoreria ERP:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [salesData, purchaseData] = await Promise.all([
+        erpService.getSalesInvoices(),
+        erpService.getPurchaseInvoices()
+      ]);
+      setSalesInvoices(Array.isArray(salesData) ? salesData : []);
+      setPurchaseInvoices(Array.isArray(purchaseData) ? purchaseData : []);
+    } catch (error) {
+      setErrorMessage('No se pudo cargar tesoreria.');
+      console.error('Error cargando tesoreria ERP:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    load();
+  useEffect(() => {
+    loadData();
   }, []);
 
   const metrics = useMemo(() => {
@@ -59,6 +64,34 @@ const TreasuryManagement = () => {
   const pendingReceivables = salesInvoices.filter((row) => isPendingStatus(row.status)).slice(0, 8);
   const pendingPayables = purchaseInvoices.filter((row) => isPendingStatus(row.status)).slice(0, 8);
 
+  const handlePayReceivable = async (invoiceId) => {
+    try {
+      setSaving(true);
+      setErrorMessage('');
+      await erpService.recordInvoicePayment(invoiceId, { paidDate: toIsoDate() });
+      await loadData();
+    } catch (error) {
+      setErrorMessage('No se pudo marcar la factura de venta como pagada.');
+      console.error('Error actualizando cobro ERP:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handlePayPayable = async (invoiceId) => {
+    try {
+      setSaving(true);
+      setErrorMessage('');
+      await erpService.updatePurchaseInvoice(invoiceId, { status: 'paid', paidDate: toIsoDate() });
+      await loadData();
+    } catch (error) {
+      setErrorMessage('No se pudo marcar la factura de compra como pagada.');
+      console.error('Error actualizando pago ERP:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="erp-section-page">
       <header className="erp-section-header">
@@ -67,6 +100,8 @@ const TreasuryManagement = () => {
           <p>Posicion de caja, cuentas por cobrar y cuentas por pagar.</p>
         </div>
       </header>
+
+      {errorMessage && <p className="form-error">{errorMessage}</p>}
 
       <section className="erp-section-grid">
         <article className="erp-section-card">
@@ -110,10 +145,11 @@ const TreasuryManagement = () => {
               <ul className="erp-section-list">
                 {pendingReceivables.map((row) => (
                   <li key={row.id}>
-                    <span>
-                      {row.invoiceNumber || '-'} · vence {formatDate(row.dueDate)}
-                    </span>
+                    <span>{row.invoiceNumber || '-'} - vence {formatDate(row.dueDate)}</span>
                     <span className="value">{formatCurrency(Number(row.total) || 0)}</span>
+                    <button className="btn-icon" onClick={() => handlePayReceivable(row.id)} disabled={saving}>
+                      Cobrar
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -130,10 +166,11 @@ const TreasuryManagement = () => {
               <ul className="erp-section-list">
                 {pendingPayables.map((row) => (
                   <li key={row.id}>
-                    <span>
-                      {row.invoiceNumber || '-'} · vence {formatDate(row.dueDate)}
-                    </span>
+                    <span>{row.invoiceNumber || '-'} - vence {formatDate(row.dueDate)}</span>
                     <span className="value">{formatCurrency(Number(row.total) || 0)}</span>
+                    <button className="btn-icon" onClick={() => handlePayPayable(row.id)} disabled={saving}>
+                      Pagar
+                    </button>
                   </li>
                 ))}
               </ul>

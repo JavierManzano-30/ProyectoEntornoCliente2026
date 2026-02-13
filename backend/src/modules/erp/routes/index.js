@@ -8,12 +8,25 @@ const purchases = require('../controllers/purchase-controller');
 const sales = require('../controllers/sales-controller');
 
 const router = express.Router();
+const { envelopeError } = require('../../../utils/envelope');
 
 router.get('/health', (req, res) => {
   res.json({ success: true, data: { module: 'erp', status: 'ok' } });
 });
 
 router.use(requireAuth);
+router.use((req, res, next) => {
+  const companyId = req.user?.companyId || req.user?.company_id || req.headers['x-company-id'] || null;
+  if (!companyId) {
+    return res.status(403).json(envelopeError('FORBIDDEN', 'Invalid company context'));
+  }
+  req.user = {
+    ...(req.user || {}),
+    companyId,
+    company_id: companyId
+  };
+  return next();
+});
 
 // Rutas de Contabilidad
 router.get('/accounting/chart-of-accounts', accounting.getChartOfAccounts);
