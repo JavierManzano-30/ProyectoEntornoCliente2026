@@ -18,6 +18,13 @@ router.use(requireAuth);
 // Rutas de Contabilidad
 router.get('/accounting/chart-of-accounts', accounting.getChartOfAccounts);
 router.get('/accounting/journal-entries', accounting.getJournalEntries);
+router.get('/accounting/journal-entries/:id', accounting.getJournalEntryById);
+router.post('/accounting/journal-entries', accounting.createJournalEntry);
+router.put('/accounting/journal-entries/:id', accounting.updateJournalEntry);
+router.post('/accounting/journal-entries/:id/post', accounting.postJournalEntry);
+router.post('/accounting/journal-entries/:id/reverse', accounting.reverseJournalEntry);
+router.get('/accounting/reports/trial-balance', accounting.getTrialBalance);
+router.get('/accounting/reports/general-ledger', accounting.getGeneralLedger);
 router.get('/accounting/accounts/:id', accounting.getAccountById);
 router.post('/accounting/accounts', accounting.createAccount);
 router.put('/accounting/accounts/:id', accounting.updateAccount);

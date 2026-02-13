@@ -1,90 +1,83 @@
 import { useEffect, useState } from 'react';
-import { Plus, Search, Filter, Download } from 'lucide-react';
+import { Plus, Search, Download } from 'lucide-react';
 import { useAccounting } from '../hooks';
 import { formatCurrency, formatDate } from '../utils';
 import { ACCOUNTING_ENTRY_STATUS_LABELS, ACCOUNTING_ENTRY_STATUS_COLORS } from '../constants';
 import './AccountingGeneral.css';
 
+const normalizeEntry = (entry) => ({
+  id: entry.id,
+  number: entry.number || entry.entryNumber || entry.entry_number || '-',
+  date: entry.date || entry.entryDate || entry.entry_date,
+  description: entry.description || entry.entry_description || '-',
+  type: entry.type || entry.entryType || entry.entry_type || 'Estandar',
+  totalDebit: entry.totalDebit || entry.total_debit || 0,
+  totalCredit: entry.totalCredit || entry.total_credit || 0,
+  status: entry.status || entry.entry_status || 'draft'
+});
+
 /**
- * Página de Contabilidad General
- * Gestión de plan contable y asientos contables
+ * Pagina de Contabilidad General
+ * Gestion de plan contable y asientos contables
  */
 const AccountingGeneral = () => {
   const { journalEntries, loading, loadJournalEntries } = useAccounting();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [view, setView] = useState('entries'); // 'entries' | 'accounts'
+  const [view, setView] = useState('entries');
 
   useEffect(() => {
     loadJournalEntries();
   }, [loadJournalEntries]);
 
-  const filteredEntries = journalEntries.filter(entry => {
-    const matchesSearch = entry.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         entry.number?.toLowerCase().includes(searchTerm.toLowerCase());
+  const normalizedEntries = journalEntries.map(normalizeEntry);
+
+  const filteredEntries = normalizedEntries.filter((entry) => {
+    const search = searchTerm.toLowerCase();
+    const matchesSearch = entry.description.toLowerCase().includes(search) || entry.number.toLowerCase().includes(search);
     const matchesStatus = statusFilter === 'all' || entry.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
-
-  const handleCreateEntry = () => {
-    console.log('Crear nuevo asiento');
-  };
-
-  const handleExport = () => {
-    console.log('Exportar asientos');
-  };
 
   return (
     <div className="accounting-general">
       <div className="page-header">
         <h1>Contabilidad General</h1>
         <div className="page-actions">
-          <button className="btn-primary" onClick={handleCreateEntry}>
+          <button className="btn-primary">
             <Plus size={20} />
             Nuevo Asiento
           </button>
-          <button className="btn-secondary" onClick={handleExport}>
+          <button className="btn-secondary">
             <Download size={20} />
             Exportar
           </button>
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="view-tabs">
-        <button 
-          className={view === 'entries' ? 'active' : ''}
-          onClick={() => setView('entries')}
-        >
+        <button className={view === 'entries' ? 'active' : ''} onClick={() => setView('entries')}>
           Asientos Contables
         </button>
-        <button 
-          className={view === 'accounts' ? 'active' : ''}
-          onClick={() => setView('accounts')}
-        >
+        <button className={view === 'accounts' ? 'active' : ''} onClick={() => setView('accounts')}>
           Plan Contable
         </button>
       </div>
 
       {view === 'entries' && (
         <>
-          {/* Filtros */}
           <div className="filters-bar">
             <div className="search-box">
               <Search size={20} />
               <input
                 type="text"
-                placeholder="Buscar por número o descripción..."
+                placeholder="Buscar por numero o descripcion..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(event) => setSearchTerm(event.target.value)}
               />
             </div>
 
-            <select 
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="filter-select"
-            >
+            <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="filter-select">
               <option value="all">Todos los estados</option>
               <option value="draft">Borrador</option>
               <option value="posted">Contabilizado</option>
@@ -93,28 +86,23 @@ const AccountingGeneral = () => {
             </select>
           </div>
 
-          {/* Tabla de asientos */}
           <div className="entries-table-container">
             {loading ? (
               <div className="table-loading">
-                <div className="spinner"></div>
+                <div className="spinner" />
                 <p>Cargando asientos...</p>
               </div>
             ) : filteredEntries.length === 0 ? (
               <div className="table-empty">
                 <p>No se encontraron asientos contables</p>
-                <button className="btn-primary" onClick={handleCreateEntry}>
-                  <Plus size={20} />
-                  Crear primer asiento
-                </button>
               </div>
             ) : (
               <table className="entries-table">
                 <thead>
                   <tr>
-                    <th>Número</th>
+                    <th>Numero</th>
                     <th>Fecha</th>
-                    <th>Descripción</th>
+                    <th>Descripcion</th>
                     <th>Tipo</th>
                     <th className="text-right">Debe</th>
                     <th className="text-right">Haber</th>
@@ -123,16 +111,16 @@ const AccountingGeneral = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredEntries.map(entry => (
+                  {filteredEntries.map((entry) => (
                     <tr key={entry.id}>
-                      <td className="entry-number">{entry.number || '-'}</td>
+                      <td className="entry-number">{entry.number}</td>
                       <td>{formatDate(entry.date)}</td>
                       <td className="entry-description">{entry.description}</td>
                       <td>
-                        <span className="entry-type">{entry.type || 'Estándar'}</span>
+                        <span className="entry-type">{entry.type}</span>
                       </td>
-                      <td className="text-right">{formatCurrency(entry.totalDebit || 0)}</td>
-                      <td className="text-right">{formatCurrency(entry.totalCredit || 0)}</td>
+                      <td className="text-right">{formatCurrency(entry.totalDebit)}</td>
+                      <td className="text-right">{formatCurrency(entry.totalCredit)}</td>
                       <td>
                         <span className={`status-badge status-${ACCOUNTING_ENTRY_STATUS_COLORS[entry.status]}`}>
                           {ACCOUNTING_ENTRY_STATUS_LABELS[entry.status] || entry.status}
@@ -156,7 +144,7 @@ const AccountingGeneral = () => {
         <div className="accounts-view">
           <div className="accounts-placeholder">
             <h3>Plan Contable</h3>
-            <p>Aquí se mostrará el plan contable de la empresa</p>
+            <p>Aqui se muestra el plan contable cargado desde ERP.</p>
           </div>
         </div>
       )}

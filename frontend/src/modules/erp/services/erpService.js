@@ -340,7 +340,7 @@ export const getGeneralLedger = async (params) => {
  * Obtener órdenes de compra
  */
 export const getPurchaseOrders = async (filters = {}) => {
-  const response = await axios.get(`${BASE_URL}/purchases/orders`, { params: filters });
+  const response = await axios.get(`${BASE_URL}/purchase-orders`, { params: filters });
   return response.data;
 };
 
@@ -348,7 +348,7 @@ export const getPurchaseOrders = async (filters = {}) => {
  * Obtener orden de compra por ID
  */
 export const getPurchaseOrderById = async (orderId) => {
-  const response = await axios.get(`${BASE_URL}/purchases/orders/${orderId}`);
+  const response = await axios.get(`${BASE_URL}/purchase-orders/${orderId}`);
   return response.data;
 };
 
@@ -356,7 +356,7 @@ export const getPurchaseOrderById = async (orderId) => {
  * Crear orden de compra
  */
 export const createPurchaseOrder = async (orderData) => {
-  const response = await axios.post(`${BASE_URL}/purchases/orders`, orderData);
+  const response = await axios.post(`${BASE_URL}/purchase-orders`, orderData);
   return response.data;
 };
 
@@ -364,7 +364,7 @@ export const createPurchaseOrder = async (orderData) => {
  * Actualizar orden de compra
  */
 export const updatePurchaseOrder = async (orderId, orderData) => {
-  const response = await axios.put(`${BASE_URL}/purchases/orders/${orderId}`, orderData);
+  const response = await axios.put(`${BASE_URL}/purchase-orders/${orderId}`, orderData);
   return response.data;
 };
 
@@ -372,7 +372,7 @@ export const updatePurchaseOrder = async (orderId, orderData) => {
  * Confirmar orden de compra
  */
 export const confirmPurchaseOrder = async (orderId) => {
-  const response = await axios.post(`${BASE_URL}/purchases/orders/${orderId}/confirm`);
+  const response = await axios.put(`${BASE_URL}/purchase-orders/${orderId}`, { status: 'confirmed' });
   return response.data;
 };
 
@@ -380,7 +380,10 @@ export const confirmPurchaseOrder = async (orderId) => {
  * Registrar recepción de mercancía
  */
 export const createGoodsReceipt = async (receiptData) => {
-  const response = await axios.post(`${BASE_URL}/purchases/goods-receipts`, receiptData);
+  const response = await axios.post(`${BASE_URL}/movements`, {
+    movementType: 'in',
+    ...receiptData
+  });
   return response.data;
 };
 
@@ -388,7 +391,7 @@ export const createGoodsReceipt = async (receiptData) => {
  * Obtener proveedores
  */
 export const getVendors = async (filters = {}) => {
-  const response = await axios.get(`${BASE_URL}/purchases/vendors`, { params: filters });
+  const response = await axios.get(`${BASE_URL}/suppliers`, { params: filters });
   return response.data;
 };
 
@@ -396,7 +399,7 @@ export const getVendors = async (filters = {}) => {
  * Obtener proveedor por ID
  */
 export const getVendorById = async (vendorId) => {
-  const response = await axios.get(`${BASE_URL}/purchases/vendors/${vendorId}`);
+  const response = await axios.get(`${BASE_URL}/suppliers/${vendorId}`);
   return response.data;
 };
 
@@ -404,7 +407,7 @@ export const getVendorById = async (vendorId) => {
  * Crear proveedor
  */
 export const createVendor = async (vendorData) => {
-  const response = await axios.post(`${BASE_URL}/purchases/vendors`, vendorData);
+  const response = await axios.post(`${BASE_URL}/suppliers`, vendorData);
   return response.data;
 };
 
@@ -412,17 +415,49 @@ export const createVendor = async (vendorData) => {
  * Actualizar proveedor
  */
 export const updateVendor = async (vendorId, vendorData) => {
-  const response = await axios.put(`${BASE_URL}/purchases/vendors/${vendorId}`, vendorData);
+  const response = await axios.put(`${BASE_URL}/suppliers/${vendorId}`, vendorData);
+  return response.data;
+};
+
+/**
+ * Obtener facturas de compra
+ */
+export const getPurchaseInvoices = async (filters = {}) => {
+  const response = await axios.get(`${BASE_URL}/purchase-invoices`, { params: filters });
+  return response.data;
+};
+
+/**
+ * Crear factura de compra
+ */
+export const createPurchaseInvoice = async (invoiceData) => {
+  const response = await axios.post(`${BASE_URL}/purchase-invoices`, invoiceData);
+  return response.data;
+};
+
+/**
+ * Actualizar factura de compra
+ */
+export const updatePurchaseInvoice = async (invoiceId, invoiceData) => {
+  const response = await axios.put(`${BASE_URL}/purchase-invoices/${invoiceId}`, invoiceData);
   return response.data;
 };
 
 // ==================== VENTAS ====================
 
 /**
+ * Obtener ordenes de venta
+ */
+export const getSalesOrders = async (filters = {}) => {
+  const response = await axios.get(`${BASE_URL}/sales-orders`, { params: filters });
+  return response.data;
+};
+
+/**
  * Obtener facturas de venta
  */
 export const getSalesInvoices = async (filters = {}) => {
-  const response = await axios.get(`${BASE_URL}/sales/invoices`, { params: filters });
+  const response = await axios.get(`${BASE_URL}/invoices`, { params: filters });
   return response.data;
 };
 
@@ -430,7 +465,7 @@ export const getSalesInvoices = async (filters = {}) => {
  * Obtener factura de venta por ID
  */
 export const getSalesInvoiceById = async (invoiceId) => {
-  const response = await axios.get(`${BASE_URL}/sales/invoices/${invoiceId}`);
+  const response = await axios.get(`${BASE_URL}/invoices/${invoiceId}`);
   return response.data;
 };
 
@@ -438,7 +473,7 @@ export const getSalesInvoiceById = async (invoiceId) => {
  * Crear factura de venta
  */
 export const createSalesInvoice = async (invoiceData) => {
-  const response = await axios.post(`${BASE_URL}/sales/invoices`, invoiceData);
+  const response = await axios.post(`${BASE_URL}/invoices`, invoiceData);
   return response.data;
 };
 
@@ -446,7 +481,7 @@ export const createSalesInvoice = async (invoiceData) => {
  * Actualizar factura de venta
  */
 export const updateSalesInvoice = async (invoiceId, invoiceData) => {
-  const response = await axios.put(`${BASE_URL}/sales/invoices/${invoiceId}`, invoiceData);
+  const response = await axios.put(`${BASE_URL}/invoices/${invoiceId}`, invoiceData);
   return response.data;
 };
 
@@ -454,7 +489,10 @@ export const updateSalesInvoice = async (invoiceId, invoiceData) => {
  * Enviar factura por email
  */
 export const sendInvoiceEmail = async (invoiceId, emailData) => {
-  const response = await axios.post(`${BASE_URL}/sales/invoices/${invoiceId}/send`, emailData);
+  const response = await axios.put(`${BASE_URL}/invoices/${invoiceId}`, {
+    status: 'issued',
+    ...emailData
+  });
   return response.data;
 };
 
@@ -462,7 +500,11 @@ export const sendInvoiceEmail = async (invoiceId, emailData) => {
  * Registrar pago de factura
  */
 export const recordInvoicePayment = async (invoiceId, paymentData) => {
-  const response = await axios.post(`${BASE_URL}/sales/invoices/${invoiceId}/payments`, paymentData);
+  const response = await axios.put(`${BASE_URL}/invoices/${invoiceId}`, {
+    status: 'paid',
+    paidDate: paymentData?.paidDate || new Date().toISOString().slice(0, 10),
+    ...paymentData
+  });
   return response.data;
 };
 
@@ -470,16 +512,32 @@ export const recordInvoicePayment = async (invoiceId, paymentData) => {
  * Obtener cuentas por cobrar
  */
 export const getAccountsReceivable = async (filters = {}) => {
-  const response = await axios.get(`${BASE_URL}/sales/receivables`, { params: filters });
-  return response.data;
+  const invoices = await getSalesInvoices(filters);
+  return toArray(invoices).filter((invoice) => {
+    const status = String(invoice?.status || '').toLowerCase();
+    return status !== 'paid' && status !== 'voided';
+  });
 };
 
 /**
  * Obtener reporte de antigüedad de saldos
  */
 export const getAgingReport = async (params) => {
-  const response = await axios.get(`${BASE_URL}/sales/reports/aging`, { params });
-  return response.data;
+  const receivables = await getAccountsReceivable(params);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  return toArray(receivables).map((invoice) => {
+    const dueDate = toDateOnly(invoice?.dueDate || invoice?.due_date);
+    const diffDays = dueDate ? Math.floor((today - dueDate) / (1000 * 60 * 60 * 24)) : 0;
+    return {
+      id: invoice.id,
+      invoiceNumber: invoice.invoiceNumber || invoice.invoice_number,
+      total: toNumber(invoice.total),
+      dueDate: invoice.dueDate || invoice.due_date,
+      daysPastDue: diffDays > 0 ? diffDays : 0
+    };
+  });
 };
 
 // ==================== INVENTARIO ====================
@@ -488,7 +546,7 @@ export const getAgingReport = async (params) => {
  * Obtener productos
  */
 export const getProducts = async (filters = {}) => {
-  const response = await axios.get(`${BASE_URL}/inventory/products`, { params: filters });
+  const response = await axios.get(`${BASE_URL}/products`, { params: filters });
   return response.data;
 };
 
@@ -496,7 +554,7 @@ export const getProducts = async (filters = {}) => {
  * Obtener producto por ID
  */
 export const getProductById = async (productId) => {
-  const response = await axios.get(`${BASE_URL}/inventory/products/${productId}`);
+  const response = await axios.get(`${BASE_URL}/products/${productId}`);
   return response.data;
 };
 
@@ -504,7 +562,7 @@ export const getProductById = async (productId) => {
  * Crear producto
  */
 export const createProduct = async (productData) => {
-  const response = await axios.post(`${BASE_URL}/inventory/products`, productData);
+  const response = await axios.post(`${BASE_URL}/products`, productData);
   return response.data;
 };
 
@@ -512,7 +570,7 @@ export const createProduct = async (productData) => {
  * Actualizar producto
  */
 export const updateProduct = async (productId, productData) => {
-  const response = await axios.put(`${BASE_URL}/inventory/products/${productId}`, productData);
+  const response = await axios.put(`${BASE_URL}/products/${productId}`, productData);
   return response.data;
 };
 
@@ -520,7 +578,7 @@ export const updateProduct = async (productId, productData) => {
  * Obtener stock actual
  */
 export const getStockLevels = async (filters = {}) => {
-  const response = await axios.get(`${BASE_URL}/inventory/stock`, { params: filters });
+  const response = await axios.get(`${BASE_URL}/inventory`, { params: filters });
   return response.data;
 };
 
@@ -528,7 +586,7 @@ export const getStockLevels = async (filters = {}) => {
  * Obtener movimientos de inventario
  */
 export const getInventoryMovements = async (filters = {}) => {
-  const response = await axios.get(`${BASE_URL}/inventory/movements`, { params: filters });
+  const response = await axios.get(`${BASE_URL}/movements`, { params: filters });
   return response.data;
 };
 
@@ -536,7 +594,7 @@ export const getInventoryMovements = async (filters = {}) => {
  * Registrar movimiento de inventario
  */
 export const createInventoryMovement = async (movementData) => {
-  const response = await axios.post(`${BASE_URL}/inventory/movements`, movementData);
+  const response = await axios.post(`${BASE_URL}/movements`, movementData);
   return response.data;
 };
 
@@ -544,7 +602,7 @@ export const createInventoryMovement = async (movementData) => {
  * Obtener almacenes
  */
 export const getWarehouses = async () => {
-  const response = await axios.get(`${BASE_URL}/inventory/warehouses`);
+  const response = await axios.get(`${BASE_URL}/warehouses`);
   return response.data;
 };
 
@@ -552,7 +610,10 @@ export const getWarehouses = async () => {
  * Realizar conteo cíclico
  */
 export const createCycleCount = async (countData) => {
-  const response = await axios.post(`${BASE_URL}/inventory/cycle-counts`, countData);
+  const response = await axios.post(`${BASE_URL}/movements`, {
+    movementType: 'adjustment',
+    ...countData
+  });
   return response.data;
 };
 
@@ -560,8 +621,27 @@ export const createCycleCount = async (countData) => {
  * Obtener reporte de valoración de inventario
  */
 export const getInventoryValuation = async (params) => {
-  const response = await axios.get(`${BASE_URL}/inventory/reports/valuation`, { params });
-  return response.data;
+  const [products, stockLevels] = await Promise.all([
+    getProducts(params),
+    getStockLevels(params)
+  ]);
+
+  const productCostById = toArray(products).reduce((acc, product) => {
+    acc[product.id] = toNumber(product?.costPrice ?? product?.cost_price);
+    return acc;
+  }, {});
+
+  return toArray(stockLevels).map((stock) => {
+    const quantity = toNumber(stock.quantityAvailable ?? stock.quantity_available);
+    const cost = toNumber(productCostById[stock.productId ?? stock.product_id]);
+    return {
+      inventoryId: stock.id,
+      productId: stock.productId ?? stock.product_id,
+      quantity,
+      unitCost: cost,
+      totalValue: round(quantity * cost)
+    };
+  });
 };
 
 // ==================== PRODUCCIÓN ====================
@@ -877,8 +957,12 @@ export default {
   getVendorById,
   createVendor,
   updateVendor,
+  getPurchaseInvoices,
+  createPurchaseInvoice,
+  updatePurchaseInvoice,
   
   // Ventas
+  getSalesOrders,
   getSalesInvoices,
   getSalesInvoiceById,
   createSalesInvoice,
