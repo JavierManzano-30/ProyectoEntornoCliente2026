@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Shield,
@@ -84,6 +84,17 @@ const modules = [
 const MainHub = () => {
   const navigate = useNavigate();
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isExitingToModule, setIsExitingToModule] = useState(false);
+  const exitTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    document.body.classList.remove("main-transitioning", "module-transitioning");
+    return () => {
+      if (exitTimeoutRef.current) {
+        clearTimeout(exitTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const goPrev = () => {
     setActiveIndex((prev) => (prev - 1 + modules.length) % modules.length);
@@ -100,8 +111,17 @@ const MainHub = () => {
     return diff;
   };
 
+  const handleModuleEnter = (path, isCenter) => {
+    if (!isCenter || isExitingToModule) return;
+    setIsExitingToModule(true);
+    document.body.classList.add("module-transitioning");
+    exitTimeoutRef.current = setTimeout(() => {
+      navigate(path);
+    }, 260);
+  };
+
   return (
-    <div className="main-hub-page">
+    <div className={`main-hub-page${isExitingToModule ? " is-exiting" : ""}`}>
       <header className="main-hub-topbar">
         <div className="main-hub-brand">
           <img src="/images/synera-logo.png" alt="SYNERA Logo" />
@@ -136,8 +156,8 @@ const MainHub = () => {
                 key={item.id}
                 type="button"
                 className={`module-card pos-${position} ${isCenter ? "is-center" : ""} ${isVisible ? "" : "is-hidden"}`}
-                disabled={!isCenter}
-                onClick={() => isCenter && navigate(item.path)}
+                disabled={!isCenter || isExitingToModule}
+                onClick={() => handleModuleEnter(item.path, isCenter)}
               >
                 <div className="module-card-inner">
                   <div className="module-card-face module-card-front">

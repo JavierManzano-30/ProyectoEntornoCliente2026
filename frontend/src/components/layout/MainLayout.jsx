@@ -30,6 +30,8 @@ import "./MainLayout.css";
 const MainLayout = ({ module = "soporte" }) => {
   const navigate = useNavigate();
   const [companyName, setCompanyName] = React.useState("Empresa");
+  const [isExitingToMain, setIsExitingToMain] = React.useState(false);
+  const exitTimeoutRef = React.useRef(null);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -41,7 +43,7 @@ const MainLayout = ({ module = "soporte" }) => {
       try {
         const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
         return storedUser.companyName || storedUser.empresaNombre || "";
-      } catch (error) {
+      } catch {
         return "";
       }
     };
@@ -62,7 +64,7 @@ const MainLayout = ({ module = "soporte" }) => {
           setCompanyName(realName);
           localStorage.setItem("companyName", realName);
         }
-      } catch (error) {
+      } catch {
         if (!cachedName && !cancelled) {
           setCompanyName("Empresa");
         }
@@ -75,6 +77,18 @@ const MainLayout = ({ module = "soporte" }) => {
     };
   }, []);
 
+  React.useEffect(() => {
+    document.body.classList.remove("module-transitioning");
+  }, []);
+
+  React.useEffect(() => {
+    return () => {
+      if (exitTimeoutRef.current) {
+        clearTimeout(exitTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("refreshToken");
@@ -84,6 +98,17 @@ const MainLayout = ({ module = "soporte" }) => {
     localStorage.removeItem("roleId");
     localStorage.removeItem("user");
     navigate('/');
+  };
+
+  const handleBackToMain = (event) => {
+    event.preventDefault();
+    if (isExitingToMain) return;
+
+    setIsExitingToMain(true);
+    document.body.classList.add("main-transitioning");
+    exitTimeoutRef.current = setTimeout(() => {
+      navigate('/main');
+    }, 260);
   };
 
   // Tema: iluminado/oscuro
@@ -190,7 +215,7 @@ const MainLayout = ({ module = "soporte" }) => {
   const navigation = currentNav.items;
 
   return (
-    <div className={`main-layout${darkMode ? ' dark-mode' : ''}`}>
+    <div className={`main-layout${darkMode ? ' dark-mode' : ''}${isExitingToMain ? ' is-exiting' : ''}`}>
       <aside className="main-sidebar">
         <div className="sidebar-header">
           <h1 className="sidebar-logo company-name">{companyName}</h1>
@@ -222,9 +247,13 @@ const MainLayout = ({ module = "soporte" }) => {
           <div className="header-content">
             <h2 className="header-title header-title-blue">{currentNav.title}</h2>
             <div className="header-actions">
-              <NavLink to="/main" className="header-module-link">
+              <button
+                type="button"
+                className="header-module-link header-module-button"
+                onClick={handleBackToMain}
+              >
                 Main
-              </NavLink>
+              </button>
               <NavLink to="/core" className="header-module-link">
                 Core
               </NavLink>

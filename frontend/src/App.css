@@ -8,6 +8,19 @@
   min-height: 100vh;
 }
 
+body.main-transitioning {
+  background:
+    radial-gradient(circle at 12% 20%, rgba(37, 99, 235, 0.18), transparent 35%),
+    radial-gradient(circle at 82% 8%, rgba(16, 185, 129, 0.14), transparent 32%),
+    linear-gradient(180deg, #0b1733 0%, #081226 100%);
+}
+
+body.module-transitioning {
+  background:
+    radial-gradient(circle at 15% 25%, rgba(249, 250, 251, 0.9), transparent 35%),
+    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
 /* Capa global dark mode para pantallas modulares */
 body.dark-mode [class$="-page"] {
   color: #e5e7eb;

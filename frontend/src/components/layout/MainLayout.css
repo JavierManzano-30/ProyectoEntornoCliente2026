@@ -75,7 +75,39 @@ body.dark-mode .header-title-blue {
 .main-layout {
   display: flex;
   min-height: 100vh;
+  position: relative;
   background: linear-gradient(135deg, #f5f7fa 0%, #f9fafb 100%);
+  transition: transform 0.24s ease, filter 0.24s ease;
+  transform-origin: top center;
+}
+
+.main-layout::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 12% 20%, rgba(37, 99, 235, 0.18), transparent 35%),
+    radial-gradient(circle at 82% 8%, rgba(16, 185, 129, 0.14), transparent 32%),
+    linear-gradient(180deg, #0b1733 0%, #081226 100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.24s ease;
+  z-index: 200;
+}
+
+.main-layout.is-exiting {
+  transform: translateY(8px) scale(0.995);
+  filter: blur(2px);
+}
+
+.main-layout.is-exiting::after {
+  opacity: 1;
+}
+
+.main-layout.is-exiting .main-sidebar,
+.main-layout.is-exiting .main-content {
+  opacity: 0.42;
+  transition: opacity 0.24s ease;
 }
 
 .main-sidebar {
@@ -89,6 +121,7 @@ body.dark-mode .header-title-blue {
   height: 100vh;
   left: 0;
   top: 0;
+  transition: opacity 0.24s ease;
 }
 
 .sidebar-header {
@@ -170,6 +203,7 @@ body.dark-mode .company-name {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  transition: opacity 0.24s ease;
 }
 
 .main-header {
@@ -230,6 +264,12 @@ body.dark-mode .header-title {
   font-size: 0.875rem;
   font-weight: 500;
   transition: all 0.2s;
+}
+
+.header-module-button {
+  border: none;
+  cursor: pointer;
+  font: inherit;
 }
 
 .header-module-link:hover {
