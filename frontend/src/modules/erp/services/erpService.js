@@ -113,10 +113,10 @@ const buildKPIsFromOperationalData = async (params = {}) => {
     return status !== 'voided';
   };
 
-  const currentRevenue = sumByMonth(invoices, 'issueDate', 'total', currentMonthKey, includeSalesInvoiceInRevenue);
-  const previousRevenue = sumByMonth(invoices, 'issueDate', 'total', previousMonthKey, includeSalesInvoiceInRevenue);
-  const currentExpenses = sumByMonth(purchaseInvoices, 'receivedDate', 'total', currentMonthKey, includePurchaseInvoiceInExpenses);
-  const previousExpenses = sumByMonth(purchaseInvoices, 'receivedDate', 'total', previousMonthKey, includePurchaseInvoiceInExpenses);
+  const currentRevenue = sumByMonth(invoices, 'issue_date', 'total', currentMonthKey, includeSalesInvoiceInRevenue);
+  const previousRevenue = sumByMonth(invoices, 'issue_date', 'total', previousMonthKey, includeSalesInvoiceInRevenue);
+  const currentExpenses = sumByMonth(purchaseInvoices, 'received_date', 'total', currentMonthKey, includePurchaseInvoiceInExpenses);
+  const previousExpenses = sumByMonth(purchaseInvoices, 'received_date', 'total', previousMonthKey, includePurchaseInvoiceInExpenses);
 
   const currentProfit = currentRevenue - currentExpenses;
   const previousProfit = previousRevenue - previousExpenses;
@@ -135,14 +135,14 @@ const buildKPIsFromOperationalData = async (params = {}) => {
 
   const previousPaidSalesCash = invoices.reduce((sum, invoice) => {
     if (String(invoice?.status || '').toLowerCase() !== 'paid') return sum;
-    const paidDate = toDateOnly(invoice?.paidDate);
+    const paidDate = toDateOnly(invoice?.paid_date);
     if (!paidDate || paidDate >= currentMonthStart) return sum;
     return sum + toNumber(invoice?.total);
   }, 0);
 
   const previousPaidPurchaseCash = purchaseInvoices.reduce((sum, invoice) => {
     if (String(invoice?.status || '').toLowerCase() !== 'paid') return sum;
-    const paidDate = toDateOnly(invoice?.paidDate);
+    const paidDate = toDateOnly(invoice?.paid_date);
     if (!paidDate || paidDate >= currentMonthStart) return sum;
     return sum + toNumber(invoice?.total);
   }, 0);
@@ -156,7 +156,7 @@ const buildKPIsFromOperationalData = async (params = {}) => {
     const total = toNumber(invoice?.total);
     acc.current += total;
 
-    const dueDate = toDateOnly(invoice?.dueDate);
+    const dueDate = toDateOnly(invoice?.due_date);
     if (dueDate && dueDate < today) {
       acc.overdue += total;
     }
@@ -170,7 +170,7 @@ const buildKPIsFromOperationalData = async (params = {}) => {
     const total = toNumber(invoice?.total);
     acc.current += total;
 
-    const dueDate = toDateOnly(invoice?.dueDate);
+    const dueDate = toDateOnly(invoice?.due_date);
     if (dueDate && dueDate < today) {
       acc.overdue += total;
     }
@@ -178,13 +178,13 @@ const buildKPIsFromOperationalData = async (params = {}) => {
   }, { current: 0, overdue: 0 });
 
   const productCostById = products.reduce((acc, product) => {
-    acc[product.id] = toNumber(product?.costPrice ?? product?.cost_price);
+    acc[product.id] = toNumber(product?.cost_price);
     return acc;
   }, {});
 
   const inventoryValue = inventory.reduce((sum, item) => {
-    const quantity = toNumber(item?.quantityAvailable ?? item?.quantity_available);
-    const cost = toNumber(productCostById[item?.productId ?? item?.product_id]);
+    const quantity = toNumber(item?.quantity_available);
+    const cost = toNumber(productCostById[item?.product_id]);
     return sum + (quantity * cost);
   }, 0);
 
@@ -244,7 +244,8 @@ const buildKPIsFromOperationalData = async (params = {}) => {
  */
 export const getChartOfAccounts = async (filters = {}) => {
   const response = await axios.get(`${BASE_URL}/accounting/chart-of-accounts`, { params: filters });
-  return response.data;
+  const data = response.data || response;
+  return Array.isArray(data) ? data : data?.data || [];
 };
 
 /**
@@ -252,7 +253,7 @@ export const getChartOfAccounts = async (filters = {}) => {
  */
 export const getAccountById = async (accountId) => {
   const response = await axios.get(`${BASE_URL}/accounting/accounts/${accountId}`);
-  return response.data;
+  return response.data || response;
 };
 
 /**
@@ -260,7 +261,7 @@ export const getAccountById = async (accountId) => {
  */
 export const createAccount = async (accountData) => {
   const response = await axios.post(`${BASE_URL}/accounting/accounts`, accountData);
-  return response.data;
+  return response.data || response;
 };
 
 /**
@@ -268,7 +269,7 @@ export const createAccount = async (accountData) => {
  */
 export const updateAccount = async (accountId, accountData) => {
   const response = await axios.put(`${BASE_URL}/accounting/accounts/${accountId}`, accountData);
-  return response.data;
+  return response.data || response;
 };
 
 /**
@@ -276,7 +277,8 @@ export const updateAccount = async (accountId, accountData) => {
  */
 export const getJournalEntries = async (filters = {}) => {
   const response = await axios.get(`${BASE_URL}/accounting/journal-entries`, { params: filters });
-  return response.data;
+  const data = response.data || response;
+  return Array.isArray(data) ? data : data?.data || [];
 };
 
 /**
@@ -284,7 +286,7 @@ export const getJournalEntries = async (filters = {}) => {
  */
 export const getJournalEntryById = async (entryId) => {
   const response = await axios.get(`${BASE_URL}/accounting/journal-entries/${entryId}`);
-  return response.data;
+  return response.data || response;
 };
 
 /**
@@ -292,7 +294,8 @@ export const getJournalEntryById = async (entryId) => {
  */
 export const createJournalEntry = async (entryData) => {
   const response = await axios.post(`${BASE_URL}/accounting/journal-entries`, entryData);
-  return response.data;
+  // Response is already unwrapped by axios interceptor
+  return response.data || response;
 };
 
 /**
@@ -300,7 +303,7 @@ export const createJournalEntry = async (entryData) => {
  */
 export const updateJournalEntry = async (entryId, entryData) => {
   const response = await axios.put(`${BASE_URL}/accounting/journal-entries/${entryId}`, entryData);
-  return response.data;
+  return response.data || response;
 };
 
 /**
@@ -308,7 +311,7 @@ export const updateJournalEntry = async (entryId, entryData) => {
  */
 export const postJournalEntry = async (entryId) => {
   const response = await axios.post(`${BASE_URL}/accounting/journal-entries/${entryId}/post`);
-  return response.data;
+  return response.data || response;
 };
 
 /**
@@ -316,7 +319,7 @@ export const postJournalEntry = async (entryId) => {
  */
 export const reverseJournalEntry = async (entryId, reverseData) => {
   const response = await axios.post(`${BASE_URL}/accounting/journal-entries/${entryId}/reverse`, reverseData);
-  return response.data;
+  return response.data || response;
 };
 
 /**
@@ -324,7 +327,7 @@ export const reverseJournalEntry = async (entryId, reverseData) => {
  */
 export const getTrialBalance = async (params) => {
   const response = await axios.get(`${BASE_URL}/accounting/reports/trial-balance`, { params });
-  return response.data;
+  return response.data || response;
 };
 
 /**
@@ -332,7 +335,8 @@ export const getTrialBalance = async (params) => {
  */
 export const getGeneralLedger = async (params) => {
   const response = await axios.get(`${BASE_URL}/accounting/reports/general-ledger`, { params });
-  return response.data;
+  const data = response.data || response;
+  return Array.isArray(data) ? data : data?.data || [];
 };
 
 // ==================== COMPRAS ====================
