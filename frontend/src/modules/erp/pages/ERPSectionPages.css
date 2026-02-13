@@ -180,3 +180,98 @@
     transform: rotate(360deg);
   }
 }
+
+body.dark-mode .erp-section-page {
+  color: #e5e7eb;
+}
+
+body.dark-mode .erp-section-header h1,
+body.dark-mode .erp-section-header p {
+  color: #e5e7eb;
+}
+
+body.dark-mode .erp-section-card,
+body.dark-mode .erp-section-panel,
+body.dark-mode .erp-section-list li {
+  background: #1f2937;
+  border-color: #374151;
+  color: #d1d5db;
+}
+
+body.dark-mode .erp-section-card h3,
+body.dark-mode .erp-section-card strong,
+body.dark-mode .erp-section-card span {
+  color: #e5e7eb;
+}
+
+body.dark-mode .erp-section-panel h2 {
+  color: #f3f4f6;
+  border-color: #374151;
+}
+
+body.dark-mode .erp-section-table {
+  border-color: #374151;
+}
+
+body.dark-mode .erp-section-table thead th {
+  color: #cbd5e1;
+  border-bottom-color: #374151;
+  background: #111827;
+}
+
+body.dark-mode .erp-section-table tbody td {
+  color: #d1d5db;
+  border-color: #1f2937;
+}
+
+body.dark-mode .erp-section-table tbody tr {
+  border-bottom-color: #1f2937;
+  background: #111827;
+}
+
+body.dark-mode .erp-section-table tbody tr:last-child td {
+  border-bottom-color: transparent;
+}
+
+body.dark-mode .erp-section-table tbody tr:hover {
+  background: #1f2937;
+}
+
+body.dark-mode .erp-section-muted {
+  color: #9ca3af;
+}
+
+body.dark-mode .erp-section-status {
+  background: #111827;
+  color: #d1d5db;
+  border-color: #374151;
+}
+
+body.dark-mode .erp-section-status.status-ok {
+  background: #0f172a;
+  color: #4ade80;
+}
+
+body.dark-mode .erp-section-status.status-warn {
+  background: rgba(17, 17, 17, 0.6);
+  color: #fbbf24;
+}
+
+body.dark-mode .erp-section-status.status-danger {
+  background: rgba(17, 0, 0, 0.6);
+  color: #f87171;
+}
+
+body.dark-mode .erp-section-loading,
+body.dark-mode .erp-section-empty {
+  color: #9ca3af;
+}
+
+body.dark-mode .erp-section-spinner {
+  border: 4px solid #374151;
+  border-top-color: #3b82f6;
+}
+
+body.dark-mode .erp-section-list .value {
+  color: #e5e7eb;
+}

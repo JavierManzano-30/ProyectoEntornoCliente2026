@@ -301,3 +301,114 @@
     transform: rotate(360deg);
   }
 }
+
+body.dark-mode .reports-page {
+  color: #e5e7eb;
+}
+
+body.dark-mode .reports-page .filter-group {
+  background: #111827;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+body.dark-mode .reports-page .filter-group span {
+  color: #9ca3af;
+}
+
+body.dark-mode .reports-page .filter-btn {
+  border-color: #374151;
+  background: #1f2937;
+  color: #d1d5db;
+}
+
+body.dark-mode .reports-page .filter-btn:hover {
+  border-color: #4b5563;
+  background: #374151;
+}
+
+body.dark-mode .reports-page .filter-btn.active {
+  background: #1d4ed8;
+  color: white;
+  border-color: #1d4ed8;
+}
+
+body.dark-mode .reports-page .report-card {
+  background: #111827;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #1f2937;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+}
+
+body.dark-mode .reports-page .report-card:hover {
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.6);
+}
+
+body.dark-mode .reports-page .report-header {
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .reports-page .report-info h3,
+body.dark-mode .reports-page .report-description {
+  color: #e5e7eb;
+}
+
+body.dark-mode .reports-page .report-description {
+  color: #9ca3af;
+}
+
+body.dark-mode .reports-page .meta-item {
+  color: #9ca3af;
+}
+
+body.dark-mode .reports-page .report-status {
+  border: 1px solid #374151;
+}
+
+body.dark-mode .reports-page .status-success {
+  background: #064e3b;
+  color: #a7f3d0;
+}
+
+body.dark-mode .reports-page .status-warning {
+  background: #422006;
+  color: #fef08a;
+}
+
+body.dark-mode .reports-page .status-error {
+  background: #2b0505;
+  color: #fecaca;
+}
+
+body.dark-mode .reports-page .status-info {
+  background: #0f172a;
+  color: #bfdbfe;
+}
+
+body.dark-mode .reports-page .report-actions {
+  border-top-color: #374151;
+}
+
+body.dark-mode .reports-page .btn-secondary {
+  background: #1f2937;
+  color: #cbd5e1;
+  border-color: #374151;
+}
+
+body.dark-mode .reports-page .btn-secondary:hover {
+  background: #272f3d;
+  border-color: #4c566a;
+}
+
+body.dark-mode .reports-page .empty-state {
+  color: #9ca3af;
+}
+
+body.dark-mode .reports-page .empty-state svg {
+  color: #6b7280;
+}
+
+body.dark-mode .reports-page .empty-state h3 {
+  color: #f3f4f6;
+}

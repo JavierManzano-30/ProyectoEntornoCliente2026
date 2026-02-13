@@ -213,6 +213,50 @@
   color: #991b1b;
 }
 
+body.dark-mode .detail-card h3 {
+  color: #f3f4f6;
+}
+
+body.dark-mode .detail-item span {
+  color: #9ca3af;
+}
+
+body.dark-mode .detail-item strong {
+  color: #f3f4f6;
+}
+
+body.dark-mode .dashboard-alerts {
+  background: #0f172a;
+  border-color: #374151;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  color: #e5e7eb;
+}
+
+body.dark-mode .dashboard-alerts h3 {
+  color: #f3f4f6;
+}
+
+body.dark-mode .dashboard-alerts li {
+  background: #111827;
+  border-color: #1f2937;
+  color: #d1d5db;
+}
+
+body.dark-mode .alert-warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+}
+
+body.dark-mode .alert-danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+body.dark-mode .dashboard-loading,
+body.dark-mode .dashboard-error {
+  color: #9ca3af;
+}
+
 /* Loading & Error States */
 .dashboard-loading,
 .dashboard-error {

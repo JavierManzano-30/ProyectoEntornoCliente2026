@@ -133,3 +133,75 @@
     min-width: 900px;
   }
 }
+
+body.dark-mode .sales-invoicing {
+  color: #e5e7eb;
+}
+
+body.dark-mode .invoice-stats {
+  gap: 1.5rem;
+}
+
+body.dark-mode .stat-card {
+  background: #1f2937;
+  border-color: #374151;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  color: #d1d5db;
+}
+
+body.dark-mode .stat-label {
+  color: #9ca3af;
+}
+
+body.dark-mode .stat-value {
+  color: #f3f4f6;
+}
+
+body.dark-mode .stat-value.success {
+  color: #34d399;
+}
+
+body.dark-mode .stat-value.danger {
+  color: #fca5a5;
+}
+
+body.dark-mode .stat-count {
+  color: #9ca3af;
+}
+
+body.dark-mode .invoices-table-container {
+  background: #111827;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .invoices-table thead {
+  background: #111827;
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .invoices-table th {
+  color: #cbd5e1;
+}
+
+body.dark-mode .invoices-table tbody tr {
+  border-bottom-color: #1f2937;
+  background: #111827;
+}
+
+body.dark-mode .invoices-table tbody tr:hover {
+  background: #1f2937;
+}
+
+body.dark-mode .invoices-table td {
+  color: #d1d5db;
+  border-color: #1f2937;
+}
+
+body.dark-mode .invoice-number {
+  color: #60a5fa;
+}
+
+body.dark-mode .status-badge.status-yellow {
+  background: #4b2e05;
+  color: #fbbf24;
+}

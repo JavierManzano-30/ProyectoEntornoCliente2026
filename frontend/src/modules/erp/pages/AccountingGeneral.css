@@ -327,3 +327,160 @@
     min-width: 800px;
   }
 }
+
+body.dark-mode .accounting-general {
+  color: #e5e7eb;
+}
+
+body.dark-mode .page-header h1 {
+  color: #f3f4f6;
+}
+
+body.dark-mode .page-actions .btn-primary {
+  background: #2563eb;
+}
+
+body.dark-mode .page-actions .btn-secondary {
+  background: #111827;
+  color: #d1d5db;
+  border-color: #374151;
+}
+
+body.dark-mode .view-tabs {
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .view-tabs button {
+  color: #cbd5e1;
+}
+
+body.dark-mode .view-tabs button.active {
+  color: #60a5fa;
+  border-bottom-color: #60a5fa;
+}
+
+body.dark-mode .filters-bar {
+  background: #111827;
+}
+
+body.dark-mode .search-box {
+  background: #111827;
+  border-color: #374151;
+}
+
+body.dark-mode .search-box svg {
+  color: #9ca3af;
+}
+
+body.dark-mode .search-box input {
+  color: #e5e7eb;
+  background: transparent;
+}
+
+body.dark-mode .search-box input::placeholder {
+  color: #9ca3af;
+}
+
+body.dark-mode .filter-select {
+  background: #111827;
+  color: #e5e7eb;
+  border-color: #374151;
+}
+
+body.dark-mode .entries-table-container {
+  background: #111827;
+  border-color: #374151;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .entries-table thead {
+  background: #111827;
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .entries-table th {
+  color: #cbd5e1;
+}
+
+body.dark-mode .entries-table tbody tr {
+  border-bottom-color: #1f2937;
+  background: #0f172a;
+}
+
+body.dark-mode .entries-table tbody tr:hover {
+  background: #1f2937;
+}
+
+body.dark-mode .entries-table td {
+  color: #d1d5db;
+  border-color: #1f2937;
+}
+
+body.dark-mode .entry-number {
+  color: #60a5fa;
+}
+
+body.dark-mode .status-badge {
+  background: #1f2937;
+  color: #e5e7eb;
+  border: 1px solid #374151;
+}
+
+body.dark-mode .status-badge.status-gray {
+  background: #1f2937;
+  color: #9ca3af;
+}
+
+body.dark-mode .status-badge.status-blue {
+  background: #0f172a;
+  color: #60a5fa;
+}
+
+body.dark-mode .status-badge.status-green {
+  background: #052e16;
+  color: #4ade80;
+}
+
+body.dark-mode .status-badge.status-orange {
+  background: #3f2b0d;
+  color: #fef08a;
+}
+
+body.dark-mode .status-badge.status-red {
+  background: #2b0808;
+  color: #f87171;
+}
+
+body.dark-mode .btn-icon {
+  border-color: #374151;
+  color: #60a5fa;
+}
+
+body.dark-mode .btn-icon:hover {
+  background: #2563eb;
+  color: white;
+}
+
+body.dark-mode .table-loading,
+body.dark-mode .table-empty {
+  color: #9ca3af;
+}
+
+body.dark-mode .table-loading .spinner {
+  border-color: #374151;
+  border-top-color: #3b82f6;
+}
+
+body.dark-mode .accounts-view {
+  background: #111827;
+  border-color: #374151;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .accounts-placeholder {
+  color: #9ca3af;
+}
+
+body.dark-mode .accounts-placeholder h3 {
+  color: #f3f4f6;
+}

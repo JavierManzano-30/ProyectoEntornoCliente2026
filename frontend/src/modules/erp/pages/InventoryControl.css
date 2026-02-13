@@ -166,3 +166,91 @@
     min-width: 1000px;
   }
 }
+
+body.dark-mode .inventory-control {
+  color: #e5e7eb;
+}
+
+body.dark-mode .inventory-stats {
+  gap: 1.5rem;
+}
+
+body.dark-mode .stat-card {
+  background: #1f2937;
+  border-color: #374151;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  color: #d1d5db;
+}
+
+body.dark-mode .stat-card.warning {
+  background: #262f3f;
+  border-left-color: #fbbf24;
+}
+
+body.dark-mode .stat-card.danger {
+  background: #2c2020;
+  border-left-color: #f87171;
+}
+
+body.dark-mode .stat-label {
+  color: #9ca3af;
+}
+
+body.dark-mode .stat-content {
+  color: #e5e7eb;
+}
+
+body.dark-mode .stat-icon {
+  color: #a5b4fc;
+}
+
+body.dark-mode .products-table-container {
+  background: #111827;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .products-table thead {
+  background: #111827;
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .products-table th {
+  color: #cbd5e1;
+}
+
+body.dark-mode .products-table tbody tr {
+  border-bottom-color: #1f2937;
+  background: #111827;
+}
+
+body.dark-mode .products-table tbody tr:hover {
+  background: #1f2937;
+}
+
+body.dark-mode .products-table td {
+  color: #d1d5db;
+  border-color: #1f2937;
+}
+
+body.dark-mode .product-sku,
+body.dark-mode .product-name {
+  color: #e5e7eb;
+}
+
+body.dark-mode .stock-value.stock-low,
+body.dark-mode .status-badge.stock-low {
+  background: #4b2e05;
+  color: #fbbf24;
+}
+
+body.dark-mode .stock-value.stock-normal,
+body.dark-mode .status-badge.stock-normal {
+  background: #064e3b;
+  color: #6ee7b7;
+}
+
+body.dark-mode .stock-value.stock-high,
+body.dark-mode .status-badge.stock-high {
+  background: #1e40af;
+  color: #bfdbfe;
+}

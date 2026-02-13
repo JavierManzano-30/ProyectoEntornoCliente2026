@@ -81,6 +81,19 @@ const AlertsPage = () => {
     return alert.tipo === filter;
   });
 
+  const statusFilters = [
+    { key: 'todas', label: 'Todas' },
+    { key: 'no_leidas', label: 'Sin Leer' },
+    { key: 'leidas', label: 'Leídas' },
+  ];
+
+  const typeFilters = [
+    { key: 'error', label: 'Errores' },
+    { key: 'warning', label: 'Advertencias' },
+    { key: 'success', label: 'Éxito' },
+    { key: 'info', label: 'Información' },
+  ];
+
   if (loading) {
     return (
       <div className="alerts-page-loading">
@@ -126,97 +139,27 @@ const AlertsPage = () => {
 
       <Card style={{ marginBottom: '2rem', padding: '1rem 1.5rem' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center' }}>
-          <button 
-            style={{
-              padding: '0.5rem 1rem',
-              border: filter === 'todas' ? 'none' : '1px solid #e2e8f0',
-              borderRadius: '6px',
-              background: filter === 'todas' ? '#3b82f6' : 'white',
-              color: filter === 'todas' ? 'white' : '#64748b',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              cursor: 'pointer'
-            }}
-            onClick={() => setFilter('todas')}
-          >
-            Todas
-          </button>
-          <button 
-            style={{
-              padding: '0.5rem 1rem',
-              border: filter === 'no_leidas' ? 'none' : '1px solid #e2e8f0',
-              borderRadius: '6px',
-              background: filter === 'no_leidas' ? '#3b82f6' : 'white',
-              color: filter === 'no_leidas' ? 'white' : '#64748b',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              cursor: 'pointer'
-            }}
-            onClick={() => setFilter('no_leidas')}
-          >
-            Sin Leer
-          </button>
-          <button 
-            style={{
-              padding: '0.5rem 1rem',
-              border: filter === 'leidas' ? 'none' : '1px solid #e2e8f0',
-              borderRadius: '6px',
-              background: filter === 'leidas' ? '#3b82f6' : 'white',
-              color: filter === 'leidas' ? 'white' : '#64748b',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              cursor: 'pointer'
-            }}
-            onClick={() => setFilter('leidas')}
-          >
-            Leídas
-          </button>
-          <div style={{ width: '1px', height: '24px', background: '#e2e8f0', margin: '0 0.25rem' }}></div>
-          <button 
-            style={{
-              padding: '0.5rem 1rem',
-              border: filter === 'error' ? 'none' : '1px solid #e2e8f0',
-              borderRadius: '6px',
-              background: filter === 'error' ? '#3b82f6' : 'white',
-              color: filter === 'error' ? 'white' : '#64748b',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              cursor: 'pointer'
-            }}
-            onClick={() => setFilter('error')}
-          >
-            Errores
-          </button>
-          <button 
-            style={{
-              padding: '0.5rem 1rem',
-              border: filter === 'warning' ? 'none' : '1px solid #e2e8f0',
-              borderRadius: '6px',
-              background: filter === 'warning' ? '#3b82f6' : 'white',
-              color: filter === 'warning' ? 'white' : '#64748b',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              cursor: 'pointer'
-            }}
-            onClick={() => setFilter('warning')}
-          >
-            Advertencias
-          </button>
-          <button 
-            style={{
-              padding: '0.5rem 1rem',
-              border: filter === 'success' ? 'none' : '1px solid #e2e8f0',
-              borderRadius: '6px',
-              background: filter === 'success' ? '#3b82f6' : 'white',
-              color: filter === 'success' ? 'white' : '#64748b',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              cursor: 'pointer'
-            }}
-            onClick={() => setFilter('success')}
-          >
-            Éxito
-          </button>
+          {statusFilters.map((option) => (
+            <button
+              key={option.key}
+              type="button"
+              className={`filter-btn${filter === option.key ? ' active' : ''}`}
+              onClick={() => setFilter(option.key)}
+            >
+              {option.label}
+            </button>
+          ))}
+          <div className="filter-divider" />
+          {typeFilters.map((option) => (
+            <button
+              key={option.key}
+              type="button"
+              className={`filter-btn${filter === option.key ? ' active' : ''}`}
+              onClick={() => setFilter(option.key)}
+            >
+              {option.label}
+            </button>
+          ))}
         </div>
       </Card>
 

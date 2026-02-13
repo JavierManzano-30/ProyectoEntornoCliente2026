@@ -121,12 +121,12 @@
 }
 
 .metric-label {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: #64748b;
 }
 
 .metric-value {
-  font-size: 1.75rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: #1e293b;
   text-align: right;
@@ -231,50 +231,81 @@
   }
 }
 
-body.dark-mode .dataset-info h3,
-body.dark-mode .metric-value {
+body.dark-mode .datasets-page {
+  color: #e5e7eb;
+}
+
+body.dark-mode .datasets-page .dataset-info h3,
+body.dark-mode .datasets-page .metric-value {
   color: #f3f4f6;
 }
 
-body.dark-mode .dataset-source,
-body.dark-mode .metric-label,
-body.dark-mode .empty-state,
-body.dark-mode .empty-state h3 {
+body.dark-mode .datasets-page .dataset-source,
+body.dark-mode .datasets-page .metric-label,
+body.dark-mode .datasets-page .empty-state,
+body.dark-mode .datasets-page .empty-state h3 {
   color: #9ca3af;
 }
 
-body.dark-mode .dataset-metrics {
+body.dark-mode .datasets-page .dataset-card {
   background: #111827;
+  border-radius: 12px;
+  border: 1px solid #1f2937;
+  padding: 1.25rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
 }
 
-body.dark-mode .dataset-actions {
+body.dark-mode .datasets-page .dataset-card:hover {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+}
+
+body.dark-mode .datasets-page .dataset-header {
+  color: #f3f4f6;
+}
+
+body.dark-mode .datasets-page .dataset-icon {
+  background: #0f172a;
+}
+
+body.dark-mode .datasets-page .dataset-metrics {
+  background: #0f172a;
+  border: 1px solid #374151;
+}
+
+body.dark-mode .datasets-page .metric svg {
+  color: #60a5fa;
+}
+
+body.dark-mode .datasets-page .dataset-actions {
   border-top-color: #374151;
 }
 
-body.dark-mode .btn-secondary {
-  background: #374151;
-  color: #e5e7eb;
-  border-color: #4b5563;
+body.dark-mode .datasets-page .btn-primary {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
 }
 
-body.dark-mode .btn-secondary:hover {
-  background: #4b5563;
-  color: #f3f4f6;
-  border-color: #6b7280;
+body.dark-mode .datasets-page .btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
 }
 
-body.dark-mode .status-active {
+body.dark-mode .datasets-page .btn-secondary {
+  background: #1f2937;
+  color: #cbd5e1;
+  border-color: #374151;
+}
+
+body.dark-mode .datasets-page .btn-secondary:hover {
+  background: #272f40;
+  border-color: #4c566a;
+}
+
+body.dark-mode .datasets-page .status-active {
   background: #064e3b;
   color: #a7f3d0;
 }
 
-body.dark-mode .status-inactive {
+body.dark-mode .datasets-page .status-inactive {
   background: #7f1d1d;
   color: #fecaca;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
 }

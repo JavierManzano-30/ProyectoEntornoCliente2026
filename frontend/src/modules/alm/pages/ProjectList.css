@@ -119,3 +119,41 @@
     grid-template-columns: 1fr;
   }
 }
+
+body.dark-mode .project-list-page {
+  color: #e5e7eb;
+}
+
+body.dark-mode .metric-value {
+  color: #f3f4f6;
+}
+
+body.dark-mode .metric-label {
+  color: #9ca3af;
+}
+
+body.dark-mode .search-bar {
+  background: #111827;
+  border-color: #374151;
+}
+
+body.dark-mode .search-bar svg {
+  color: #9ca3af;
+}
+
+body.dark-mode .search-bar input {
+  background: transparent;
+  color: #e5e7eb;
+}
+
+body.dark-mode .search-bar input::placeholder {
+  color: #9ca3af;
+}
+
+body.dark-mode .empty-state h3 {
+  color: #f3f4f6;
+}
+
+body.dark-mode .empty-state p {
+  color: #9ca3af;
+}
