@@ -112,11 +112,24 @@ const MainLayout = ({ module = "soporte" }) => {
   };
 
   // Tema: iluminado/oscuro
-  const [darkMode, setDarkMode] = React.useState(() => document.body.classList.contains('dark-mode'));
+  const [darkMode, setDarkMode] = React.useState(() => {
+    try {
+      const stored = localStorage.getItem('darkMode');
+      if (stored !== null) return stored === 'true';
+    } catch {
+      /* ignore storage errors */
+    }
+    return document.body.classList.contains('dark-mode');
+  });
   const handleToggleTheme = () => {
     setDarkMode((prev) => {
       const next = !prev;
       document.body.classList.toggle('dark-mode', next);
+      try {
+        localStorage.setItem('darkMode', next ? 'true' : 'false');
+      } catch {
+        /* ignore storage errors */
+      }
       return next;
     });
   };

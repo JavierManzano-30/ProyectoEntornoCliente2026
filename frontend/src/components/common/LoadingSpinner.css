@@ -20,11 +20,21 @@
   z-index: 9999;
 }
 
+/* Mantén el modo oscuro también durante las pantallas de carga */
+body.dark-mode .loading-spinner-fullscreen {
+  background-color: rgba(17, 24, 39, 0.92);
+}
+
 .loading-spinner {
   border: 3px solid #e5e7eb;
   border-top-color: #2563eb;
   border-radius: 50%;
   animation: loading-spinner-rotate 0.8s linear infinite;
+}
+
+body.dark-mode .loading-spinner {
+  border-color: #374151;
+  border-top-color: #60a5fa;
 }
 
 .loading-spinner-small {
@@ -49,6 +59,10 @@
   margin-top: 1rem;
   font-size: 0.875rem;
   color: #6b7280;
+}
+
+body.dark-mode .loading-spinner-text {
+  color: #e5e7eb;
 }
 
 @keyframes loading-spinner-rotate {
