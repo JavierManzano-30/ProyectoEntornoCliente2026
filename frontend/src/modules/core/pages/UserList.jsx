@@ -7,7 +7,7 @@ import ErrorMessage from '../../../components/common/ErrorMessage';
 import Button from '../../../components/common/Button';
 import Card from '../../../components/common/Card';
 import Badge from '../../../components/common/Badge';
-import { Users as UsersIcon, UserPlus, Search, Filter, Mail, Phone } from 'lucide-react';
+import { Users as UsersIcon, UserPlus, Search, Filter, Mail, Phone, TrendingUp } from 'lucide-react';
 import { getFullName, getInitials, formatLastAccess } from '../utils/userHelpers';
 import { USER_STATUS_LABELS, USER_STATUS_COLORS } from '../constants/userStatus';
 import { USER_ROLE_LABELS, USER_ROLE_COLORS } from '../constants/userRoles';
@@ -111,13 +111,16 @@ const UserList = () => {
           return (
             <Card key={index} padding="medium" className="metric-card">
               <div className="metric-content">
-                <div className={`metric-icon metric-icon-${metric.color}`}>
-                  <Icon size={24} />
+                  <div className={`metric-icon metric-icon-${metric.color}`}>
+                    <Icon size={28} />
                 </div>
                 <div className="metric-info">
                   <span className="metric-label">{metric.label}</span>
                   <span className="metric-value">{metric.value}</span>
-                  <span className="metric-trend">{metric.trend}</span>
+                  <span className="metric-trend">
+                    <TrendingUp size={14} />
+                    {metric.trend}
+                  </span>
                 </div>
               </div>
             </Card>

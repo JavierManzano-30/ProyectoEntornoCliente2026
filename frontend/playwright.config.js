@@ -1,7 +1,7 @@
-import { defineConfig } from '@playwright/test';
-
-export default defineConfig({
+module.exports = {
   testDir: './e2e',
+  testMatch: '**/*.spec.js',
+  testIgnore: ['**/node_modules/**', '**/src/**'],
   timeout: 30 * 1000,
   retries: 0,
   use: {
@@ -14,4 +14,4 @@ export default defineConfig({
       use: { browserName: 'chromium' }
     }
   ]
-});
+};
